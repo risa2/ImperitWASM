@@ -1,0 +1,29 @@
+﻿@inherits InputBase<int>
+
+@code {
+    [Parameter] public IEnumerable<Shared.Data.PlayerId>? Options { get; set; }
+    protected override bool TryParseValueFromString(string value, out int result, out string? errorMsg)
+    {
+        if (int.TryParse(value, out result))
+        {
+            errorMsg = null;
+            return true;
+        }
+        else
+        {
+            errorMsg = "'" + value + "' is not a number";
+            return false;
+        }
+    }
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        CurrentValue = Options.First().Id;
+    }
+}
+<select @attributes="@AdditionalAttributes" class="@CssClass" @bind="@CurrentValue">
+    @foreach (var opt in Options!)
+    {
+        <option class="@CssClass" value="@opt.Id">@opt.Name</option>
+    }
+</select>

@@ -1,0 +1,42 @@
+@inject HttpClient http;
+
+@code{
+	[Parameter] public Func<string, Task>? LoginAsync { get; set; }
+	LoginModel model = new LoginModel();
+	bool Wrong = false;
+	async Task LoginAction()
+	{
+		string? result = (await http.PostJsonResponseAsync<Shared.Data.Login, Shared.Data.StringValue>("api/Player/Login", new Shared.Data.Login(model.Id, model.Password))).Value;
+		if (result is string)
+		{
+			await LoginAsync!(result);
+		}
+		else
+		{
+			Wrong = true;
+			model.Password = "";
+		}
+	}
+	Shared.Data.PlayerId[]? players = null;
+	protected override async Task OnInitializedAsync()
+	{
+		players = await http.GetJsonAsync<Shared.Data.PlayerId[]>("api/Player/Players");
+	}
+}
+
+@if (Wrong)
+{
+	<p>Zadané heslo není správné</p>
+}
+<EditForm Model="model" OnSubmit="LoginAction">
+	<DataAnnotationsValidator/><ValidationSummary/>
+	<label>
+		Hráč:<br/>
+		@if (players != null)
+		{
+			<IntSelect @bind-Value="model.Id" Options="players"/><br/>
+		}
+	</label>
+	<label>Heslo:<br/><InputText type="password" @bind-Value="model.Password"/><br/></label>
+	<button type="submit">Přihlásit se</button>
+</EditForm>

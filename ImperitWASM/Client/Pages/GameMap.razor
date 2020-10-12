@@ -1,0 +1,58 @@
+@inject HttpClient http;
+
+@using Mode = Shared.Data.Switch.Mode;
+
+@code{
+	[Parameter] public string LoginId { get; set; } = "";
+	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public bool IsActive { get; set; }
+	[Parameter] public Action<Mode, int?, int?> Switch { get; set; } = ((a, x, y) => { });
+	[Parameter] public bool Preview { get; set; }
+	[Parameter] public Func<Task>? Logout { get; set; }
+	[Parameter] public Func<Task>? NextTurn { get; set; }
+	[Parameter] public Shared.Data.DisplayableShape[]? Provinces { get; set; }
+	async Task<int?> OnClick(int clicked, int? from)
+	{
+		var r = await http.PostJsonResponseAsync<Shared.Data.Click, Shared.Data.Switch>("api/Switch/Clicked", new Shared.Data.Click(LoggedIn, LoginId, from, clicked));
+		Switch(r.NextMode, r.From, r.To);
+		return r.Selected;
+	}
+	Shared.Data.ProvinceVariables[]? Variables = null;
+	int? PowersCount = null, PlayerMoney = 0;
+	public async Task Update()
+	{
+		Variables = await http.GetJsonAsync<Shared.Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current");
+		PowersCount = await http.GetJsonAsync<int>("api/Powers/Count");
+		PlayerMoney = await http.PostJsonResponseAsync<int, int>("api/Player/Money", LoggedIn);
+		this.StateHasChanged();
+	}
+	protected override Task OnInitializedAsync() => Update();
+}
+<nav>
+	@if (Preview)
+	{
+		<a @onclick="() => Switch(Mode.Map, null, null)">Zpět</a>
+		<a class="this">Náhled</a>
+	}
+	else
+	{
+		@if (IsActive)
+		{
+			<a @onclick="NextTurn">Konec</a>
+		}
+		else
+		{
+			<a @onclick="Logout">Odhlášení</a>
+		}
+		<a class="this">Imperit</a>
+		<a @onclick="() => Switch(Mode.Players, null, null)">@(PlayerMoney)@Sym.Money</a>
+		<a @onclick="() => Switch(Mode.Preview, null, null)">Náhled</a>
+		@if (PowersCount is int count && count > 2)
+		{
+			<a @onclick="() => Switch(Mode.Powers, null, null)">Výsledky</a>
+		}
+	}
+</nav>
+<main>
+	<Map Width="1000" Height="1000" Provinces="Provinces" Variables="Variables" Select="OnClick" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" />
+</main>

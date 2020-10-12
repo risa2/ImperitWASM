@@ -1,0 +1,71 @@
+@inject HttpClient http;
+
+@using Mode = Shared.Data.Switch.Mode;
+
+@code{
+	[Parameter] public Action<Mode> Switch { get; set; } = (x => { });
+	[Parameter] public int Land { get; set; }
+	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public string LoginId { get; set; } = "";
+	RecruitModel model = new RecruitModel();
+	Shared.Data.RecruitInfo? Info = null;
+	protected override async Task OnInitializedAsync()
+	{
+		Info = await http.PostJsonResponseAsync<int, Shared.Data.RecruitInfo> ("api/Action/RecruitInfo", Land);
+		model.Soldiers = IntModel.Array(Info.Recruitable.Length);
+	}
+	int Price => model.Soldiers.Select((count, i) => count.Value * Info?.Recruitable?[i].Price ?? 0).Sum();
+	int Missing => Price - Info?.Money ?? 0;
+	async Task DoRecruit()
+	{
+		await http.PostJsonAsync<Shared.Data.RecruitCmd>("api/Action/Recruit", new Shared.Data.RecruitCmd(LoggedIn, LoginId, Land, model.Soldiers.Select(s => s.Value).ToArray()));
+		Switch(Mode.Map);
+	}
+	SoldierTypeInfobox? infobox;
+}
+<nav>
+	<a @onclick="() => Switch(Mode.Map)">Zrušit</a>
+	<a class="this">Verbování</a>
+	<a @onclick="() => Switch(Mode.Players)">@Info?.Money@Sym.Money</a>
+</nav>
+<main>
+	<SoldierTypeInfobox @ref="infobox" />
+	<EditForm Model="model" OnValidSubmit="DoRecruit">
+		<DataAnnotationsValidator /><ValidationSummary />
+		<p>
+			@Info?.Name
+			@if (!string.IsNullOrWhiteSpace(Info?.Soldiers))
+			{
+				<text>má @Info?.Soldiers</text>
+			}
+			else
+			{
+				<text>nemá žádné vojáky</text>
+			}
+		</p>
+		<table>
+			@foreach (var (i, (type, price)) in (Info?.Recruitable).Try().Index())
+			{
+				<tr>
+					<td>@type.Name @price@(Sym.Money)<sup @onclick="() => infobox?.Open(type)">?</sup></td>
+					<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>
+				</tr>
+			}
+			@if (Missing > 0)
+			{
+				<tr>
+					<td>Chybí ti @Missing@Sym.Money</td>
+					<td>Půjčit si: <InputCheckbox @bind-Value="model.Borrow" /></td>
+				</tr>
+			}
+			else
+			{
+				model.Borrow = false;
+			}
+			@if (Missing <= 0 || model.Borrow)
+			{
+				<tr><td></td><td><button type="submit">Verbovat</button></td></tr>
+			}
+		</table>
+	</EditForm>
+</main>

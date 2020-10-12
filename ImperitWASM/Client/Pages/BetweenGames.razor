@@ -1,0 +1,44 @@
+﻿@inject HttpClient http;
+
+@code {
+	[Parameter] public Action Return { get; set; } = () => { };
+	TimeSpan? TimeToStart = null;
+	Shared.Data.DisplayablePlayer[]? Players = null, Former = null;
+	PlayersPower[]? Powers = null;
+	protected override async Task OnInitializedAsync()
+	{
+		TimeToStart = TimeSpan.FromSeconds(await http.GetJsonAsync<int>("api/Game/TimeToStart"));
+		Players = await http.GetJsonAsync<Shared.Data.DisplayablePlayer[]>("api/Player/Display");
+		this.StateHasChanged();
+		Former = await http.GetJsonAsync<Shared.Data.DisplayablePlayer[]>("api/Player/Former");
+		Powers = await http.GetJsonAsync<PlayersPower[]>("api/Powers/List");
+		while (TimeToStart > TimeSpan.FromSeconds(1))
+		{
+			await Task.Delay(1000);
+			TimeToStart = TimeToStart - TimeSpan.FromSeconds(1);
+			this.StateHasChanged();
+		}
+		await Task.Delay(2000);
+		Return();
+	}
+}
+
+@if (TimeToStart is TimeSpan time && time > TimeSpan.Zero && time < TimeSpan.FromDays(1))
+{
+	<p>Hra začne za @time.ToString("mm\\:ss")</p>
+}
+else
+{
+	<p>Hra ještě nezačala</p>
+}
+<p>Zaregistrovaní hráči: 
+	@foreach (var player in Players.Try())
+	{
+		<span style="color:@player.Color;">@player.Name </span>
+	}
+</p>
+@if (Powers != null && Powers.Length > 2)
+{
+	<p>Výsledek minulé hry:</p>
+	<PowerGraphs Players="Former" Powers="Powers"/>
+}

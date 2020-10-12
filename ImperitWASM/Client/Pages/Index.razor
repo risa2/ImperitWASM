@@ -1,0 +1,36 @@
+﻿@page "/"
+@page "/{loginid}"
+
+@inject HttpClient http;
+@inject NavigationManager nav;
+
+@code{
+	[Parameter] public string? LoginId { get; set; }
+	async Task LoginAsync(string loginId)
+	{
+		LoginId = loginId;
+		LoggedIn = await http.PostJsonResponseAsync<string?, int?>("api/Player/FromId", LoginId);
+		nav.NavigateTo("/" + loginId);
+	}
+	void Logout()
+	{
+		LoggedIn = null;
+		nav.NavigateTo("/");
+	}
+	int? LoggedIn = null;
+	protected override async Task OnInitializedAsync()
+	{
+		if (LoginId is string)
+		{
+			LoggedIn = await http.PostJsonResponseAsync<string?, int?>("api/Player/FromId", LoginId);
+		}
+	}
+}
+@if (LoggedIn is int loggedIn)
+{
+	<GameSwitch LoggedIn="loggedIn" Logout="Logout" LoginId="@LoginId"/>
+}
+else
+{
+	<StartSwitch LoginAsync="LoginAsync"/>
+}

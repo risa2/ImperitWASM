@@ -1,0 +1,75 @@
+@inject HttpClient http;
+
+@using Mode = Shared.Data.Switch.Mode;
+
+@code{
+	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public string LoginId { get; set; } = "";
+	[Parameter] public Action<Mode, int?, int?, (int, int, string)?> Switch { get; set; } = ((a, x, y, z) => { });
+	void Donate(int player)
+	{
+		Switch(Mode.Donation, null, null, (PlayerInfos?[LoggedIn].Money ?? 0, player, PlayerInfos?[player].Name ?? "")); 
+	}
+	async Task DoGiveUp()
+	{
+		await http.PostJsonAsync<Shared.Data.User>("api/Action/GiveUp", new Shared.Data.User(LoggedIn, LoginId));
+		Switch(Mode.Map, null, null, null);
+	}
+
+	Shared.Data.PlayerFullInfo[]? PlayerInfos = null;
+	Shared.Data.ProvinceInstability[]? Instabilities = null;
+	Shared.Data.DebtInfo[]? Debts = null;
+	protected override async Task OnInitializedAsync()
+	{
+		PlayerInfos = await http.GetJsonAsync<Shared.Data.PlayerFullInfo[]>("api/Player/Infos");
+		Instabilities = await http.GetJsonAsync<Shared.Data.ProvinceInstability[]>("api/Provinces/Instabilities");
+		Debts = await http.GetJsonAsync<Shared.Data.DebtInfo[]>("api/Action/Debts");
+	}
+}
+<nav>
+	<a @onclick="() => Switch(Mode.Map, null, null, null)">Zpět</a>
+	<a class="this">@PlayerInfos?[LoggedIn].Money@Sym.Money</a>
+</nav>
+<main>
+	@if (PlayerInfos != null)
+	{
+		<p>Přihlášen: <span style="color:@PlayerInfos[LoggedIn].Color;">@PlayerInfos[LoggedIn].Name</span></p><br/>
+	}
+	<table class="players">
+		@foreach (var player in PlayerInfos.Try().Where(p => p.Display))
+		{
+			<tr>
+				<td style="color:@player.Color;">@player.Name</td>
+				@if (player.Alive)
+				{
+					<td>@(player.Money)@Sym.Money</td>
+					<td>(+@(player.Income)@Sym.Money)</td>
+					@if (player.Id == LoggedIn)
+					{
+						<td class="link-like" @onclick="DoGiveUp">Vzdát se</td>
+					}
+					else
+					{
+						<td class="link-like" @onclick="() => Donate(player.Id)">Věnovat</td>
+					}
+				}
+				else
+				{
+					<td colspan="3">není</td>
+				}
+			</tr>
+		}
+	</table><br/>
+	@if (Debts != null && PlayerInfos != null)
+	{
+		@foreach (var loan in Debts)
+		{
+			<p><span style="color:@PlayerInfos[loan.Debtor].Color;">@PlayerInfos[loan.Debtor].Name</span> dluží @(loan.Debt)@Sym.Money</p>
+		}
+	}
+	
+	@foreach (var ins in Instabilities.Try())
+	{
+		<p>Riziko odtržení země <span style="color:@ins.Color;">@ins.Name</span>: @(ins.Instability.ProbabilityToString(prec: 1))</p>
+	}
+</main>

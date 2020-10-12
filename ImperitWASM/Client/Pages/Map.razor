@@ -1,0 +1,28 @@
+@code{
+	[Parameter] public int Width { get; set; }
+	[Parameter] public int Height { get; set; }
+	[Parameter] public Shared.Data.DisplayableShape[]? Provinces { get; set; }
+	[Parameter] public Shared.Data.ProvinceVariables[]? Variables { get; set; }
+	[Parameter] public Color SelectedColor { get; set; }
+	[Parameter] public Func<int, int?, Task<int?>>? Select { get; set; }
+	[Parameter] public int FontSize { get; set; }
+	int? selected = null;
+	Point[]? SelectedPoints => selected is int i ? Provinces?[i].Border : null;
+	Country? country;
+	async Task ClickSelect(int? index)
+	{
+		selected = index is int i ? await Select!(i, selected) : null;
+		country?.Select(SelectedPoints, SelectedColor);
+	}
+}
+<svg viewBox="0 0 @Width @Height">
+	@foreach (var (i, province) in Provinces.Try().Index())
+	{
+		<Country Points="province.Border" Fill="Variables?[i].Fill ?? province.Fill" Stroke="province.Stroke" StrokeWidth="province.StrokeWidth" Width="Width" Height="Height" OnClick="async() => await ClickSelect(i)" />
+	}
+	<Country @ref="country" Points="SelectedPoints" Fill="SelectedColor" Width="Width" Height="Height" OnClick="async() => await ClickSelect(selected)" />
+	@foreach (var (i, province, text) in Provinces.Try().Index().Zip(Variables.Try(), (a, b) => (a.i, a.v, b.Text)))
+	{
+		<Caption Text="text" Center="province.Center" Width="Width" Height="Height" FontSize="FontSize" OnClick="async() => await ClickSelect(i)" />
+	}
+</svg>

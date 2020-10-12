@@ -1,0 +1,40 @@
+@inject HttpClient http;
+
+@code{
+	[Parameter] public Action Return { get; set; } = (() => { });
+	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public string LoginId { get; set; } = "";
+	[Parameter] public int Land { get; set; }
+	async Task DoPurchase()
+	{
+		await http.PostJsonAsync<Shared.Data.PurchaseCmd>("api/Action/Purchase", new Shared.Data.PurchaseCmd(LoggedIn, LoginId, Land));
+		Return();
+	}
+	Shared.Data.PurchaseInfo? Info = null;
+	protected override async Task OnInitializedAsync()
+	{
+		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.PurchaseInfo>("api/Action/PurchaseInfo", new Shared.Data.IntPair(LoggedIn, Land));
+		if (!Info.Possible)
+		{
+			Return();
+		}
+	}
+}
+<nav>
+	<a @onclick="Return">Zrušit</a>
+	<a class="this">Koupě</a>
+</nav>
+<main>
+	@if (Info is Shared.Data.PurchaseInfo)
+	{
+		@if (Info.Price > Info.Money)
+		{
+			<p>@Info.Name stojí @Info.Price@Sym.Money, chceš si půjčit @(Info.Price - Info.Money)@Sym.Money a koupit?</p>
+		}
+		else
+		{
+			<p>@Info.Name stojí @Info.Price@Sym.Money</p>
+		}
+		<button @onclick="DoPurchase">Koupit</button>
+	}
+</main>

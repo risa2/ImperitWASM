@@ -1,0 +1,69 @@
+﻿@code{
+	[Parameter]
+	public IReadOnlyList<Shared.Data.DisplayablePlayer> Players { get; set; } = Array.Empty<Shared.Data.DisplayablePlayer>();
+	[Parameter]
+	public IReadOnlyList<PlayersPower> Powers { get; set; } = Array.Empty<PlayersPower>();
+	static string Polyline(IEnumerable<int> y_values, int count, int max_y, int x_offset, int y_offset, int width, int height, bool reverse = false)
+	{
+		return string.Join(' ', y_values.Select((y, i) => ((long)i * width / count + x_offset) + "," + ((long)height - y * height / max_y + y_offset)).Reverse(reverse));
+	}
+	static string ToString(double num) => num.ToString(ExtMethods.Culture);
+}
+@{
+	var sum_soldiers = Powers[^1].SoldiersSum;
+	var sum_lands = Powers[^1].LandsSum;
+	var sum_income = Powers[^1].IncomeSum;
+	var sum_money = Powers[^1].MoneySum;
+
+	var total_avg = Powers.Select(p => p.TotalAvg);
+	var total_max = Powers.Max(p => p.TotalMax);
+	var ratios = Powers.Select(p => p.GetRatios()).ToArray();
+	var ratio_sums = new double[ratios.Length];
+	var life = Players.Select((_, i) => Powers.Count(p => p[i].Alive)).ToArray();
+}
+<table class="Players">
+@foreach (var (power, player) in Powers[^1].Zip(Players, (a, b) => (a, b)).Where(it => it.Item1.Alive))
+{
+	<tr>
+		<td style="color:@player.Color;">@player.Name @if (sum_soldiers / power.Soldiers < 2 && sum_lands / power.Lands < 2 && sum_income / power.Income < 2 && sum_money / power.Money < 2) { @Sym.Trophy }</td>
+		<td>@(power.Soldiers * 100 / sum_soldiers) % vojáků</td>
+		<td>@(power.Lands * 100 / sum_lands) % zemí</td>
+		<td>@(power.Income * 100 / sum_income) % příjmů</td>
+		<td>@(power.Money * 100 / sum_money) % peněz</td>
+	</tr>
+}
+</table>
+<p>Trvání: @Powers.Count tahů</p>
+<p>Síla:</p>
+<svg viewBox="-10 -10 1220 620" class="diagram">
+	@for (int i = 0; i < Players.Count; ++i)
+	{
+		<polyline points="@Polyline(Powers.Select(p => p[i].Total).Take(life[i]), Powers.Count, total_max, 0, 0, 1200, 600)" fill="none" stroke="@Players[i].Color" stroke-width="3"></polyline>
+	}
+	<polyline points="@Polyline(total_avg, Powers.Count, total_max, 0, 0, 1200, 600)" fill="none" stroke="#FFF" stroke-width="1"></polyline>
+</svg>
+@if (Powers.Count > 6)
+{
+	var changes = Powers.Zip(Powers.Skip(1), (prev, next) => prev.Zip(next, (p1, p2) => (double)p2.Total / p1.Total - 1.0).ToArray()).ToArray();
+	<p>Poměrná změna síly:</p>
+	<svg viewBox="-10 -10 1220 620" class="diagram">
+		@for (int p = 0; p < Players.Count; ++p)
+		{
+			@for (int c = 0; c < changes.Length && c < life[p]; ++c)
+			{
+				<line y1="@ToString(300 - (300 * changes[c][p]))" y2="300"
+					x1="@(1200 * (2 * c + 1) / (2 * Powers.Count - 2))" x2="@(1200 * (2 * c + 1) / (2 * Powers.Count - 2))"
+					stroke="@Players[p].Color" stroke-width="@ToString(1200.0 / (Powers.Count - 1))"></line>
+			}
+		}
+	</svg>
+}
+<p>Počet vojáků a peněz v poměru k ostatním hráčům:</p>
+<svg viewBox="-10 -10 1220 620" class="diagram">
+	@for (int i = 0; i < Players.Count; ++i)
+	{
+		<polyline points="@(Polyline(ratio_sums.Select(r => (int)(r * 2000)).Take(life[i]), ratios.Length, 2000, 0, 0, 1200, 600) + " " +
+							Polyline(ratio_sums.Select((r,j) => (int)((r + ratios[j][i]) * 2000)).Take(life[i]), ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i].Color"></polyline>
+		ratio_sums = ratio_sums.Select((r, j) => r + ratios[j][i]).ToArray();
+	}
+</svg>

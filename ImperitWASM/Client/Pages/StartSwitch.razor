@@ -1,0 +1,34 @@
+﻿@inject HttpClient http;
+
+@code{
+	[Parameter] public Func<string, Task>? LoginAsync { get; set; }
+	bool IsRegistration = false;
+	void Set(bool mode)
+	{
+		IsRegistration = mode;
+		this.StateHasChanged();
+	}
+	bool? IsActive = null;
+	protected override async Task OnInitializedAsync()
+	{
+		IsActive = await http.GetJsonAsync<bool>("api/Game/IsActive");
+	}
+}
+@if (IsActive is bool isActive)
+{
+	<StartMenu Set="Set" IsRegistration="IsRegistration" IsActive="isActive"/>
+	<main>
+		@if (IsRegistration)
+		{
+			<Registration Return="() => Set(false)"/>
+		}
+		else if (isActive)
+		{
+			<Login LoginAsync="LoginAsync!"/>
+		}
+		else
+		{
+			<BetweenGames/>
+		}
+	</main>
+}

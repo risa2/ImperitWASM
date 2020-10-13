@@ -5,11 +5,10 @@ namespace ImperitWASM.Shared.Motion.Commands
 {
 	public class GiveUp : ICommand
 	{
-		public readonly int Player;
-		public GiveUp(int player) => Player = player;
-		public bool Allowed(IReadOnlyList<Player> players, IProvinces provinces) => true;
-		public (IAction?, Province) Perform(Province province) => (null, province.IsAllyOf(Player) ? province.Revolt() : province);
-		public (IAction?, Player) Perform(Player player, IProvinces provinces) => (null, player.Id == Player ? player.Die() : player);
-
+		public readonly Player Player;
+		public GiveUp(Player player) => Player = player;
+		public bool Allowed(PlayersAndProvinces pap) => true;
+		public Province Perform(Province province) => province.IsAllyOf(Player) ? province.Revolt() : province;
+		public Player Perform(Player player, PlayersAndProvinces pap) => player == Player ? player.Die() : player;
 	}
 }

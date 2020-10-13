@@ -1,5 +1,9 @@
+using ImperitWASM.Shared.Motion;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace ImperitWASM.Shared.State
 {
@@ -10,8 +14,9 @@ namespace ImperitWASM.Shared.State
 		public readonly Shape Shape;
 		public readonly Army Army, DefaultArmy;
 		public readonly int Earnings;
+		public readonly ImmutableList<IAction> Actions;
 		protected readonly Settings settings;
-		public Province(int id, string name, Shape shape, Army army, Army defaultArmy, int earnings, Settings set)
+		public Province(int id, string name, Shape shape, Army army, Army defaultArmy, int earnings, ImmutableList<IAction> actions, Settings set)
 		{
 			Id = id;
 			Name = name;
@@ -19,15 +24,41 @@ namespace ImperitWASM.Shared.State
 			Army = army;
 			DefaultArmy = defaultArmy;
 			Earnings = earnings;
+			Actions = actions;
 			settings = set;
 		}
 		public abstract Province GiveUpTo(Army army);
+		protected abstract Province WithActions(ImmutableList<IAction> new_actions);
+		public Province Add(params IAction[] actions) => WithActions(Actions.AddRange(actions));
+		public Province Replace(Func<IAction, IAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
 		public Province GiveUpTo(Player p) => GiveUpTo(new Army(new Soldiers(), p));
+		Province Act(Player active, PlayersAndProvinces pap)
+		{
+			var (a, p) = Actions.Fold(this, (province, action) => action.Perform(province, active, pap));
+			return p.WithActions(a);
+		}
+		(Province, Player) Act(Player player, Player active, PlayersAndProvinces pap)
+		{
+			var (a, p) = Actions.Fold(player, (player, action) => action.Perform(player, active, pap));
+			return (WithActions(a), p);
+		}
+		public (Province, ImmutableArray<Player>.Builder) Act(PlayersAndProvinces pap, Player active)
+		{
+			var province = Act(active, pap);
+			var new_players = ImmutableArray.CreateBuilder<Player>(pap.PlayersCount);
+			for (int i = 0; i < pap.PlayersCount; ++i)
+			{
+				var (new_province, new_player) = province.Act(pap.Player(i), active, pap);
+				province = new_province;
+				new_players.Add(new_player);
+			}
+			return (province, new_players);
+		}
 		public Province Revolt() => GiveUpTo(DefaultArmy);
 		public Province Subtract(Soldiers army) => GiveUpTo(Army.Subtract(army));
 		public Province AttackedBy(Army another) => GiveUpTo(Army.AttackedBy(another));
 		public Province ReinforcedBy(Soldiers another) => GiveUpTo(Army.Join(another));
-		public bool IsAllyOf(int p) => Army.IsAllyOf(p);
+		public bool IsAllyOf(Player p) => Army.IsAllyOf(p);
 		public bool IsAllyOf(Army army) => Army.IsAllyOf(army);
 		public bool IsAllyOf(Province prov) => IsAllyOf(prov.Army);
 		public Soldiers Soldiers => Army.Soldiers;

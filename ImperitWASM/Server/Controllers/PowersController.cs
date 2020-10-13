@@ -10,10 +10,7 @@ namespace ImperitWASM.Server.Controllers
 	public class PowersController : ControllerBase
 	{
 		readonly IPowersLoader powers;
-		public PowersController(IPowersLoader powers)
-		{
-			this.powers = powers;
-		}
+		public PowersController(IPowersLoader powers) => this.powers = powers;
 		[HttpGet("List")]
 		public IEnumerable<PlayersPower> List() => powers;
 		[HttpGet("Count")]

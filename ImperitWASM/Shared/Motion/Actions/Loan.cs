@@ -6,40 +6,28 @@ namespace ImperitWASM.Shared.Motion.Actions
 	public class Loan : IAction
 	{
 		readonly Settings settings;
-		public readonly int Debtor;
 		public readonly int Debt;
-		public Loan(int debtor, int debt, Settings set)
+		public Loan(int debt, Settings set)
 		{
-			Debtor = debtor;
 			Debt = debt;
 			settings = set;
 		}
-		public (IAction?, Player) Perform(Player player, Player active, IProvinces provinces)
+		public (Player, IAction?) Perform(Player player, Player active, PlayersAndProvinces pap)
 		{
-			if (player == active && player.Id == Debtor)
+			int next_debt = Debt + (int)Math.Ceiling(Debt * settings.Interest);
+			if (next_debt <= player.Money)
 			{
-				int next_debt = Debt + (int)Math.Ceiling(Debt * settings.Interest);
-				if (next_debt <= player.Money)
-				{
-					return (null, player.ChangeMoney(-next_debt));
-				}
-				return (new Loan(Debtor, next_debt - player.Money, settings), player.ChangeMoney(-player.Money));
+				return (player.ChangeMoney(-next_debt), null);
 			}
-			return (this, player);
+			return (player.ChangeMoney(-player.Money), new Loan(next_debt - player.Money, settings));
 		}
-		public (IAction?, Province) Perform(Province province, Player active)
+		public (Province, IAction?) Perform(Province province, Player active, PlayersAndProvinces pap)
 		{
-			if (active.Id == Debtor && province is Land land && land.IsAllyOf(Debtor) && Debt > settings.DebtLimit + active.Money)
+			if (province is Land land && land.IsAllyOf(active) && Debt > settings.DebtLimit + active.Money)
 			{
-				return (land.Price > Debt ? null : new Loan(Debtor, Debt - land.Price, settings), land.Revolt());
+				return (land.Revolt(), land.Price > Debt ? null : new Loan(Debt - land.Price, settings));
 			}
-			return (this, province);
+			return (province, this);
 		}
-		public (IAction?, bool) Interact(ICommand another) => another switch
-		{
-			Commands.Borrow Loan when Loan.Player == Debtor => (new Loan(Debtor, Debt + Loan.Amount, settings), false),
-			_ => (this, true)
-		};
-		public byte Priority => 130;
 	}
 }

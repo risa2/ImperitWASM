@@ -2,20 +2,13 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion.Actions
 {
-	public class Fight : Movement
+	public class Fight : IAction
 	{
-		public Fight(int province, Army army) : base(province, army) { }
-		public override (IAction?, Province) Perform(Province province, Player active)
+		public readonly Army Army;
+		public Fight(Army army) => Army = army;
+		public (Province, IAction?) Perform(Province province, Player active, PlayersAndProvinces pap)
 		{
-			return Province == province.Id ? (null, province.AttackedBy(Army)) : (this, province);
+			return (province.AttackedBy(Army), null);
 		}
-		public override (IAction, bool) Interact(ICommand another) => another switch
-		{
-			Commands.Attack attack when Army.IsAllyOf(attack.Player) && attack.To == Province
-				=> (new Fight(Province, Army.Join(attack.Soldiers)), false),
-			Commands.Buy purchase when Army.IsAllyOf(purchase.Player.Id) && purchase.Land == Province
-				=> (new Reinforcement(Province, Army), true),
-			_ => (this, true)
-		};
 	}
 }

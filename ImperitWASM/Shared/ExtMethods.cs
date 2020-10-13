@@ -14,22 +14,34 @@ namespace ImperitWASM.Shared
 		public static IEnumerable<(int i, T v)> Index<T>(this IEnumerable<T> e) => e.Select((v, i) => (i, v));
 		public static T? MinBy<T, TC>(this IEnumerable<T> e, Func<T, TC> selector, T? v = default) where T : class => e.OrderBy(selector).FirstOr(v);
 		public static T Must<T>(this T? value) where T : struct => value ?? throw new ArgumentNullException();
-		public static void Must(this bool value, Exception e)
-		{
-			if (!value)
-			{
-				throw e;
-			}
-		}
 		public static IEnumerable<T> Try<T>(this IEnumerable<T>? e) => e is null ? Enumerable.Empty<T>() : e;
-		public static IEnumerable<T> Must<T>(this IEnumerable<T?> e) where T : class => e.Where(x => x is T)!;
 		public static int DivUp(this int a, int b) => (a / b) + (a % b > 0 ? 1 : 0);
-		public static IEnumerable<T> Infinity<T>(this T value)
+		public static TA Aggregate<T, TA>(this IEnumerable<T> e, TA init, Func<TA, T, int, TA> fn)
 		{
-			while (true)
+			foreach (var (i, item) in e.Index())
 			{
-				yield return value;
+				init = fn(init, item, i);
 			}
+			return init;
+		}
+		public static (ImmutableList<A>, P) Fold<A, P>(this IEnumerable<A> e, P init, Func<P, A, (P, A?)> fn) where A : class
+		{
+			var result = ImmutableList.CreateBuilder<A>();
+			foreach (A item in e)
+			{
+				var (p, a) = fn(init, item);
+				init = p;
+				if (a is A)
+				{
+					result.Add(a);
+				}
+			}
+			return (result.ToImmutable(), init);
+		}
+		public static int Mod(this int x, int y) => ((x % y) + y) % y;
+		public static int FirstRotated<T>(this IReadOnlyList<T> arr, int shift, Func<T, bool> cond)
+		{
+			return Enumerable.Range(shift, arr.Count).Select(i => i.Mod(arr.Count)).Where(i => cond(arr[i])).FirstOr(-1);
 		}
 		public static int Find<T>(this IList<T> ts, Func<T, bool> cond)
 		{
@@ -68,12 +80,6 @@ namespace ImperitWASM.Shared
 			rand.NextBytes(buf);
 			return Convert.ToBase64String(buf).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 		}
-		public static ImmutableSortedSet<T> AddRange<T>(this ImmutableSortedSet<T> set, IEnumerable<T> items)
-		{
-			ImmutableSortedSet<T>.Builder builder = set.ToBuilder();
-			builder.UnionWith(items);
-			return builder.ToImmutable();
-		}
 		public static void Shuffle<T>(this Random rand, IList<T> list)
 		{
 			int n = list.Count;
@@ -86,10 +92,5 @@ namespace ImperitWASM.Shared
 				list[n] = value;
 			}
 		}
-		public static (TA, TB) Unzip<T, TU, TA, TB>(this IEnumerable<(T, TU)> en, Func<IEnumerable<T>, TA> s1, Func<IEnumerable<TU>, TB> s2)
-		{
-			return (s1(en.Select(it => it.Item1)), s2(en.Select(it => it.Item2)));
-		}
-		public static (IEnumerable<T>, IEnumerable<TU>) Unzip<T, TU>(this IEnumerable<(T, TU)> en) => Unzip(en, x => x, x => x);
 	}
 }

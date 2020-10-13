@@ -18,15 +18,13 @@ namespace ImperitWASM.Server
 		public IConfiguration Configuration { get; }
 		public void ConfigureServices(IServiceCollection services)
 		{
-
+			string p = System.AppDomain.CurrentDomain.BaseDirectory ?? ".";
 			services.AddControllersWithViews();
 			services.AddRazorPages();
-			services.AddSingleton<IServiceIO>(s => new ServiceIO(new File("./Files/Settings.json"), new File("./Files/Players.json"), new File("./Files/Provinces.json"), new File("./Files/Actions.json"), new File("./Files/Events.json"), new File("./Files/Active.json"), new File("./Files/Password.txt"), new File("./Files/Graph.json"), new File("./Files/Mountains.json"), new File("./Files/Shapes.json"), new File("./Files/Powers.json"), new File("./Files/Game.json"), new File("./Files/FormerPlayers.json")))
-					.AddSingleton<ILoginService, LoginService>().AddSingleton<IActionLoader, ActionLoader>()
-					.AddSingleton<ISettingsLoader, SettingsLoader>().AddSingleton<IPlayersLoader, PlayersLoader>()
-					.AddSingleton<IFormerPlayersLoader, FormerPlayersLoader>()
-					.AddSingleton<IProvincesLoader, ProvincesLoader>().AddSingleton<IPowersLoader, PowersLoader>()
-					.AddSingleton<IGameLoader, GameLoader>().AddTransient<IActivePlayer, ActivePlayer>()
+			services.AddSingleton<IServiceIO>(s => new ServiceIO(File.Path(p, "Files/Settings.json"), File.Path(p, "Files/Players.json"), File.Path(p, "Files/Provinces.json"), File.Path(p, "Files/Actions.json"), File.Path(p, "Files/Events.json"), File.Path(p, "Files/Active.json"), File.Path(p, "Files/Password.txt"), File.Path(p, "Files/Graph.json"), File.Path(p, "Files/Mountains.json"), File.Path(p, "Files/Shapes.json"), File.Path(p, "Files/Powers.json"), File.Path(p, "Files/Game.json"), File.Path(p, "Files/FormerPlayers.json")))
+					.AddSingleton<ILoginService, LoginService>().AddSingleton<ISettingsLoader, SettingsLoader>()
+					.AddSingleton<IPlayersProvinces, PlayersProvinces>().AddSingleton<IFormerPlayers, FormerPlayers>()
+					.AddSingleton<IPowersLoader, PowersLoader>().AddSingleton<IGameLoader, GameLoader>()
 					.AddTransient<INewGame, NewGame>().AddTransient<IEndOfTurn, EndOfTurn>();
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

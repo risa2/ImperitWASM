@@ -10,6 +10,7 @@ namespace ImperitWASM.Server.Load
 	{
 		readonly string path;
 		public File(string path) => this.path = path;
+		public static File Path(params string[] parts) => new File(System.IO.Path.Combine(parts));
 		public string Read() => System.IO.File.ReadAllText(path);
 		public void Write(string str) => System.IO.File.WriteAllText(path, str);
 		public void Append(string str) => System.IO.File.AppendAllText(path, str);

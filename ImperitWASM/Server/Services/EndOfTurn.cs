@@ -1,5 +1,4 @@
 ﻿using ImperitWASM.Shared.State;
-using System.Linq;
 
 namespace ImperitWASM.Server.Services
 {
@@ -9,31 +8,27 @@ namespace ImperitWASM.Server.Services
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
-		readonly IPlayersLoader players;
-		readonly IProvincesLoader pr;
-		readonly IActionLoader actions;
-		readonly IActivePlayer active;
+		readonly IPlayersProvinces pap;
 		readonly IPowersLoader powers;
-		public EndOfTurn(IPlayersLoader players, IProvincesLoader pr, IActionLoader actions, IActivePlayer active, IPowersLoader powers)
+		public EndOfTurn(IPlayersProvinces pap, IPowersLoader powers)
 		{
-			this.players = players;
-			this.pr = pr;
-			this.actions = actions;
-			this.active = active;
+			this.pap = pap;
 			this.powers = powers;
 		}
-		int LivingHumans => players.Count(player => !(player is Robot) && !(player is Savage) && player.Alive);
 		void End()
 		{
-			actions.EndOfTurn(active.Id);
-			powers.Add(players);
-			active.Next(players);
+			pap.Act();
+			powers.Compute();
+			pap.Next();
 		}
 		void AllRobotsActions()
 		{
-			while (players[active.Id] is Robot robot && LivingHumans > 0)
+			while (pap.Active is Robot robot && pap.LivingHumans > 0)
 			{
-				_ = actions.Add(robot.Think(pr));
+				foreach (var cmd in robot.Think(pap.Provinces))
+				{
+					pap.Do(cmd);
+				}
 				End();
 			}
 		}
@@ -41,10 +36,8 @@ namespace ImperitWASM.Server.Services
 		{
 			End();
 			AllRobotsActions();
-			players.Save();
-			pr.Save();
-			actions.Save();
-			return LivingHumans > 0 && !powers.Last.MajorityReached /**/&& powers.Count < 15;
+			pap.Save();
+			return pap.LivingHumans > 0 && !powers.Last.MajorityReached;
 		}
 	}
 }

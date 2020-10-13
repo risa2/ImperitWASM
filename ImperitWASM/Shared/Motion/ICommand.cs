@@ -5,8 +5,8 @@ namespace ImperitWASM.Shared.Motion
 {
 	public interface ICommand
 	{
-		(IAction?, Province) Perform(Province province) => (null, province);
-		(IAction?, Player) Perform(Player player, IProvinces provinces) => (null, player);
-		bool Allowed(IReadOnlyList<Player> players, IProvinces provinces);
+		Province Perform(Province province) => province;
+		Player Perform(Player player, PlayersAndProvinces pap) => player;
+		bool Allowed(PlayersAndProvinces pap);
 	}
 }

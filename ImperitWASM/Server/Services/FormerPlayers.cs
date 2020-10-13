@@ -6,15 +6,15 @@ using System.Collections.Immutable;
 
 namespace ImperitWASM.Server.Services
 {
-	public interface IFormerPlayersLoader : IReadOnlyList<Player>
+	public interface IFormerPlayers : IReadOnlyList<Player>
 	{
 		void Reset(IEnumerable<Player> players);
 	}
-	public class FormerPlayersLoader : IFormerPlayersLoader
+	public class FormerPlayers : IFormerPlayers
 	{
 		readonly JsonWriter<JsonPlayer, Player, Settings> loader;
 		ImmutableArray<Player> players;
-		public FormerPlayersLoader(IServiceIO io, ISettingsLoader sl)
+		public FormerPlayers(IServiceIO io, ISettingsLoader sl)
 		{
 			loader = new JsonWriter<JsonPlayer, Player, Settings>(io.FormerPlayers, sl.Settings, JsonPlayer.From);
 			players = loader.Load().ToImmutableArray();

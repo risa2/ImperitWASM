@@ -5,7 +5,7 @@ namespace ImperitWASM.Shared.Motion.Commands
 {
 	public class Reinforce : Move
 	{
-		public Reinforce(int player, int from, int to, Army army) : base(player, from, to, army) { }
-		protected override Movement Action => new Reinforcement(To, Army);
+		public Reinforce(Player player, Province from, Province to, Army army) : base(player, from, to, army) { }
+		protected override IAction Action => new Reinforcement(Army.Soldiers);
 	}
 }

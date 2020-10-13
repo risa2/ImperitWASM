@@ -3,6 +3,7 @@ using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.Motion.Actions;
 using ImperitWASM.Shared.State;
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace ImperitWASM.Server.Services
@@ -18,21 +19,16 @@ namespace ImperitWASM.Server.Services
 	{
 		static readonly Random rand = new Random();
 		readonly ISettingsLoader sl;
-		readonly IPlayersLoader players;
-		readonly IProvincesLoader provinces;
-		readonly IActionLoader actions;
-		readonly IActivePlayer active;
+		readonly IPlayersProvinces pap;
 		readonly IPowersLoader powers;
 		readonly ILoginService login;
 		readonly IGameLoader game;
-		readonly IFormerPlayersLoader former;
-		public NewGame(ISettingsLoader sl, IPlayersLoader players, IProvincesLoader provinces, IActionLoader actions, IActivePlayer active, IPowersLoader powers, ILoginService login, IGameLoader game, IFormerPlayersLoader former)
+		readonly IFormerPlayers former;
+		readonly static ImmutableList<IAction> Actions = ImmutableList.Create<IAction>(new Earnings(), new Mortality(), new Instability());
+		public NewGame(ISettingsLoader sl, IPlayersProvinces pap, IPowersLoader powers, ILoginService login, IGameLoader game, IFormerPlayers former)
 		{
 			this.sl = sl;
-			this.players = players;
-			this.provinces = provinces;
-			this.actions = actions;
-			this.active = active;
+			this.pap = pap;
 			this.powers = powers;
 			this.login = login;
 			this.game = game;
@@ -40,48 +36,42 @@ namespace ImperitWASM.Server.Services
 		}
 		public void Finish()
 		{
-			actions.Save(new ActionQueue(new[] { new Instability() as IAction, new Earnings(), new Mortality() }));
-			former.Reset(players);
-			players.Clear();
-			players.Add(new Savage(0));
+			former.Reset(pap.Players);
 			login.Clear();
 			game.Finish();
-
-			provinces.Reset(sl.Settings, players);
-			provinces.Set(provinces.Select(prov => prov.Revolt()).ToArray());
-			provinces.Save();
+			
+			pap.RemovePlayers();
+			pap.Add(new Savage(0));
+			pap.Save();
 		}
-		public Color NextColor => new Color(120.0 + (137.507764050037854 * (players.Count - 1)), 1.0, 1.0);
-		Province[] UnoccupiedStartLands => provinces.Where(p => p is Land L1 && L1.IsStart && !L1.Occupied).ToArray();
+		public Color NextColorFn(int i) => new Color(120.0 + (137.507764050037854 * (pap.PlayersCount - 1 + i)), 1.0, 1.0);
+		public Color NextColor => NextColorFn(0);
+		Province[] UnoccupiedStartLands(int max) => pap.Provinces.Where(p => p is Land L1 && L1.IsStart && !L1.Occupied).Take(max).ToArray();
+		Robot GetRobot(int earnings, int i)
+		{
+			return new Robot(pap.PlayersCount + i, sl.Settings.RobotNames[i], NextColorFn(i), new Password(""), sl.Settings.DefaultMoney - (earnings * 2), true, sl.Settings, Actions);
+		}
 		void AddRobots()
 		{
-			var starts = UnoccupiedStartLands;
+			var starts = UnoccupiedStartLands(sl.Settings.RobotNames.Length);
 			rand.Shuffle(starts);
-			for (int i = 0; i < starts.Length && i < sl.Settings.RobotNames.Length; ++i)
-			{
-				players.Add(new Robot(players.Count, sl.Settings.RobotNames[i], NextColor, new Password(""), sl.Settings.DefaultMoney - (starts[i].Earnings * 2), true, sl.Settings));
-				provinces[starts[i].Id] = starts[i].GiveUpTo(new Army(starts[i].Soldiers, players[^1]));
-			}
-			provinces.Reset(sl.Settings, players);
-			provinces.Save();
+			pap.Add(starts.Select((start, i) => (GetRobot(start.Earnings, i) as Player, start.Soldiers, start.Id)));
 		}
 		public void Start()
 		{
 			AddRobots();
 			powers.Clear();
 			game.Start();
-
-			active.Reset(players);
-			powers.Add(players);
+			
+			powers.Compute();
+			pap.Next();
+			pap.Save();
 		}
 		public void Registration(string name, Password password, Land land)
 		{
-			var player = new Player(players.Count, name, NextColor, password, sl.Settings.DefaultMoney - (land.Earnings * 2), true);
-			players.Add(player);
-
-			provinces.Reset(sl.Settings, players);
-			provinces[land.Id] = land.GiveUpTo(new Army(land.Soldiers, player));
-			provinces.Save();
+			var player = new Player(pap.PlayersCount, name, NextColor, password, sl.Settings.DefaultMoney - (land.Earnings * 2), true, Actions);
+			pap.Add(player, land.DefaultSoldiers, land.Id);
+			pap.Save();
 			game.Register();
 		}
 	}

@@ -5,7 +5,7 @@
 	public IReadOnlyList<PlayersPower> Powers { get; set; } = Array.Empty<PlayersPower>();
 	static string Polyline(IEnumerable<int> y_values, int count, int max_y, int x_offset, int y_offset, int width, int height, bool reverse = false)
 	{
-		return string.Join(' ', y_values.Select((y, i) => ((long)i * width / count + x_offset) + "," + ((long)height - y * height / max_y + y_offset)).Reverse(reverse));
+		return max_y == 0 || count == 0 ? "" : string.Join(' ', y_values.Select((y, i) => ((long)i * width / count + x_offset) + "," + ((long)height - y * height / max_y + y_offset)).Reverse(reverse));
 	}
 	static string ToString(double num) => num.ToString(ExtMethods.Culture);
 }
@@ -22,15 +22,18 @@
 	var life = Players.Select((_, i) => Powers.Count(p => p[i].Alive)).ToArray();
 }
 <table class="Players">
-@foreach (var (power, player) in Powers[^1].Zip(Players, (a, b) => (a, b)).Where(it => it.Item1.Alive))
+@if (sum_money > 0 && sum_soldiers > 0 && sum_lands > 0 && sum_income > 0)
 {
-	<tr>
-		<td style="color:@player.Color;">@player.Name @if (sum_soldiers / power.Soldiers < 2 && sum_lands / power.Lands < 2 && sum_income / power.Income < 2 && sum_money / power.Money < 2) { @Sym.Trophy }</td>
-		<td>@(power.Soldiers * 100 / sum_soldiers) % vojáků</td>
-		<td>@(power.Lands * 100 / sum_lands) % zemí</td>
-		<td>@(power.Income * 100 / sum_income) % příjmů</td>
-		<td>@(power.Money * 100 / sum_money) % peněz</td>
-	</tr>
+	foreach (var (power, player) in Powers[^1].Zip(Players, (a, b) => (a, b)).Where(it => it.Item1.Alive))
+	{
+		<tr>
+			<td style="color:@player.Color;">@player.Name @if (sum_soldiers < 2 * power.Soldiers && sum_lands < 2 * power.Lands && sum_income < 2 * power.Income && sum_money < 2 * power.Money) { @Sym.Trophy }</td>
+			<td>@(power.Soldiers * 100 / sum_soldiers) % vojáků</td>
+			<td>@(power.Lands * 100 / sum_lands) % zemí</td>
+			<td>@(power.Income * 100 / sum_income) % příjmů</td>
+			<td>@(power.Money * 100 / sum_money) % peněz</td>
+		</tr>
+	}
 }
 </table>
 <p>Trvání: @Powers.Count tahů</p>

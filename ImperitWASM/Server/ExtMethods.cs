@@ -14,13 +14,6 @@ namespace ImperitWASM.Server
 		public static IEnumerable<(int i, T v)> Index<T>(this IEnumerable<T> e) => e.Select((v, i) => (i, v));
 		public static T? MinBy<T, TC>(this IEnumerable<T> e, Func<T, TC> selector, T? v = default) where T : class => e.OrderBy(selector).FirstOr(v);
 		public static T Must<T>(this T? value) where T : struct => value ?? throw new ArgumentNullException();
-		public static void Must(this bool value, Exception e)
-		{
-			if (!value)
-			{
-				throw e;
-			}
-		}
 		public static IEnumerable<T> Try<T>(this IEnumerable<T>? e) => e is null ? Enumerable.Empty<T>() : e;
 		public static IEnumerable<T> Must<T>(this IEnumerable<T?> e) where T : class => e.Where(x => x is T)!;
 		public static int DivUp(this int a, int b) => (a / b) + (a % b > 0 ? 1 : 0);

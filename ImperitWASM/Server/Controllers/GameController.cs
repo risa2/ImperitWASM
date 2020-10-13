@@ -11,18 +11,16 @@ namespace ImperitWASM.Server.Controllers
 	{
 		readonly IGameLoader game;
 		readonly INewGame newGame;
-		readonly IProvincesLoader provinces;
+		readonly IPlayersProvinces pap;
 		readonly ILoginService login;
 		readonly IEndOfTurn end;
-		readonly IActivePlayer active;
-		public GameController(IGameLoader game, INewGame newGame, IProvincesLoader provinces, ILoginService login, IEndOfTurn end, IActivePlayer active)
+		public GameController(IGameLoader game, INewGame newGame, IPlayersProvinces pap, ILoginService login, IEndOfTurn end)
 		{
 			this.game = game;
 			this.newGame = newGame;
-			this.provinces = provinces;
+			this.pap = pap;
 			this.login = login;
 			this.end = end;
-			this.active = active;
 		}
 
 		[HttpGet("IsActive")]
@@ -38,7 +36,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Register")]
 		public bool Register([FromBody] Shared.Data.RegisteredPlayer player)
 		{
-			if (!string.IsNullOrWhiteSpace(player.Name) && !string.IsNullOrWhiteSpace(player.Name) && provinces[player.Start] is Land land && land.IsStart && !land.Occupied)
+			if (!string.IsNullOrWhiteSpace(player.Name) && !string.IsNullOrWhiteSpace(player.Name) && pap.Province(player.Start) is Land land && land.IsStart && !land.Occupied)
 			{
 				newGame.Registration(player.Name, new Password(player.Password), land);
 				return true;
@@ -53,7 +51,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("NextTurn")]
 		public bool NextTurn([FromBody] Shared.Data.User loggedIn)
 		{
-			if (active.Id == loggedIn.Id && login.Get(loggedIn.LoginId) == loggedIn.Id)
+			if (pap.Active.Id == loggedIn.Id && login.Get(loggedIn.LoginId) == loggedIn.Id)
 			{
 				if (!end.NextTurn())
 				{

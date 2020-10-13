@@ -1,5 +1,5 @@
+using ImperitWASM.Shared.Motion.Actions;
 using ImperitWASM.Shared.State;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace ImperitWASM.Shared.Motion.Commands
@@ -7,24 +7,23 @@ namespace ImperitWASM.Shared.Motion.Commands
 	public class Buy : ICommand
 	{
 		public readonly Player Player;
-		public readonly int Land;
+		public readonly Province Province;
 		public readonly int Price;
-		public Buy(Player player, int land, int price)
+		public Buy(Player player, Province province, int price)
 		{
 			Player = player;
-			Land = land;
+			Province = province;
 			Price = price;
 		}
-		public bool Allowed(IReadOnlyList<Player> players, IProvinces provinces)
-			=> players[Player.Id].Money >= Price && provinces.NeighborsOf(Land).Any(prov => prov is Land land && land.IsAllyOf(Player.Id));
-
-		public (IAction?, Province) Perform(Province province)
+		public bool Allowed(PlayersAndProvinces pap)
+			=> Player.Money >= Price && pap.NeighborsOf(Province).Any(prov => prov is Land land && land.IsAllyOf(Player));
+		public Province Perform(Province province)
 		{
-			return (null, province.Id == Land ? province.GiveUpTo(Player) : province);
+			return province == Province ? province.GiveUpTo(Player).Replace(a => a is Fight f ? new Reinforcement(f.Army.Soldiers) : a) : province;
 		}
-		public (IAction?, Player) Perform(Player player, IProvinces provinces)
+		public Player Perform(Player player, PlayersAndProvinces pap)
 		{
-			return (null, Player == player ? player.ChangeMoney(-Price) : player);
+			return Player == player ? player.ChangeMoney(-Price) : player;
 		}
 	}
 }

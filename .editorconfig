@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# IDE0022: Pro metody používat text bloku
+csharp_style_expression_bodied_methods = false:none
+
+# CS0114: Člen skrývá zděděný člen. Chybí klíčové slovo override.
+dotnet_diagnostic.CS0114.severity = error

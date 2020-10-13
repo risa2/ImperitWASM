@@ -1,27 +1,27 @@
 using ImperitWASM.Shared.State;
-using System.Collections.Generic;
 
 namespace ImperitWASM.Shared.Motion.Commands
 {
 	public abstract class Move : ICommand
 	{
-		public readonly int Player, From, To;
+		public readonly Player Player;
+		public readonly Province From, To;
 		public readonly Army Army;
-		public Move(int player, int from, int to, Army army)
+		public Move(Player player, Province from, Province to, Army army)
 		{
 			Player = player;
 			From = from;
 			To = to;
 			Army = army;
 		}
-		public virtual bool Allowed(IReadOnlyList<Player> players, IProvinces provinces)
+		public virtual bool Allowed(PlayersAndProvinces pap)
 		{
-			return provinces[From].IsAllyOf(Player) && Army.CanMove(provinces, From, To) && provinces[To].Subtract(Army.Soldiers).CanSoldiersSurvive;
+			return From.IsAllyOf(Player) && Army.CanMove(pap, From.Id, To.Id) && To.Subtract(Army.Soldiers).CanSoldiersSurvive;
 		}
-		protected abstract Actions.Movement Action { get; }
-		public (IAction?, Province) Perform(Province province)
+		protected abstract IAction Action { get; }
+		public Province Perform(Province province)
 		{
-			return province.Id == From ? (Action, province.Subtract(Army.Soldiers)) : (null, province);
+			return province == From ? province.Subtract(Army.Soldiers) : province == To ? province.Add(Action) : province;
 		}
 		public Soldiers Soldiers => Army.Soldiers;
 	}

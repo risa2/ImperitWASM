@@ -1,28 +1,29 @@
 using ImperitWASM.Shared.State;
-using System.Collections.Generic;
 
 namespace ImperitWASM.Shared.Motion.Commands
 {
 	public class Recruit : ICommand
 	{
-		public readonly int Player;
-		public readonly int Land;
-		public readonly Army Army;
-		public Recruit(int player, int land, Army army)
+		public readonly Player Player;
+		public readonly Province Province;
+		public readonly Soldiers Soldiers;
+		public Recruit(Player player, Province province, Soldiers soldeirs)
 		{
 			Player = player;
-			Land = land;
-			Army = army;
+			Province = province;
+			Soldiers = soldeirs;
 		}
-
-		public (IAction?, Player) Perform(Player player, IProvinces provinces)
+		public Player Perform(Player player, PlayersAndProvinces pap)
 		{
-			return player.Id == Player ? (new Actions.Reinforcement(Land, Army), player.ChangeMoney(-Army.Price)) : (null, player);
+			return player == Player ? player.ChangeMoney(-Soldiers.Price) : player;
 		}
-		public bool Allowed(IReadOnlyList<Player> players, IProvinces provinces)
+		public Province Perform(Province province)
 		{
-			return provinces[Land].IsAllyOf(Player) && players[Player].Money >= Army.Price && Army.AnySoldiers;
+			return province == Province ? province.Add(new Actions.Reinforcement(Soldiers)) : province;
 		}
-		public Soldiers Soldiers => Army.Soldiers;
+		public bool Allowed(PlayersAndProvinces pap)
+		{
+			return Province.IsAllyOf(Player) && Player.Money >= Soldiers.Price && Soldiers.Any;
+		}
 	}
 }

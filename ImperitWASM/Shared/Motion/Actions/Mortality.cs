@@ -1,21 +1,16 @@
 ﻿using ImperitWASM.Shared.State;
-using System.Linq;
 
 namespace ImperitWASM.Shared.Motion.Actions
 {
 	public class Mortality : IAction
 	{
-		public (IAction?, Player) Perform(Player player, Player active, IProvinces provinces)
+		public (Player, IAction?) Perform(Player player, Player active, PlayersAndProvinces pap)
 		{
-			return (this, provinces.Any(prov => prov.IsAllyOf(player.Id)) ? player : player.Die());
+			return (pap.HasAny(player) ? player : player.Die(), null);
 		}
-		public (IAction?, Province) Perform(Province province, Player active)
+		public (Province, IAction?) Perform(Province province, Player active, PlayersAndProvinces pap)
 		{
-			if (province is Sea Sea && Sea.Occupied && !Sea.Soldiers.Any)
-			{
-				return (this, Sea.Revolt());
-			}
-			return (this, province.CanSoldiersSurvive ? province : province.Revolt());
+			return ((province is Sea Sea && Sea.Occupied && !Sea.Soldiers.Any) || !province.CanSoldiersSurvive ? province.Revolt() : province, this);
 		}
 		public byte Priority => 200;
 	}

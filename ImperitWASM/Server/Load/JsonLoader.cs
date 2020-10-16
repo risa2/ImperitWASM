@@ -15,7 +15,7 @@ namespace ImperitWASM.Server.Load
 			this.io = io;
 			this.arg = arg;
 		}
-		public IEnumerable<TK> Load() => io.Read().Split('\n', StringSplitOptions.RemoveEmptyEntries).Select((line, i) => JsonSerializer.Deserialize<T>(line).Convert(i, arg));
-		public TK LoadOne() => JsonSerializer.Deserialize<T>(io.Read()).Convert(0, arg);
+		public IEnumerable<TK> Load() => io.Read().Select((line, i) => JsonSerializer.Deserialize<T>(line).Convert(i, arg));
+		public TK LoadOne() => JsonSerializer.Deserialize<T>(io.Read()[0]).Convert(0, arg);
 	}
 }

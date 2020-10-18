@@ -14,25 +14,22 @@ namespace ImperitWASM.Server.Controllers
 	public class ProvincesController : ControllerBase
 	{
 		readonly IPlayersProvinces pap;
-		public ProvincesController(IPlayersProvinces pap)
-		{
-			this.pap = pap;
-		}
+		public ProvincesController(IPlayersProvinces pp) => pap = pp;
 		[HttpGet("Shapes")]
 		public IEnumerable<Shared.Data.DisplayableShape> Shapes()
 		{
-			return pap.Provinces.Select(p => new Shared.Data.DisplayableShape(p.ToArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart));
+			return pap.Provinces.Select(p => new Shared.Data.DisplayableShape(p.ToArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart, p.Text));
 		}
 		[HttpGet("Current")]
 		public IEnumerable<Shared.Data.ProvinceVariables> Current()
 		{
-			return pap.Provinces.Select(p => new Shared.Data.ProvinceVariables(p.Text, p.Fill));
+			return pap.Provinces.Select(p => new Shared.Data.ProvinceVariables(p.Text.LastOrDefault(), p.Fill));
 		}
 		[HttpGet("Preview")]
 		public IEnumerable<Shared.Data.ProvinceVariables> Preview()
 		{
 			var preview = pap.PaP.Act(false).Provinces;
-			return preview.Select(p => new Shared.Data.ProvinceVariables(p.Text, p.Fill));
+			return preview.Select(p => new Shared.Data.ProvinceVariables(p.Text.LastOrDefault(), p.Fill));
 		}
 		[HttpGet("Instabilities")]
 		public IEnumerable<Shared.Data.ProvinceInstability> Instabilities()

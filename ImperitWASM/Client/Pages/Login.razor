@@ -1,17 +1,12 @@
 @inject HttpClient http;
 
 @code{
-	[Parameter] public Func<string, Task>? LoginAsync { get; set; }
+	[Parameter] public Func<int, string, Task<bool>>? LoginAsync { get; set; }
 	LoginModel model = new LoginModel();
 	bool Wrong = false;
 	async Task LoginAction()
 	{
-		string? result = (await http.PostJsonResponseAsync<Shared.Data.Login, Shared.Data.StringValue>("api/Player/Login", new Shared.Data.Login(model.Id, model.Password))).Value;
-		if (result is string)
-		{
-			await LoginAsync!(result);
-		}
-		else
+		if(!await LoginAsync!(model.Id, model.Password))
 		{
 			Wrong = true;
 			model.Password = "";

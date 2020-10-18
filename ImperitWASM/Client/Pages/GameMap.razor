@@ -3,19 +3,18 @@
 @using Mode = Shared.Data.Switch.Mode;
 
 @code{
-	[Parameter] public string LoginId { get; set; } = "";
 	[Parameter] public int LoggedIn { get; set; }
 	[Parameter] public bool IsActive { get; set; }
 	[Parameter] public Action<Mode, int?, int?> Switch { get; set; } = ((a, x, y) => { });
 	[Parameter] public bool Preview { get; set; }
-	[Parameter] public Func<Task>? Logout { get; set; }
-	[Parameter] public Func<Task>? NextTurn { get; set; }
+	[Parameter] public Func<Task>? LogoutAsync { get; set; }
+	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
 	[Parameter] public Shared.Data.DisplayableShape[]? Provinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
-		var r = await http.PostJsonResponseAsync<Shared.Data.Click, Shared.Data.Switch>("api/Switch/Clicked", new Shared.Data.Click(LoggedIn, LoginId, from, clicked));
-		Switch(r.NextMode, r.From, r.To);
-		return r.Selected;
+		var r = await http.PostJsonResponseAsync<Shared.Data.Click, Shared.Data.Switch>("api/Switch/Clicked", new Shared.Data.Click(LoggedIn, from, clicked));
+		Switch(r.M, r.F, r.T);
+		return r.S;
 	}
 	Shared.Data.ProvinceVariables[]? Variables = null;
 	int? PowersCount = null, PlayerMoney = 0;
@@ -38,11 +37,11 @@
 	{
 		@if (IsActive)
 		{
-			<a @onclick="NextTurn">Konec</a>
+			<a @onclick="NextTurnAsync">Konec</a>
 		}
 		else
 		{
-			<a @onclick="Logout">Odhlášení</a>
+			<a @onclick="LogoutAsync">Odhlášení</a>
 		}
 		<a class="this">Imperit</a>
 		<a @onclick="() => Switch(Mode.Players, null, null)">@(PlayerMoney)@Sym.Money</a>

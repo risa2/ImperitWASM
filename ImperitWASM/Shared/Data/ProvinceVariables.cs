@@ -1,17 +1,16 @@
 ﻿using ImperitWASM.Shared.State;
-using System;
 
 namespace ImperitWASM.Shared.Data
 {
 	public class ProvinceVariables
 	{
-		public ProvinceVariables(string[] text, Color fill)
+		public ProvinceVariables(string text, Color fill)
 		{
-			Text = text;
-			Fill = fill;
+			T = text;
+			F = fill;
 		}
 		public ProvinceVariables() { }
-		public string[] Text { get; set; } = Array.Empty<string>();
-		public Color Fill { get; set; }
+		public string T { get; set; } = "";
+		public Color F { get; set; }
 	}
 }

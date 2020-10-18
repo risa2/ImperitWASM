@@ -11,26 +11,18 @@ namespace ImperitWASM.Server.Controllers
 	public class SwitchController : ControllerBase
 	{
 		readonly IPlayersProvinces pap;
-		readonly ILoginService login;
-		public SwitchController(IPlayersProvinces pap, ILoginService login)
+		public SwitchController(IPlayersProvinces pap) => this.pap = pap;
+		Switch ClickedResult(Shared.Data.Click c) => c.F switch
 		{
-			this.pap = pap;
-			this.login = login;
-		}
+			int start => new Switch(null, start == c.C ? Mode.Recruit : Mode.Move, start, c.C),
+			null when pap.Province(c.C).IsAllyOf(pap.Player(c.U)) => new Switch(c.C, Mode.Map, null, null),
+			null when pap.Province(c.C) is Land L1 && !L1.Occupied => new Switch(null, Mode.Purchase, c.C, c.C),
+			_ => new Switch(null, Mode.Map, null, null)
+		};
 		[HttpPost("Clicked")]
 		public Switch Clicked([FromBody] Shared.Data.Click c)
 		{
-			if (login.Get(c.LoginId) != c.LoggedIn || c.LoggedIn != pap.Active.Id)
-			{
-				return new Switch(null, Mode.Map, null, null);
-			}
-			return c.From switch
-			{
-				int start => new Switch(null, start == c.Clicked ? Mode.Recruit : Mode.Move, start, c.Clicked),
-				null when pap.Province(c.Clicked).IsAllyOf(pap.Player(c.LoggedIn)) => new Switch(c.Clicked, Mode.Map, null, null),
-				null when pap.Province(c.Clicked) is Land L1 && !L1.Occupied => new Switch(null, Mode.Purchase, c.Clicked, c.Clicked),
-				_ => new Switch(null, Mode.Map, null, null)
-			};
+			return c.U == pap.Active.Id ? ClickedResult(c) : new Switch(null, Mode.Map, null, null);
 		}
 	}
 }

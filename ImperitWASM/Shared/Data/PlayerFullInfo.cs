@@ -3,7 +3,7 @@
 	public class PlayerFullInfo
 	{
 		public PlayerFullInfo() { }
-		public PlayerFullInfo(int id, bool real, string name, string color, bool alive, int money, int income)
+		public PlayerFullInfo(int id, bool real, string name, string color, bool alive, int money, int income, int debt)
 		{
 			Id = id;
 			Display = real;
@@ -12,6 +12,7 @@
 			Alive = alive;
 			Money = money;
 			Income = income;
+			Debt = debt;
 		}
 		public int Id { get; set; }
 		public bool Display { get; set; }
@@ -20,5 +21,6 @@
 		public bool Alive { get; set; }
 		public int Money { get; set; }
 		public int Income { get; set; }
+		public int Debt { get; set; }
 	}
 }

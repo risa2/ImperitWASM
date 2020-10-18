@@ -1,4 +1,5 @@
 @inject HttpClient http;
+@inject ISessionStorageService cookies;
 
 @using Mode = Shared.Data.Switch.Mode;
 
@@ -6,37 +7,39 @@
 	[Parameter] public Action<Mode> Switch { get; set; } = (x => { });
 	[Parameter] public int Land { get; set; }
 	[Parameter] public int LoggedIn { get; set; }
-	[Parameter] public string LoginId { get; set; } = "";
 	RecruitModel model = new RecruitModel();
 	Shared.Data.RecruitInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<int, Shared.Data.RecruitInfo> ("api/Action/RecruitInfo", Land);
-		model.Soldiers = IntModel.Array(Info.Recruitable.Length);
+		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.RecruitInfo> ("api/Command/RecruitInfo", new Shared.Data.IntPair(Land, LoggedIn));
+		model.Soldiers = IntModel.Array(Info.R.Length);
 	}
-	int Price => model.Soldiers.Select((count, i) => count.Value * Info?.Recruitable?[i].Price ?? 0).Sum();
-	int Missing => Price - Info?.Money ?? 0;
+	int Price => Info is null ? 0 : model.Soldiers.Zip(Info.R, (count, type) => count.Value * type.P).Sum();
+	int Missing => Price - Info?.M ?? 0;
 	async Task DoRecruit()
 	{
-		await http.PostJsonAsync<Shared.Data.RecruitCmd>("api/Action/Recruit", new Shared.Data.RecruitCmd(LoggedIn, LoginId, Land, model.Soldiers.Select(s => s.Value).ToArray()));
-		Switch(Mode.Map);
+		if (Missing <= 0 || model.Borrow)
+		{
+			await http.PostJsonAsync<Shared.Data.RecruitCmd>("api/Command/Recruit", new Shared.Data.RecruitCmd(LoggedIn, await cookies.GetStringAsync("login") ?? "", Land, model.Soldiers.Select(s => s.Value).ToArray()));
+			Switch(Mode.Map);
+		}
 	}
 	SoldierTypeInfobox? infobox;
 }
 <nav>
 	<a @onclick="() => Switch(Mode.Map)">Zrušit</a>
 	<a class="this">Verbování</a>
-	<a @onclick="() => Switch(Mode.Players)">@Info?.Money@Sym.Money</a>
+	<a @onclick="() => Switch(Mode.Players)">@Info?.M@Sym.Money</a>
 </nav>
 <main>
 	<SoldierTypeInfobox @ref="infobox" />
 	<EditForm Model="model" OnValidSubmit="DoRecruit">
 		<DataAnnotationsValidator /><ValidationSummary />
 		<p>
-			@Info?.Name
-			@if (!string.IsNullOrWhiteSpace(Info?.Soldiers))
+			@Info?.N
+			@if (!string.IsNullOrWhiteSpace(Info?.S))
 			{
-				<text>má @Info?.Soldiers</text>
+				<text>má @Info!.S</text>
 			}
 			else
 			{
@@ -44,10 +47,10 @@
 			}
 		</p>
 		<table>
-			@foreach (var (i, (type, price)) in (Info?.Recruitable).Try().Index())
+			@foreach (var (i, (type, price)) in (Info?.R?.Index()).Try())
 			{
 				<tr>
-					<td>@type.Name @price@(Sym.Money)<sup @onclick="() => infobox?.Open(type)">?</sup></td>
+					<td>@type.Name @price@Sym.Money<sup @onclick="() => infobox?.Open(type)">?</sup></td>
 					<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>
 				</tr>
 			}

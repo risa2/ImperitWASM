@@ -1,19 +1,19 @@
 @inject HttpClient http;
+@inject ISessionStorageService cookies;
 
 @code{
 	[Parameter] public Action Return { get; set; } = (() => { });
 	[Parameter] public int LoggedIn { get; set; }
-	[Parameter] public string LoginId { get; set; } = "";
 	[Parameter] public int Land { get; set; }
 	async Task DoPurchase()
 	{
-		await http.PostJsonAsync<Shared.Data.PurchaseCmd>("api/Action/Purchase", new Shared.Data.PurchaseCmd(LoggedIn, LoginId, Land));
+		await http.PostJsonAsync<Shared.Data.PurchaseCmd>("api/Command/Purchase", new Shared.Data.PurchaseCmd(LoggedIn, await cookies.GetStringAsync("login") ?? "", Land));
 		Return();
 	}
 	Shared.Data.PurchaseInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.PurchaseInfo>("api/Action/PurchaseInfo", new Shared.Data.IntPair(LoggedIn, Land));
+		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.PurchaseInfo>("api/Command/PurchaseInfo", new Shared.Data.IntPair(LoggedIn, Land));
 		if (!Info.Possible)
 		{
 			Return();

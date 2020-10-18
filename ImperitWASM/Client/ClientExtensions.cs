@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text;
+using Blazored.SessionStorage;
+using System.IO;
 
 namespace ImperitWASM.Client
 {
@@ -12,18 +14,34 @@ namespace ImperitWASM.Client
 	}
 	public static class ClientExtensions
 	{
-		static readonly JsonSerializerOptions opt = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = HttpNamingPolicy.Instance };
-		public static async Task<TResponse> GetJsonAsync<TResponse>(this HttpClient http, string url)
+		static readonly JsonSerializerOptions opt = new JsonSerializerOptions
 		{
-			return await JsonSerializer.DeserializeAsync<TResponse>(await http.GetStreamAsync(url), opt);
+			PropertyNameCaseInsensitive = true,
+			PropertyNamingPolicy = HttpNamingPolicy.Instance
+		};
+		static async Task<T> Parse<T>(HttpResponseMessage msg)
+		{
+			return await JsonSerializer.DeserializeAsync<T>(await msg.Content.ReadAsStreamAsync(), opt);
 		}
-		public static async Task<HttpContent> PostJsonAsync<TData>(this HttpClient http, string url, TData data)
+		static StringContent MakeContent<T>(T data)
 		{
-			return (await http.PostAsync(url, new StringContent(JsonSerializer.Serialize(data, opt), Encoding.UTF8, "application/json"))).Content;
+			return new StringContent(JsonSerializer.Serialize(data, opt), Encoding.UTF8, "application/json");
 		}
-		public static async Task<TResponse> PostJsonResponseAsync<TData, TResponse>(this HttpClient http, string url, TData data)
+		public static async Task<T> GetJsonAsync<T>(this HttpClient http, string url)
 		{
-			return await JsonSerializer.DeserializeAsync<TResponse>(await (await http.PostJsonAsync(url, data)).ReadAsStreamAsync(), opt);
+			return await Parse<T>(await http.GetAsync(url));
+		}
+		public static Task PostJsonAsync<T>(this HttpClient http, string url, T data)
+		{
+			return http.PostAsync(url, MakeContent(data));
+		}
+		public static async Task<T> PostJsonResponseAsync<TD, T>(this HttpClient http, string url, TD data)
+		{
+			return await Parse<T>(await http.PostAsync(url, MakeContent(data)));
+		}
+		public static Task<string?> GetStringAsync(this ISessionStorageService cookies, string key)
+		{
+			return cookies.GetItemAsync<string?>(key);
 		}
 	}
 }

@@ -10,9 +10,6 @@ namespace ImperitWASM.Server.Services
 	public class SettingsLoader : ISettingsLoader
 	{
 		public Settings Settings { get; }
-		public SettingsLoader(IServiceIO io)
-		{
-			Settings = new JsonWriter<JsonSettings, Settings, bool>(io.Settings, false, JsonSettings.From).LoadOne();
-		}
+		public SettingsLoader(IServiceIO io) => Settings = new JsonWriter<JsonSettings, Settings, bool>(io.Settings, false, JsonSettings.From).LoadOne();
 	}
 }

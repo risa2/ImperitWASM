@@ -4,11 +4,11 @@
 	{
 		public PlayerId(int id, string name)
 		{
-			Id = id;
-			Name = name;
+			I = id;
+			N = name;
 		}
 		public PlayerId() { }
-		public int Id { get; set; }
-		public string Name { get; set; } = "";
+		public int I { get; set; }
+		public string N { get; set; } = "";
 	}
 }

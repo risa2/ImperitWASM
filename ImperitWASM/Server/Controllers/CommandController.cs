@@ -1,37 +1,32 @@
 ﻿using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.Motion.Actions;
 using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace ImperitWASM.Server.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	public class ActionController : ControllerBase
+	public class CommandController : ControllerBase
 	{
 		readonly IPlayersProvinces pap;
 		readonly ILoginService login;
 		readonly ISettingsLoader sl;
-		public ActionController(IPlayersProvinces pap, ILoginService login, ISettingsLoader sl)
+		public CommandController(IPlayersProvinces pap, ILoginService login, ISettingsLoader sl)
 		{
 			this.pap = pap;
 			this.login = login;
 			this.sl = sl;
 		}
 		bool Validate(int loggedIn, string loginId) => login.Get(loginId) == loggedIn && loggedIn == pap.Active.Id;
-		[HttpGet("Debts")]
-		public IEnumerable<Shared.Data.DebtInfo> Debts() => pap.Players.SelectMany(p => p.Actions.OfType<Loan>().Select(l => new Shared.Data.DebtInfo(p.Id, l.Debt)));
 		[HttpPost("GiveUp")]
 		public void GiveUp([FromBody] Shared.Data.User player)
 		{
-			if (login.Get(player.LoginId) == player.Id)
+			if (login.Get(player.I) == player.U)
 			{
-				pap.Do(new GiveUp(pap.Player(player.Id)));
-				if (pap.Active.Id == player.Id)
+				_ = pap.Do(new GiveUp(pap.Player(player.U)));
+				if (pap.Active.Id == player.U)
 				{
 					pap.Next();
 				}
@@ -78,15 +73,15 @@ namespace ImperitWASM.Server.Controllers
 			{
 				if (Land.Price > pap.Player(purchase.LoggedIn).Money)
 				{
-					pap.Do(new Borrow(pap.Player(purchase.LoggedIn), Land.Price - pap.Player(purchase.LoggedIn).Money, sl.Settings));
+					_ = pap.Do(new Borrow(pap.Player(purchase.LoggedIn), Land.Price - pap.Player(purchase.LoggedIn).Money, sl.Settings));
 				}
-				pap.Do(new Buy(pap.Player(purchase.LoggedIn), pap.Province(purchase.Land), Land.Price));
+				_ = pap.Do(new Buy(pap.Player(purchase.LoggedIn), pap.Province(purchase.Land), Land.Price));
 			}
 		}
 		[HttpPost("RecruitInfo")]
-		public Shared.Data.RecruitInfo RecruitInfo([FromBody] int i)
+		public Shared.Data.RecruitInfo RecruitInfo([FromBody] Shared.Data.IntPair p)
 		{
-			return new Shared.Data.RecruitInfo(pap.Province(i).Name, pap.Province(i).Soldiers.ToString(), sl.Settings.SoldierTypes.Where(t => t.IsRecruitable(pap.Province(i))).Select(t => new Shared.Data.SoldiersItem(t.Description, t.Price)).ToArray(), pap.Province(i).Army.Player.Money);
+			return new Shared.Data.RecruitInfo(pap.Province(p.A).Name, pap.Province(p.A).Soldiers.ToString(), sl.Settings.SoldierTypes.Where(t => t.IsRecruitable(pap.Province(p.A))).Select(t => new Shared.Data.SoldiersItem(t.Description, t.Price)).ToArray(), pap.Player(p.B).Money);
 		}
 		[HttpPost("Recruit")]
 		public void Recruit([FromBody] Shared.Data.RecruitCmd r)
@@ -96,19 +91,15 @@ namespace ImperitWASM.Server.Controllers
 				var soldiers = new Soldiers(r.Counts.Select((count, i) => (sl.Settings.SoldierTypes[i], count)));
 				if (soldiers.Price > pap.Player(r.LoggedIn).Money)
 				{
-					pap.Do(new Borrow(pap.Player(r.LoggedIn), soldiers.Price - pap.Player(r.LoggedIn).Money, sl.Settings));
+					_ = pap.Do(new Borrow(pap.Player(r.LoggedIn), soldiers.Price - pap.Player(r.LoggedIn).Money, sl.Settings));
 				}
-				pap.Do(new Recruit(pap.Player(r.LoggedIn), pap.Province(r.Province), soldiers));
+				_ = pap.Do(new Recruit(pap.Player(r.LoggedIn), pap.Province(r.Province), soldiers));
 			}
 		}
 		[HttpPost("Donate")]
 		public bool Donate([FromBody] Shared.Data.DonationCmd donation)
 		{
-			if (login.Get(donation.LoginId) == donation.LoggedIn)
-			{
-				return pap.Do(new Donate(pap.Player(donation.LoggedIn), pap.Player(donation.Recipient), donation.Amount));
-			}
-			return false;
+			return login.Get(donation.LoginId) == donation.LoggedIn && pap.Do(new Donate(pap.Player(donation.LoggedIn), pap.Player(donation.Recipient), donation.Amount));
 		}
 	}
 }

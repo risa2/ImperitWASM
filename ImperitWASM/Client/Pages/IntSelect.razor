@@ -18,12 +18,12 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        CurrentValue = Options.First().Id;
+        CurrentValue = Options.First().I;
     }
 }
 <select @attributes="@AdditionalAttributes" class="@CssClass" @bind="@CurrentValue">
     @foreach (var opt in Options!)
     {
-        <option class="@CssClass" value="@opt.Id">@opt.Name</option>
+        <option class="@CssClass" value="@opt.I">@opt.N</option>
     }
 </select>

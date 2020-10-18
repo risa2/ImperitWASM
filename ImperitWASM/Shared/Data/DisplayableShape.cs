@@ -1,25 +1,32 @@
 ﻿using ImperitWASM.Shared.State;
 using System;
+using System.Linq;
 
 namespace ImperitWASM.Shared.Data
 {
 	public class DisplayableShape
 	{
-		public Point[] Border { get; set; } = Array.Empty<Point>();
-		public Point Center { get; set; }
-		public Color Fill { get; set; }
-		public Color Stroke { get; set; }
-		public int StrokeWidth { get; set; }
-		public bool IsStart { get; set; }
+		public Point[] B { get; set; } = Array.Empty<Point>();
+		public Point C { get; set; }
+		public Color F { get; set; }
+		public Color S { get; set; }
+		public int W { get; set; }
+		public bool R { get; set; }
+		public string[] T { get; set; } = Array.Empty<string>();
 		public DisplayableShape() { }
-		public DisplayableShape(Point[] border, Point center, Color fill, Color stroke, int strokeWidth, bool isStart)
+		public DisplayableShape(Point[] border, Point center, Color fill, Color stroke, int strokeWidth, bool isStart, string[] text)
 		{
-			Border = border;
-			Center = center;
-			Fill = fill;
-			Stroke = stroke;
-			StrokeWidth = strokeWidth;
-			IsStart = isStart;
+			B = border;
+			C = center;
+			F = fill;
+			S = stroke;
+			W = strokeWidth;
+			R = isStart;
+			T = text;
+		}
+		public DisplayableShape UpdateText(string prefix)
+		{
+			return new DisplayableShape(B, C, F, S, W, R, R ? T.Select((t, i) => i == 0 ? prefix + t : t).ToArray() : T);
 		}
 	}
 }

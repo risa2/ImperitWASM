@@ -1,19 +1,19 @@
-using ImperitWASM.Shared;
 using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.Motion.Actions;
 using ImperitWASM.Shared.State;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface INewGame
 	{
-		void Finish();
-		void Start();
+		Task Finish();
+		Task Start();
 		Color NextColor { get; }
-		void Registration(string name, Password password, Land land);
+		Task Registration(string name, Password password, Land land);
 	}
 	public class NewGame : INewGame
 	{
@@ -34,15 +34,15 @@ namespace ImperitWASM.Server.Services
 			this.game = game;
 			this.former = former;
 		}
-		public void Finish()
+		public async Task Finish()
 		{
 			former.Reset(pap.Players);
 			login.Clear();
-			game.Finish();
+			await game.Finish();
 			
 			pap.RemovePlayers();
 			pap.Add(new Savage(0));
-			pap.Save();
+			await pap.Save();
 		}
 		public Color NextColorFn(int i) => new Color(120.0 + (137.507764050037854 * (pap.PlayersCount - 1 + i)), 1.0, 1.0);
 		public Color NextColor => NextColorFn(0);
@@ -57,22 +57,22 @@ namespace ImperitWASM.Server.Services
 			rand.Shuffle(starts);
 			pap.Add(starts.Select((start, i) => (GetRobot(start.Earnings, i) as Player, start.Soldiers, start.Id)));
 		}
-		public void Start()
+		public async Task Start()
 		{
 			AddRobots();
-			powers.Clear();
-			game.Start();
+			await powers.Clear();
+			await game.Start();
 			
 			powers.Compute();
-			pap.Next();
-			pap.Save();
+			pap.ResetActive();
+			await pap.Save();
 		}
-		public void Registration(string name, Password password, Land land)
+		public async Task Registration(string name, Password password, Land land)
 		{
 			var player = new Player(pap.PlayersCount, name, NextColor, password, sl.Settings.DefaultMoney - (land.Earnings * 2), true, Actions);
 			pap.Add(player, land.DefaultSoldiers, land.Id);
-			pap.Save();
-			game.Register();
+			await pap.Save();
+			await game.Register();
 		}
 	}
 }

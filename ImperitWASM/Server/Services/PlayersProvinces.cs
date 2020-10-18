@@ -2,6 +2,7 @@ using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.State;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Services
 {
@@ -12,7 +13,7 @@ namespace ImperitWASM.Server.Services
 		int PlayersCount { get; }
 		int ProvincesCount { get; }
 		int LivingHumans { get; }
-		void Save();
+		Task Save();
 		void RemovePlayers();
 		void Add(Player player);
 		void Add(Player player, Soldiers soldiers, int start);
@@ -20,6 +21,7 @@ namespace ImperitWASM.Server.Services
 		bool Do(ICommand cmd);
 		void Act();
 		void Next();
+		void ResetActive();
 		IReadOnlyList<Player> Players { get; }
 		Provinces Provinces { get; }
 		PlayersAndProvinces PaP { get; }
@@ -38,7 +40,7 @@ namespace ImperitWASM.Server.Services
 		public int ProvincesCount => pap.ProvincesCount;
 		public Player Player(int i) => pap.Player(i);
 		public Province Province(int i) => pap.Province(i);
-		public void Save() => loader.Save(pap);
+		public Task Save() => loader.Save(pap);
 		public void Add(IEnumerable<(Player, Soldiers, int)> starts) => pap = pap.Add(starts);
 		public void Add(Player player, Soldiers soldiers, int start) => Add(new[] { (player, soldiers, start) });
 		public void Add(Player player) => pap = pap.Add(player);
@@ -51,6 +53,7 @@ namespace ImperitWASM.Server.Services
 		}
 		public void Act() => pap = pap.Act();
 		public void Next() => pap = pap.Next();
+		public void ResetActive() => pap = pap.ResetActive();
 		public int LivingHumans => pap.LivingHumans;
 		public IReadOnlyList<Player> Players => pap.Players;
 		public Provinces Provinces => pap.Provinces;

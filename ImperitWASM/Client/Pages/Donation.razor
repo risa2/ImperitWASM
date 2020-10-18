@@ -1,8 +1,8 @@
 @inject HttpClient http;
+@inject ISessionStorageService cookies;
 
 @code{
 	[Parameter] public int LoggedIn { get; set; }
-	[Parameter] public string LoginId { get; set; } = "";
 	[Parameter] public int Recipient { get; set; }
 	[Parameter] public int PlayerMoney { get; set; }
 	[Parameter] public string RecipientName { get; set; } = "";
@@ -10,7 +10,7 @@
 	IntModel model = new IntModel();
 	async Task DoDonate()
 	{
-		if (await http.PostJsonResponseAsync<Shared.Data.DonationCmd, bool>("api/Action/Donate", new Shared.Data.DonationCmd(LoggedIn, LoginId, Recipient, model.Value)))
+		if (await http.PostJsonResponseAsync<Shared.Data.DonationCmd, bool>("api/Command/Donate", new Shared.Data.DonationCmd(LoggedIn, await cookies.GetStringAsync("login") ?? "", Recipient, model.Value)))
 		{
 			Return();
 		}

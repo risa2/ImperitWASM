@@ -1,6 +1,7 @@
 using ImperitWASM.Shared.State;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Load
 {
@@ -27,12 +28,12 @@ namespace ImperitWASM.Server.Load
 			int active = int.Parse(active_file.Read(), ExtMethods.Culture);
 			return new PlayersAndProvinces(players, provinces, active);
 		}
-		public void Save(PlayersAndProvinces saved)
+		public async Task Save(PlayersAndProvinces saved)
 		{
-			player_loader.Save(saved);
-			active_file.Write(saved.ToString());
+			await player_loader.Save(saved);
+			await active_file.Write(saved.ToString());
 			var province_loader = new JsonWriter<JsonProvince, Province, (Settings, IReadOnlyList<Player>, IReadOnlyList<Shape>)>(provinces_file, (settings, saved, shapes), JsonProvince.From);
-			province_loader.Save(saved);
+			await province_loader.Save(saved);
 		}
 	}
 }

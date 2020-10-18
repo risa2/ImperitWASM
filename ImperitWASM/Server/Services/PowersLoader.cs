@@ -3,13 +3,14 @@ using ImperitWASM.Shared.State;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface IPowersLoader : IReadOnlyList<PlayersPower>
 	{
 		void Compute();
-		void Clear();
+		Task Clear();
 		PlayersPower Last { get; }
 	}
 	public class PowersLoader : IPowersLoader
@@ -27,10 +28,10 @@ namespace ImperitWASM.Server.Services
 			powers = loader.Load().ToList();
 			this.pap = pap;
 		}
-		public void Clear()
+		public Task Clear()
 		{
-			loader.Clear();
 			powers.Clear();
+			return loader.Clear();
 		}
 		public void Compute()
 		{

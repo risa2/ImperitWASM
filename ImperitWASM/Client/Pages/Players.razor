@@ -1,10 +1,10 @@
 @inject HttpClient http;
+@inject ISessionStorageService cookies;
 
 @using Mode = Shared.Data.Switch.Mode;
 
 @code{
 	[Parameter] public int LoggedIn { get; set; }
-	[Parameter] public string LoginId { get; set; } = "";
 	[Parameter] public Action<Mode, int?, int?, (int, int, string)?> Switch { get; set; } = ((a, x, y, z) => { });
 	void Donate(int player)
 	{
@@ -12,18 +12,16 @@
 	}
 	async Task DoGiveUp()
 	{
-		await http.PostJsonAsync<Shared.Data.User>("api/Action/GiveUp", new Shared.Data.User(LoggedIn, LoginId));
+		await http.PostJsonAsync<Shared.Data.User>("api/Command/GiveUp", new Shared.Data.User(LoggedIn, await cookies.GetStringAsync("login") ?? ""));
 		Switch(Mode.Map, null, null, null);
 	}
 
 	Shared.Data.PlayerFullInfo[]? PlayerInfos = null;
 	Shared.Data.ProvinceInstability[]? Instabilities = null;
-	Shared.Data.DebtInfo[]? Debts = null;
 	protected override async Task OnInitializedAsync()
 	{
 		PlayerInfos = await http.GetJsonAsync<Shared.Data.PlayerFullInfo[]>("api/Player/Infos");
 		Instabilities = await http.GetJsonAsync<Shared.Data.ProvinceInstability[]>("api/Provinces/Instabilities");
-		Debts = await http.GetJsonAsync<Shared.Data.DebtInfo[]>("api/Action/Debts");
 	}
 }
 <nav>
@@ -60,14 +58,10 @@
 			</tr>
 		}
 	</table><br/>
-	@if (Debts != null && PlayerInfos != null)
+	@foreach (var info in PlayerInfos.Try().Where(i => i.Debt > 0))
 	{
-		@foreach (var loan in Debts)
-		{
-			<p><span style="color:@PlayerInfos[loan.Debtor].Color;">@PlayerInfos[loan.Debtor].Name</span> dluží @(loan.Debt)@Sym.Money</p>
-		}
+		<p><span style="color:@info.Color;">@info.Name</span> dluží @info.Debt@Sym.Money</p>
 	}
-	
 	@foreach (var ins in Instabilities.Try())
 	{
 		<p>Riziko odtržení země <span style="color:@ins.Color;">@ins.Name</span>: @(ins.Instability.ProbabilityToString(prec: 1))</p>

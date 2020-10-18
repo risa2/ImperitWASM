@@ -6,7 +6,6 @@
 	string Password { get; set; } = "";
 	int? Selected = null;
 	Shared.Data.DisplayableShape[]? Provinces = null;
-	Shared.Data.ProvinceVariables[]? Vars = null;
 	Color NextColor;
 	async Task OnSubmit()
 	{
@@ -18,19 +17,12 @@
 	protected override async Task OnInitializedAsync()
 	{
 		NextColor = await http.GetJsonAsync<Color>("api/Game/NextColor");
-		Provinces = await http.GetJsonAsync<Shared.Data.DisplayableShape[]>("api/Provinces/Shapes");
-		Vars = await http.GetJsonAsync<Shared.Data.ProvinceVariables[]>("api/Provinces/Current");
-		for (int i = 0; i < Provinces.Length && i < Vars.Length; ++i)
-		{
-			if (Provinces[i].IsStart && Vars[i].Text.Length > 0)
-			{
-				Vars[i].Text[0] = Sym.Flag + Vars[i].Text[0];
-			}
-		}
+		Provinces = (await http.GetJsonAsync<IEnumerable<Shared.Data.DisplayableShape>>("api/Provinces/Shapes"))
+								.Select(s => s.R ? s.UpdateText(Sym.Flag) : s).ToArray();
 	}
 	async Task<int?> Select(int i, int? from)
 	{
-		if (Provinces![i].IsStart)
+		if (Provinces![i].R)
 		{
 			Selected = i;
 		}
@@ -42,6 +34,6 @@
 	<p>Jméno:</p><p><input type="text" @bind-value="Username"/></p>
 	<p>Heslo:</p><p><input type="password" @bind-value="Password"/></p>
 	<p>Vyber si zemi, kde budeš začínat:</p>
-	<Map Width="1000" Height="1000" Provinces="Provinces" Variables="Vars" SelectedColor="NextColor" Select="Select" FontSize="9" />
+	<Map Width="1000" Height="1000" Provinces="Provinces" SelectedColor="NextColor" Select="Select" FontSize="9" />
 	<button @onclick="OnSubmit">Registrovat</button>
 }

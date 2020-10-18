@@ -9,7 +9,7 @@ namespace ImperitWASM.Server.Services
 		string Add(int user);
 		void Update(string id, int user);
 		void Remove(string id);
-		int? Get(string id);
+		int? Get(string? id);
 		void Clear();
 	}
 	public class LoginService : ILoginService
@@ -19,18 +19,18 @@ namespace ImperitWASM.Server.Services
 
 		public string Add(int user)
 		{
-			var key = rand.NextId(20);
+			var key = rand.NextId(100);
 			while (dict.ContainsKey(key))
 			{
-				key = rand.NextId(20);
+				key = rand.NextId(100);
 			}
 			dict[key] = user;
 			return key;
 		}
 
-		public int? Get(string id)
+		public int? Get(string? id)
 		{
-			bool contains = dict.TryGetValue(id, out int value);
+			bool contains = dict.TryGetValue(id ?? "", out int value);
 			return contains ? (int?)value : null;
 		}
 		public void Remove(string id) => dict.Remove(id);

@@ -6,12 +6,12 @@ namespace ImperitWASM.Shared.Data
 	{
 		public SoldiersItem(Description description, int count)
 		{
-			Description = description;
-			Price = count;
+			D = description;
+			P = count;
 		}
 		public SoldiersItem() { }
-		public Description Description { get; set; } = new Description();
-		public int Price { get; set; }
-		public void Deconstruct(out Description d, out int c) => (d, c) = (Description, Price);
+		public Description D { get; set; } = new Description();
+		public int P { get; set; }
+		public void Deconstruct(out Description d, out int c) => (d, c) = (D, P);
 	}
 }

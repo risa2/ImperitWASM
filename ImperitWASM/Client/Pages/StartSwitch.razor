@@ -1,7 +1,7 @@
 ﻿@inject HttpClient http;
 
 @code{
-	[Parameter] public Func<string, Task>? LoginAsync { get; set; }
+	[Parameter] public Func<int, string, Task<bool>>? LoginAsync { get; set; }
 	bool IsRegistration = false;
 	void Set(bool mode)
 	{

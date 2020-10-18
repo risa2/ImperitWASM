@@ -2,17 +2,15 @@
 {
 	public class Click
 	{
-		public Click(int loggedIn, string loginId, int? from, int clicked)
+		public Click(int loggedIn, int? from, int clicked)
 		{
-			LoggedIn = loggedIn;
-			LoginId = loginId;
-			From = from;
-			Clicked = clicked;
+			U = loggedIn;
+			F = from;
+			C = clicked;
 		}
 		public Click() { }
-		public int LoggedIn { get; set; }
-		public string LoginId { get; set; } = "";
-		public int? From { get; set; }
-		public int Clicked { get; set; }
+		public int U { get; set; }
+		public int? F { get; set; }
+		public int C { get; set; }
 	}
 }

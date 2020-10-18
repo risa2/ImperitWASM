@@ -1,10 +1,11 @@
-﻿using ImperitWASM.Shared.State;
+﻿using System.Threading.Tasks;
+using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface IEndOfTurn
 	{
-		bool NextTurn();
+		Task<bool> NextTurn();
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
@@ -27,16 +28,16 @@ namespace ImperitWASM.Server.Services
 			{
 				foreach (var cmd in robot.Think(pap.Provinces))
 				{
-					pap.Do(cmd);
+					_ = pap.Do(cmd);
 				}
 				End();
 			}
 		}
-		public bool NextTurn()
+		public async Task<bool> NextTurn()
 		{
 			End();
 			AllRobotsActions();
-			pap.Save();
+			await pap.Save();
 			return pap.LivingHumans > 0 && !powers.Last.MajorityReached;
 		}
 	}

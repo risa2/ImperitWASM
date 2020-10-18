@@ -71,6 +71,7 @@ namespace ImperitWASM.Shared.State
 		}
 		public PlayersAndProvinces Add(Player p) => new PlayersAndProvinces(Players.Add(p), Provinces, active);
 		public PlayersAndProvinces Next() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(active + 1, p => p.Alive && !(p is Savage)));
+		public PlayersAndProvinces ResetActive() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(0, p => p.Alive && !(p is Savage)));
 		public int LivingHumans => Players.Count(p => !(p is Robot) && !(p is Savage));
 		public Player Active => Players[active];
 		public override string ToString() => active.ToString(ExtMethods.Culture);

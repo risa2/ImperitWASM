@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.State
 	{
 		public readonly bool Alive;
 		public readonly int Soldiers, Lands, Income, Money;
-		public PlayerPower(bool alive, int soldiers, int lands, int income, int money)
+		public PlayerPower(bool alive, int income, int lands, int money, int soldiers)
 		{
 			Alive = alive;
 			Soldiers = soldiers;
@@ -43,13 +43,13 @@ namespace ImperitWASM.Shared.State
 		public int TotalAvg => TotalSum / Count;
 		public int TotalMax => pp.Max(pp => pp.Total);
 		public bool MajorityReached => pp.Any(pp => pp.Soldiers * 2 > SoldiersSum && pp.Lands * 2 > LandsSum && pp.Income * 2 > IncomeSum && pp.Money * 2 > MoneySum);
+		static (int Soldiers, int Income, int Lands) SoldiersIncome(IEnumerable<Province> provinces)
+		{
+			return provinces.Aggregate((0, 0, 0), (pair, prov) => (pair.Item1 + prov.Soldiers.Price, pair.Item2 + prov.Earnings, pair.Item3 + 1));
+		}
 		public static PlayersPower Compute(PlayersAndProvinces pap)
 		{
-			static (int Soldiers, int Income, int Lands) SoldiersIncome(IEnumerable<Province> provinces)
-			{
-				return provinces.Aggregate((0, 0, 0), (pair, prov) => (pair.Item1 + prov.Soldiers.Price, pair.Item2 + prov.Earnings, pair.Item3 + 1));
-			}
-			return new PlayersPower(pap.Compute(p => (p.Money, Alive: p.Alive && !(p is Savage)), ps => SoldiersIncome(ps), (x, y) => x.Alive ? new PlayerPower(true, y.Soldiers, y.Lands, y.Income, x.Money) : new PlayerPower(false, 0, 0, 0, 0)));
+			return new PlayersPower(pap.Compute(p => (p.Money, Alive: p.Alive && !(p is Savage)), ps => SoldiersIncome(ps), (x, y) => x.Alive ? new PlayerPower(true, y.Income, x.Money, y.Lands, y.Soldiers) : new PlayerPower(false, 0, 0, 0, 0)));
 		}
 		public PlayersPower Convert(int _, bool __) => this;
 	}

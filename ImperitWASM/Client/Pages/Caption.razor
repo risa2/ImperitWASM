@@ -4,12 +4,12 @@
 	[Parameter] public int FontSize { get; set; }
 	[Parameter] public Func<Task>? OnClick { get; set; }
 	[Parameter] public Point Center { get; set; }
-	[Parameter] public string[] Text { get; set; } = Array.Empty<string>();
+	[Parameter] public IEnumerable<string>? Text { get; set; }
 	double X => Center.x * Width;
 	double Y => Center.y * Height;
 }
 <text x="@X" y="@(Y - (FontSize * 2))" @onclick="OnClick!" fill="#fff" dominant-baseline="middle" text-anchor="middle">
-	@foreach (var line in Text)
+	@foreach (var line in Text.Try())
 	{
 		<tspan x="@X" dy="@FontSize">@line</tspan>
 	}

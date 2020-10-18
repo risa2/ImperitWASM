@@ -1,34 +1,33 @@
 ﻿@page "/"
-@page "/{loginid}"
 
 @inject HttpClient http;
-@inject NavigationManager nav;
+@inject ISessionStorageService cookies;
 
 @code{
-	[Parameter] public string? LoginId { get; set; }
-	async Task LoginAsync(string loginId)
+	int? LoggedIn = null;
+	async Task<bool> LoginAsync(int id, string password)
 	{
-		LoginId = loginId;
-		LoggedIn = await http.PostJsonResponseAsync<string?, int?>("api/Player/FromId", LoginId);
-		nav.NavigateTo("/" + loginId);
+		string? loginId = (await http.PostJsonResponseAsync<Shared.Data.Login, Shared.Data.StringValue>("api/Player/Login", new Shared.Data.Login(id, password))).Value;
+		await cookies.SetItemAsync("login", loginId);
+		bool success = !string.IsNullOrWhiteSpace(loginId);
+		LoggedIn = success ? (int?)id : null;
+		this.StateHasChanged();
+		return success;
 	}
-	void Logout()
+	async Task LogoutAsync()
 	{
 		LoggedIn = null;
-		nav.NavigateTo("/");
+		await http.PostJsonAsync<string>("api/Player/Logout", await cookies.GetStringAsync("login") ?? "");
+		await cookies.RemoveItemAsync("login");
 	}
-	int? LoggedIn = null;
 	protected override async Task OnInitializedAsync()
 	{
-		if (LoginId is string)
-		{
-			LoggedIn = await http.PostJsonResponseAsync<string?, int?>("api/Player/FromId", LoginId);
-		}
+		LoggedIn = await http.PostJsonResponseAsync<string, int?>("api/Player/FromId", await cookies.GetStringAsync("login") ?? "");
 	}
 }
 @if (LoggedIn is int loggedIn)
 {
-	<GameSwitch LoggedIn="loggedIn" Logout="Logout" LoginId="@LoginId"/>
+	<GameSwitch LogoutAsync="LogoutAsync" LoggedIn="loggedIn"/>
 }
 else
 {

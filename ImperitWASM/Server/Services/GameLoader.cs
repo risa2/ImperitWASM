@@ -1,15 +1,16 @@
 ﻿using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.State;
 using System;
+using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface IGameLoader
 	{
-		void Register();
+		Task Register();
 		bool IsActive { get; }
-		void Start();
-		void Finish();
+		Task Start();
+		Task Finish();
 		TimeSpan TimeSinceFirstRegistration { get; }
 	}
 	public class GameLoader : IGameLoader
@@ -22,21 +23,21 @@ namespace ImperitWASM.Server.Services
 			game = writer.LoadOne();
 		}
 		public bool IsActive => game.IsActive;
-		public void Start()
+		public Task Start()
 		{
 			game = Game.Start();
-			writer.Save(game);
+			return writer.Save(game);
 		}
-		public void Finish()
+		public Task Finish()
 		{
 			game = Game.Finish();
-			writer.Save(game);
+			return writer.Save(game);
 		}
 		public TimeSpan TimeSinceFirstRegistration => DateTime.UtcNow.Subtract(game.FirstRegistration);
-		public void Register()
+		public Task Register()
 		{
 			game = game.Register();
-			writer.Save(game);
+			return writer.Save(game);
 		}
 	}
 }

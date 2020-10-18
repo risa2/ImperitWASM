@@ -1,4 +1,5 @@
 ﻿using ImperitWASM.Server.Services;
+using ImperitWASM.Shared.Motion.Actions;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -47,10 +48,10 @@ namespace ImperitWASM.Server.Controllers
 		[HttpGet("Infos")]
 		public IEnumerable<Shared.Data.PlayerFullInfo> Infos()
 		{
-			return pap.Players.Select(p => new Shared.Data.PlayerFullInfo(p.Id, !(p is Savage), p.Name, p.Color.ToString(), p.Alive, p.Money, pap.PaP.IncomeOf(p)));
+			return pap.Players.Select(p => new Shared.Data.PlayerFullInfo(p.Id, !(p is Savage), p.Name, p.Color.ToString(), p.Alive, p.Money, pap.PaP.IncomeOf(p), p.Actions.OfType<Loan>().Sum(l => l.Debt)));
 		}
 		[HttpPost("FromId")]
-		public int? FromId([FromBody] string loginId) => login.Get(loginId);
+		public string FromId([FromBody] string loginId) => login.Get(loginId)?.ToString() ?? "null";
 		[HttpPost("Login")]
 		public Shared.Data.StringValue Login([FromBody] Shared.Data.Login trial)
 		{

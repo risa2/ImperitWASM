@@ -1,4 +1,5 @@
 @inject HttpClient http;
+@inject ISessionStorageService cookies;
 
 @code{
 	public enum Errors { Ok, FewSoldiers, LittleCapacity, NotPlaying, Else }
@@ -7,12 +8,11 @@
 	[Parameter] public int From { get; set; }
 	[Parameter] public int To { get; set; }
 	[Parameter] public int LoggedIn { get; set; }
-	[Parameter] public string LoginId { get; set; } = "";
 	MoveModel model = new MoveModel();
 	Shared.Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.MoveInfo>("api/Action/MoveInfo", new Shared.Data.IntPair(From, To));
+		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.MoveInfo>("api/Command/MoveInfo", new Shared.Data.IntPair(From, To));
 		model.Soldiers = IntModel.Array(Info.Soldiers.Length);
 		model.IsAttack = Info.CanAttack;
 		if (!Info.Possible)
@@ -22,7 +22,7 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostJsonResponseAsync<Shared.Data.MoveCmd, Errors>("api/Action/Move", new Shared.Data.MoveCmd(LoggedIn, LoginId, model.IsAttack, From, To, model.Soldiers.Select(s => s.Value).ToArray()));
+		error = await http.PostJsonResponseAsync<Shared.Data.MoveCmd, Errors>("api/Command/Move", new Shared.Data.MoveCmd(LoggedIn, await cookies.GetStringAsync("login") ?? "", model.IsAttack, From, To, model.Soldiers.Select(s => s.Value).ToArray()));
 		if (error == Errors.Ok || error == Errors.NotPlaying)
 		{
 			Return();

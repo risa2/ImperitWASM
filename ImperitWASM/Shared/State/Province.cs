@@ -14,9 +14,9 @@ namespace ImperitWASM.Shared.State
 		public readonly Shape Shape;
 		public readonly Army Army, DefaultArmy;
 		public readonly int Earnings;
-		public readonly ImmutableList<IAction> Actions;
+		public readonly ImmutableList<IProvinceAction> Actions;
 		protected readonly Settings settings;
-		public Province(int id, string name, Shape shape, Army army, Army defaultArmy, int earnings, ImmutableList<IAction> actions, Settings set)
+		public Province(int id, string name, Shape shape, Army army, Army defaultArmy, int earnings, ImmutableList<IProvinceAction> actions, Settings set)
 		{
 			Id = id;
 			Name = name;
@@ -28,9 +28,9 @@ namespace ImperitWASM.Shared.State
 			settings = set;
 		}
 		public abstract Province GiveUpTo(Army army);
-		protected abstract Province WithActions(ImmutableList<IAction> new_actions);
-		public Province Add(params IAction[] actions) => WithActions(Actions.AddRange(actions));
-		public Province Replace(Func<IAction, IAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
+		protected abstract Province WithActions(ImmutableList<IProvinceAction> new_actions);
+		public Province Add(params IProvinceAction[] actions) => WithActions(Actions.AddRange(actions));
+		public Province Replace(Func<IProvinceAction, IProvinceAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
 		public Province GiveUpTo(Player p) => GiveUpTo(new Army(new Soldiers(), p));
 		Province Act(Player active, PlayersAndProvinces pap)
 		{

@@ -19,6 +19,7 @@
 		LoggedIn = null;
 		await http.PostJsonAsync<string>("api/Player/Logout", await cookies.GetStringAsync("login") ?? "");
 		await cookies.RemoveItemAsync("login");
+		this.StateHasChanged();
 	}
 	protected override async Task OnInitializedAsync()
 	{

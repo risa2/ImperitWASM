@@ -37,6 +37,18 @@
 		Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn);
 		Provinces = await http.GetJsonAsync<Shared.Data.DisplayableShape[]>("api/Provinces/Shapes");
 	}
+	public void UpdateProvinces(Shared.Data.ProvinceVariables[] variables)
+	{
+		if (Provinces != null && variables.Length <= Provinces.Length)
+		{
+			for (int i = 0; i < variables.Length; ++i)
+			{
+				Provinces[i].F = variables[i].F;
+				Provinces[i].T = Provinces[i].T.SkipLast(1).Append(variables[i].T).ToArray();
+			}
+		}
+		
+	}
 }
 
 <style>
@@ -50,11 +62,11 @@
 
 @if (Current == Mode.Map)
 {
-	<GameMap @ref="Map" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" LoggedIn="LoggedIn" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" LoggedIn="LoggedIn" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Preview)
 {
-	<GameMap Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" LoggedIn="LoggedIn" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" LoggedIn="LoggedIn" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Powers)
 {

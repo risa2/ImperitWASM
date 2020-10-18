@@ -2,7 +2,6 @@
 	[Parameter] public int Width { get; set; }
 	[Parameter] public int Height { get; set; }
 	[Parameter] public Shared.Data.DisplayableShape[]? Provinces { get; set; }
-	[Parameter] public Shared.Data.ProvinceVariables[]? Variables { get; set; }
 	[Parameter] public Color SelectedColor { get; set; }
 	[Parameter] public Func<int, int?, Task<int?>>? Select { get; set; }
 	[Parameter] public int FontSize { get; set; }
@@ -18,21 +17,11 @@
 <svg viewBox="0 0 @Width @Height">
 	@foreach (var (i, province) in Provinces.Try().Index())
 	{
-		<Country Points="province.B" Fill="Variables?[i].F ?? province.F" Stroke="province.S" StrokeWidth="province.W" Width="Width" Height="Height" OnClick="async() => await ClickSelect(i)" />
+		<Country Points="province.B" Fill="province.F" Stroke="province.S" StrokeWidth="province.W" Width="Width" Height="Height" OnClick="async() => await ClickSelect(i)" />
 	}
 	<Country @ref="country" Points="SelectedPoints" Fill="SelectedColor" Width="Width" Height="Height" OnClick="async() => await ClickSelect(selected)" />
-	@if (Variables is null)
+	@foreach (var (i, province) in Provinces.Try().Index())
 	{
-		foreach (var (i, province) in Provinces.Try().Index())
-		{
-			<Caption Text="province.T" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClick="async() => await ClickSelect(i)" />
-		}
-	}
-	else
-	{
-		foreach (var (i, province, text) in Provinces.Try().Index().Zip(Variables, (a, b) => (a.i, a.v, b.T)))
-		{
-			<Caption Text="province.T.SkipLast(1).Append(text)" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClick="async() => await ClickSelect(i)" />
-		}
+		<Caption Text="province.T" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClick="async() => await ClickSelect(i)" />
 	}
 </svg>

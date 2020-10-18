@@ -11,8 +11,8 @@ namespace ImperitWASM.Shared.State
 		public Password Password { get; }
 		public int Money { get; }
 		public bool Alive { get; }
-		public ImmutableList<IAction> Actions { get; }
-		public Player(int id, string name, Color color, Password password, int money, bool alive, ImmutableList<IAction> actions)
+		public ImmutableList<IPlayerAction> Actions { get; }
+		public Player(int id, string name, Color color, Password password, int money, bool alive, ImmutableList<IPlayerAction> actions)
 		{
 			Id = id;
 			Name = name;
@@ -23,12 +23,12 @@ namespace ImperitWASM.Shared.State
 			Actions = actions;
 		}
 		public virtual Player ChangeMoney(int amount) => new Player(Id, Name, Color, Password, Money + amount, Alive, Actions);
-		public virtual Player Die() => new Player(Id, Name, Color, Password, 0, false, ImmutableList<IAction>.Empty);
-		protected virtual Player WithActions(ImmutableList<IAction> new_actions) => new Player(Id, Name, Color, Password, Money, Alive, new_actions);
-		public Player Add(params IAction[] actions) => WithActions(Actions.AddRange(actions));
+		public virtual Player Die() => new Player(Id, Name, Color, Password, 0, false, ImmutableList<IPlayerAction>.Empty);
+		protected virtual Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Player(Id, Name, Color, Password, Money, Alive, new_actions);
+		public Player Add(params IPlayerAction[] actions) => WithActions(Actions.AddRange(actions));
 		Player Action(PlayersAndProvinces pap)
 		{
-			var (a, p) = Actions.Fold(this, (player, action) => action.Perform(player, player, pap));
+			var (a, p) = Actions.Fold(this, (player, action) => action.Perform(player, pap));
 			return p.WithActions(a);
 		}
 		(Province, Player) Action(Province province, PlayersAndProvinces pap)

@@ -10,19 +10,19 @@
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
 	[Parameter] public Shared.Data.DisplayableShape[]? Provinces { get; set; }
+	[Parameter] public Action<Shared.Data.ProvinceVariables[]>? UpdateProvinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
 		var r = await http.PostJsonResponseAsync<Shared.Data.Click, Shared.Data.Switch>("api/Switch/Clicked", new Shared.Data.Click(LoggedIn, from, clicked));
 		Switch(r.M, r.F, r.T);
 		return r.S;
 	}
-	Shared.Data.ProvinceVariables[]? Variables = null;
 	int? PowersCount = null, PlayerMoney = 0;
 	public async Task Update()
 	{
-		Variables = await http.GetJsonAsync<Shared.Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current");
 		PowersCount = await http.GetJsonAsync<int>("api/Powers/Count");
 		PlayerMoney = await http.PostJsonResponseAsync<int, int>("api/Player/Money", LoggedIn);
+		UpdateProvinces!(await http.GetJsonAsync<Shared.Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current"));
 		this.StateHasChanged();
 	}
 	protected override Task OnInitializedAsync() => Update();
@@ -53,5 +53,5 @@
 	}
 </nav>
 <main>
-	<Map Width="1000" Height="1000" Provinces="Provinces" Variables="Variables" Select="OnClick" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" />
+	<Map Width="1000" Height="1000" Provinces="Provinces" Select="OnClick" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" />
 </main>

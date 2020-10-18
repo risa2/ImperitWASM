@@ -1,5 +1,4 @@
 ﻿using ImperitWASM.Shared.State;
-using System.Collections.Generic;
 
 namespace ImperitWASM.Shared.Motion
 {
@@ -7,6 +6,6 @@ namespace ImperitWASM.Shared.Motion
 	{
 		Province Perform(Province province) => province;
 		Player Perform(Player player, PlayersAndProvinces pap) => player;
-		bool Allowed(PlayersAndProvinces pap);
+		bool Allowed(PlayersAndProvinces pap) => true;
 	}
 }

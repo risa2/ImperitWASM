@@ -14,7 +14,6 @@
 	{
 		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.MoveInfo>("api/Command/MoveInfo", new Shared.Data.IntPair(From, To));
 		model.Soldiers = IntModel.Array(Info.Soldiers.Length);
-		model.IsAttack = Info.CanAttack;
 		if (!Info.Possible)
 		{
 			Return();
@@ -22,18 +21,17 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostJsonResponseAsync<Shared.Data.MoveCmd, Errors>("api/Command/Move", new Shared.Data.MoveCmd(LoggedIn, await cookies.GetStringAsync("login") ?? "", model.IsAttack, From, To, model.Soldiers.Select(s => s.Value).ToArray()));
+		error = await http.PostJsonResponseAsync<Shared.Data.MoveCmd, Errors>("api/Command/Move", new Shared.Data.MoveCmd(LoggedIn, await cookies.GetStringAsync("login") ?? "", From, To, model.Soldiers.Select(s => s.Value).ToArray()));
 		if (error == Errors.Ok || error == Errors.NotPlaying)
 		{
 			Return();
 		}
 	}
-	string SubmitText => model.IsAttack ? "Zaútočit" : "Podpořit";
 	SoldierTypeInfobox? infobox;
 }
 <nav>
 	<a @onclick="Return">Zrušit</a>
-	<a class="this">Přesun</a>
+	<a class="this">Manévry</a>
 </nav>
 <main>
 	<SoldierTypeInfobox @ref="infobox" />
@@ -63,19 +61,7 @@
 						<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>
 					</tr>
 				}
-				@if (Info.CanAttack && Info.CanReinforce)
-				{
-					<tr>
-						<td>Typ přesunu</td>
-						<td colspan="2">
-							<InputSelect @bind-Value="model.MoveType">
-								<option value="@MoveModel.Type.Attack">Útok</option>
-								<option value="@MoveModel.Type.Reinforcement">Podpora</option>
-							</InputSelect>
-						</td>
-					</tr>
-				}
-				<tr><td></td><td><button type="submit">@SubmitText</button></td></tr>
+				<tr><td></td><td><button type="submit">Přesunout</button></td></tr>
 			</table>
 		</EditForm>
 	}

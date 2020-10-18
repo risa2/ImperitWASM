@@ -49,7 +49,7 @@ namespace ImperitWASM.Shared.State
 		}
 		public static PlayersPower Compute(PlayersAndProvinces pap)
 		{
-			return new PlayersPower(pap.Compute(p => (p.Money, Alive: p.Alive && !(p is Savage)), ps => SoldiersIncome(ps), (x, y) => x.Alive ? new PlayerPower(true, y.Income, x.Money, y.Lands, y.Soldiers) : new PlayerPower(false, 0, 0, 0, 0)));
+			return new PlayersPower(pap.Compute(p => (p.Money, Alive: p.Alive && !(p is Savage)), ps => SoldiersIncome(ps), (x, y) => x.Alive ? new PlayerPower(true, y.Income, y.Lands, x.Money, y.Soldiers) : new PlayerPower(false, 0, 0, 0, 0)));
 		}
 		public PlayersPower Convert(int _, bool __) => this;
 	}

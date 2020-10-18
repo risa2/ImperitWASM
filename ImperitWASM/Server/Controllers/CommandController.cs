@@ -56,9 +56,8 @@ namespace ImperitWASM.Server.Controllers
 			{
 				return Client.Pages.Move.Errors.LittleCapacity;
 			}
-			var army = new Army(s, pap.Player(m.LoggedIn));
-			return pap.Do(m.IsAttack ? new Attack(pap.Player(m.LoggedIn), pap.Province(m.From), pap.Province(m.To), army) as Move : new Reinforce(pap.Player(m.LoggedIn), pap.Province(m.From), pap.Province(m.To), army))
-				? Client.Pages.Move.Errors.Ok : Client.Pages.Move.Errors.Else;
+			return pap.Do(new Move(pap.Player(m.LoggedIn), pap.Province(m.From), pap.Province(m.To), new Army(s, pap.Player(m.LoggedIn))))
+					? Client.Pages.Move.Errors.Ok : Client.Pages.Move.Errors.Else;
 		}
 		[HttpPost("PurchaseInfo")]
 		public Shared.Data.PurchaseInfo PurchaseInfo([FromBody] Shared.Data.IntPair purchase)

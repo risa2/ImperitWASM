@@ -1,5 +1,4 @@
 using ImperitWASM.Shared.Motion;
-using ImperitWASM.Shared.Motion.Actions;
 using ImperitWASM.Shared.State;
 using System;
 using System.Collections.Immutable;
@@ -24,7 +23,7 @@ namespace ImperitWASM.Server.Services
 		readonly ILoginService login;
 		readonly IGameLoader game;
 		readonly IFormerPlayers former;
-		readonly static ImmutableList<IAction> Actions = ImmutableList.Create<IAction>(new Earnings(), new Mortality(), new Instability());
+		readonly static ImmutableList<IPlayerAction> Actions = ImmutableList.Create<IPlayerAction>(new Default(), new Instability());
 		public NewGame(ISettingsLoader sl, IPlayersProvinces pap, IPowersLoader powers, ILoginService login, IGameLoader game, IFormerPlayers former)
 		{
 			this.sl = sl;

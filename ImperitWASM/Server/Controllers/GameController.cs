@@ -54,7 +54,8 @@ namespace ImperitWASM.Server.Controllers
 		{
 			if (pap.Active.Id == loggedIn.U && login.Get(loggedIn.I) == loggedIn.U)
 			{
-				if (!await end.NextTurn())
+				await end.NextTurn();
+				if (!end.Continue)
 				{
 					await newGame.Finish();
 					return true;

@@ -5,7 +5,8 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IEndOfTurn
 	{
-		Task<bool> NextTurn();
+		Task NextTurn();
+		bool Continue { get; }
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
@@ -16,29 +17,17 @@ namespace ImperitWASM.Server.Services
 			this.pap = pap;
 			this.powers = powers;
 		}
-		void End()
+		public bool Continue => pap.LivingHumans > 0 && !powers.Last.MajorityReached;
+		public Task NextTurn()
 		{
-			pap.Act();
-			powers.Compute();
 			pap.Next();
-		}
-		void AllRobotsActions()
-		{
-			while (pap.Active is Robot robot && pap.LivingHumans > 0)
+			while (pap.Active is Robot robot && Continue && pap.Active.Alive)
 			{
-				foreach (var cmd in robot.Think(pap.Provinces))
-				{
-					_ = pap.Do(cmd);
-				}
-				End();
+				pap.PaP = robot.Think(pap.PaP);
+				pap.Next();
 			}
-		}
-		public async Task<bool> NextTurn()
-		{
-			End();
-			AllRobotsActions();
-			await pap.Save();
-			return pap.LivingHumans > 0 && !powers.Last.MajorityReached;
+			powers.Compute();
+			return pap.Save();
 		}
 	}
 }

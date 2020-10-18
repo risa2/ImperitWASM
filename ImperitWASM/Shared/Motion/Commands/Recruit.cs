@@ -19,7 +19,7 @@ namespace ImperitWASM.Shared.Motion.Commands
 		}
 		public Province Perform(Province province)
 		{
-			return province == Province ? province.Add(new Actions.Reinforcement(Soldiers)) : province;
+			return province == Province ? province.Add(new Manoeuvre(new Army(Soldiers, Player))) : province;
 		}
 		public bool Allowed(PlayersAndProvinces pap)
 		{

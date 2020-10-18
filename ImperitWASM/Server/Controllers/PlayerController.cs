@@ -1,5 +1,5 @@
 ﻿using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.Motion.Actions;
+using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -38,7 +38,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Info")]
 		public Shared.Data.PlayerInfo Info([FromBody] int player)
 		{
-			return new Shared.Data.PlayerInfo(player == pap.Active.Id, pap.Player(player).Color);
+			return new Shared.Data.PlayerInfo(player == pap.Active.Id, player >= 0 && player < pap.PlayersCount ? pap.Player(player).Color : new Color());
 		}
 		[HttpPost("Money")]
 		public int Money([FromBody] int player)

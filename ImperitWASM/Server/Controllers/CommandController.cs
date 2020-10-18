@@ -3,6 +3,7 @@ using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -13,22 +14,24 @@ namespace ImperitWASM.Server.Controllers
 		readonly IPlayersProvinces pap;
 		readonly ILoginService login;
 		readonly ISettingsLoader sl;
-		public CommandController(IPlayersProvinces pap, ILoginService login, ISettingsLoader sl)
+		readonly IEndOfTurn end;
+		public CommandController(IPlayersProvinces pap, ILoginService login, ISettingsLoader sl, IEndOfTurn end)
 		{
 			this.pap = pap;
 			this.login = login;
 			this.sl = sl;
+			this.end = end;
 		}
 		bool Validate(int loggedIn, string loginId) => login.Get(loginId) == loggedIn && loggedIn == pap.Active.Id;
 		[HttpPost("GiveUp")]
-		public void GiveUp([FromBody] Shared.Data.User player)
+		public async Task GiveUp([FromBody] Shared.Data.User player)
 		{
 			if (login.Get(player.I) == player.U)
 			{
 				_ = pap.Do(new GiveUp(pap.Player(player.U)));
 				if (pap.Active.Id == player.U)
 				{
-					pap.Next();
+					_ = await end.NextTurn();
 				}
 			}
 		}

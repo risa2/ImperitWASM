@@ -83,7 +83,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("RecruitInfo")]
 		public Shared.Data.RecruitInfo RecruitInfo([FromBody] Shared.Data.IntPair p)
 		{
-			return new Shared.Data.RecruitInfo(pap.Province(p.A).Name, pap.Province(p.A).Soldiers.ToString(), sl.Settings.SoldierTypes.Where(t => t.IsRecruitable(pap.Province(p.A))).Select(t => new Shared.Data.SoldiersItem(t.Description, t.Price)).ToArray(), pap.Player(p.B).Money);
+			return new Shared.Data.RecruitInfo(pap.Province(p.A).Name, pap.Province(p.A).Soldiers.ToString(), sl.Settings.RecruitableTypes(pap.Province(p.A), pap.Active).Select(t => new Shared.Data.SoldiersItem(t.Description, t.Price)).ToArray(), pap.Player(p.B).Money);
 		}
 		[HttpPost("Recruit")]
 		public void Recruit([FromBody] Shared.Data.RecruitCmd r)

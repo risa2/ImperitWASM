@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace ImperitWASM.Shared.State
 {
@@ -25,5 +27,6 @@ namespace ImperitWASM.Shared.State
 			SoldierTypes = soldierTypes;
 		}
 		public double Instability(Soldiers now, Soldiers start) => DefaultInstability * Math.Max(start.DefensePower - now.DefensePower - 1, -1) / start.DefensePower;
+		public IEnumerable<SoldierType> RecruitableTypes(Province where, Player player) => SoldierTypes.Where(t => t.IsRecruitable(where) && t.Price <= player.Money);
 	}
 }

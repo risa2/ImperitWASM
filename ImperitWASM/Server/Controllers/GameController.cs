@@ -48,7 +48,7 @@ namespace ImperitWASM.Server.Controllers
 		public Color NextColor() => newGame.NextColor;
 		static int TimeSpanToSec(TimeSpan time) => time > TimeSpan.FromDays(1) ? int.MaxValue : time < TimeSpan.FromDays(-1) ? int.MinValue : (int)time.TotalSeconds;
 		[HttpGet("TimeToStart")]
-		public int TimeToStart() => TimeSpanToSec(TimeSpan.FromMinutes(0.2) - game.TimeSinceFirstRegistration);
+		public int TimeToStart() => TimeSpanToSec(TimeSpan.FromMinutes(4) - game.TimeSinceFirstRegistration);
 		[HttpPost("NextTurn")]
 		public async Task<bool> NextTurn([FromBody] Shared.Data.User loggedIn)
 		{

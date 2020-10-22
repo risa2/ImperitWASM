@@ -27,11 +27,14 @@
 {
 	<Registration Return="() => Set(false)"/>
 }
-else if (IsActive ?? false)
+else if (IsActive is bool isActive)
 {
-	<Login LoginAsync="LoginAsync!"/>
-}
-else
-{
-	<BetweenGames Return="() => Set(true)"/>
+	if(isActive)
+	{
+		<Login LoginAsync="LoginAsync!"/>
+	}
+	else
+	{
+		<BetweenGames Set="Set"/>
+	}
 }

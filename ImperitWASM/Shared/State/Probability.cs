@@ -17,6 +17,9 @@ namespace ImperitWASM.Shared.State
 		public static Probability operator -(Probability x, Probability y) => new Probability((long)x.prob - y.prob);
 		public static Probability operator *(Probability x, long y) => new Probability(x.prob * y);
 		public static Probability operator /(Probability x, long y) => new Probability(x.prob / y);
+		public static Probability operator ~(Probability x) => new Probability(int.MaxValue - x.prob);
+		public static Probability operator &(Probability x, Probability y) => new Probability((long)x.prob * y.prob / int.MaxValue);
+		public static Probability operator |(Probability x, Probability y) => ~((~x) & (~y));
 		public Probability Adjust(long mul, long div) => new Probability(prob * mul / div);
 		public static bool operator <(Probability x, Probability y) => x.prob < y.prob;
 		public static bool operator >(Probability x, Probability y) => x.prob > y.prob;
@@ -26,9 +29,9 @@ namespace ImperitWASM.Shared.State
 		public static bool operator !=(Probability x, Probability y) => x.prob != y.prob;
 		public override bool Equals(object? obj) => obj is Probability p && Equals(p);
 		public override int GetHashCode() => prob.GetHashCode();
-		public int ToUnits(int max) => prob * max / int.MaxValue;
 		public long ToUnits(long max) => prob * max / int.MaxValue;
-		public string ToString(string fmt, int units, int units2)
+		public int ToInt() => prob;
+		public string ToString(string fmt, long units, long units2)
 		{
 			return string.Format(CultureInfo.InvariantCulture, fmt, ToUnits(units), ToUnits(units * units2) % units2);
 		}

@@ -42,7 +42,7 @@ namespace ImperitWASM.Shared.State
 		public int TotalSum => pp.Sum(p => p.Total);
 		public int TotalAvg => TotalSum / Count;
 		public int TotalMax => pp.Max(pp => pp.Total);
-		public bool MajorityReached => pp.Any(pp => pp.Soldiers * 2 > SoldiersSum && pp.Lands * 2 > LandsSum && pp.Income * 2 > IncomeSum && pp.Money * 2 > MoneySum);
+		public bool MajorityReached => pp.Any(pp => pp.Soldiers * 2 > SoldiersSum && pp.Lands * 2 > LandsSum);
 		static (int Soldiers, int Income, int Lands) SoldiersIncome(IEnumerable<Province> provinces)
 		{
 			return provinces.Aggregate((0, 0, 0), (pair, prov) => (pair.Item1 + prov.Soldiers.Price, pair.Item2 + prov.Earnings, pair.Item3 + 1));

@@ -1,7 +1,7 @@
 ﻿@inject HttpClient http;
 
 @code {
-	[Parameter] public Action Return { get; set; } = () => { };
+	[Parameter] public Action<bool> Set { get; set; } = b => { };
 	TimeSpan? TimeToStart = null;
 	Shared.Data.DisplayablePlayer[]? Players = null, Former = null;
 	PlayersPower[]? Powers = null;
@@ -19,12 +19,12 @@
 			this.StateHasChanged();
 		}
 		await Task.Delay(2000);
-		Return();
+		Set(false);
 	}
 }
 <nav>
 	<a class="this">Úvod</a>
-	<a @onclick="Return">Registrace</a>
+	<a @onclick="() => Set(true)">Registrace</a>
 </nav>
 <main>
 	@if (TimeToStart is TimeSpan time && time > TimeSpan.Zero && time < TimeSpan.FromDays(1))

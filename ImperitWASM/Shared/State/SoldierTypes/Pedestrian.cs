@@ -17,7 +17,7 @@
 		}
 		public override int CanMove(IProvinces provinces, int from, int to)
 		{
-			return provinces[from] is Land && provinces[to] is Land && provinces.Passable(from, to) ? Weight : 0;
+			return provinces[from] is Land && provinces[to] is Land && provinces.Passable(from, to, 1, (a, b) => a is Land && b is Land ? 1 : 2) ? Weight : 0;
 		}
 		public override bool IsRecruitable(Province province) => province is Land;
 		public override int CanSustain(Province province) => province is Land ? Weight : 0;

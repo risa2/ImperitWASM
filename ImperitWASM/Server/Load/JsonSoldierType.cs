@@ -27,10 +27,10 @@ namespace ImperitWASM.Server.Load
 		};
 		public static JsonSoldierType From(SoldierType type) => type switch
 		{
-			Pedestrian P => new JsonSoldierType { Type = "P", Description = P.Description, AttackPower = P.AttackPower, DefensePower = P.DefensePower, Weight = P.Weight, Price = P.Price },
-			Ship S => new JsonSoldierType { Type = "S", Description = S.Description, AttackPower = S.AttackPower, DefensePower = S.DefensePower, Weight = S.Weight, Price = S.Price, Capacity = S.Capacity },
-			Elephant E => new JsonSoldierType { Type = "E", Description = E.Description, AttackPower = E.AttackPower, DefensePower = E.DefensePower, Weight = E.Weight, Price = E.Price, Capacity = E.Capacity, Speed = E.Speed, RecruitPlaces = E.RecruitPlaces },
 			ElephantShip ES => new JsonSoldierType { Type = "ES", Description = ES.Description, AttackPower = ES.AttackPower, DefensePower = ES.DefensePower, Weight = ES.Weight, Price = ES.Price, Capacity = ES.Capacity, Speed = ES.Speed, RecruitPlaces = ES.RecruitPlaces },
+			Elephant E => new JsonSoldierType { Type = "E", Description = E.Description, AttackPower = E.AttackPower, DefensePower = E.DefensePower, Weight = E.Weight, Price = E.Price, Capacity = E.Capacity, Speed = E.Speed, RecruitPlaces = E.RecruitPlaces },
+			Ship S => new JsonSoldierType { Type = "S", Description = S.Description, AttackPower = S.AttackPower, DefensePower = S.DefensePower, Weight = S.Weight, Price = S.Price, Capacity = S.Capacity },
+			Pedestrian P => new JsonSoldierType { Type = "P", Description = P.Description, AttackPower = P.AttackPower, DefensePower = P.DefensePower, Weight = P.Weight, Price = P.Price },
 			_ => throw new System.Exception("Unknown State.SoldierType type: " + type.GetType())
 		};
 	}

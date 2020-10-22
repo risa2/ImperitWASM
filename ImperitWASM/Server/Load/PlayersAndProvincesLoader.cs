@@ -31,9 +31,9 @@ namespace ImperitWASM.Server.Load
 		}
 		public async Task Save(PlayersAndProvinces saved)
 		{
-			await player_loader.Save(saved);
+			await player_loader.Save(saved.Players);
 			await active_file.Write(saved.ToString());
-			var province_loader = new JsonWriter<JsonProvince, Province, (Settings, IReadOnlyList<Player>, IReadOnlyList<Shape>)>(provinces_file, (settings, saved, shapes), JsonProvince.From);
+			var province_loader = new JsonWriter<JsonProvince, Province, (Settings, IReadOnlyList<Player>, IReadOnlyList<Shape>)>(provinces_file, (settings, saved.Players, shapes), JsonProvince.From);
 			await province_loader.Save(saved);
 		}
 	}

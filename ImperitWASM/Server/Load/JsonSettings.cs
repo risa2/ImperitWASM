@@ -19,6 +19,6 @@ namespace ImperitWASM.Server.Load
 		public string SeaColor { get; set; } = "";
 		public IEnumerable<JsonSoldierType>? SoldierTypes { get; set; }
 		public Settings Convert(int _i, bool _b) => new Settings(DebtLimit, new Probability(DefaultInstability), DefaultMoney, Interest, Color.Parse(LandColor), Color.Parse(MountainsColor), MountainsWidth, RobotNames, Color.Parse(SeaColor), SoldierTypes.Select((t, i) => t.Convert(i, false)).ToImmutableArray());
-		public static JsonSettings From(Settings s) => new JsonSettings { Interest = s.Interest, DefaultInstability = s.DefaultInstability.ToUnits(int.MaxValue), DefaultMoney = s.DefaultMoney, DebtLimit = s.DebtLimit, RobotNames = s.RobotNames, LandColor = s.LandColor.ToString(), SeaColor = s.SeaColor.ToString(), MountainsColor = s.MountainsColor.ToString(), MountainsWidth = s.MountainsWidth, SoldierTypes = s.SoldierTypes.Select(t => JsonSoldierType.From(t)) };
+		public static JsonSettings From(Settings s) => new JsonSettings { Interest = s.Interest, DefaultInstability = s.DefaultInstability.ToInt(), DefaultMoney = s.DefaultMoney, DebtLimit = s.DebtLimit, RobotNames = s.RobotNames, LandColor = s.LandColor.ToString(), SeaColor = s.SeaColor.ToString(), MountainsColor = s.MountainsColor.ToString(), MountainsWidth = s.MountainsWidth, SoldierTypes = s.SoldierTypes.Select(t => JsonSoldierType.From(t)) };
 	}
 }

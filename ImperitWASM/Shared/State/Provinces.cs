@@ -9,12 +9,6 @@ namespace ImperitWASM.Shared.State
 	public interface IProvinces : IReadOnlyList<Province>
 	{
 		bool Passable(int from, int to, int distance, Func<Province, Province, int> difficulty);
-		bool Passable(int from, int to, int distance = 1) => Passable(from, to, distance, (a, b) => 1);
-		int NeighborCount(int prov);
-		IEnumerable<Province> NeighborsOf(int prov);
-		Provinces With(ImmutableArray<Province> provinces);
-		ImmutableArray<Province>.Builder ToBuilder();
-		IEnumerable<Province> ControlledBy(Player player) => this.Where(p => p.IsAllyOf(player));
 	}
 	public class Provinces : IProvinces
 	{

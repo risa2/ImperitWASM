@@ -27,7 +27,7 @@ namespace ImperitWASM.Shared.State
 			SeaColor = seaColor;
 			SoldierTypes = soldierTypes;
 		}
-		public Probability Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower - 1, -1), start.DefensePower);
+		public Probability Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
 	}
 }

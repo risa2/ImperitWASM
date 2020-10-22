@@ -45,7 +45,7 @@
 {"Type":"L","Name":"Sedmihradsko","Army":{"Soldiers":{"Items":[{"Type":0,"Count":125}]},"Player":0},"DefaultArmy":{"Soldiers":{"Items":[{"Type":0,"Count":125}]},"Player":0},"Earnings":25,"IsStart":true,"Actions":[]}
 {"Type":"L","Name":"Tours","Army":{"Soldiers":{"Items":[{"Type":0,"Count":120}]},"Player":0},"DefaultArmy":{"Soldiers":{"Items":[{"Type":0,"Count":120}]},"Player":0},"Earnings":24,"IsStart":false,"Actions":[]}
 {"Type":"L","Name":"Burgundsko","Army":{"Soldiers":{"Items":[{"Type":0,"Count":120}]},"Player":0},"DefaultArmy":{"Soldiers":{"Items":[{"Type":0,"Count":120}]},"Player":0},"Earnings":24,"IsStart":false,"Actions":[]}
-{"Type":"P","Name":"\u0160v\u00FDcarsko","Army":{"Soldiers":{"Items":[{"Type":0,"Count":200}]},"Player":0},"DefaultArmy":{"Soldiers":{"Items":[{"Type":0,"Count":200}]},"Player":0},"Earnings":50,"IsStart":false,"Actions":[]}
+{"Type":"P","Name":"\u0160v\u00FDcarsko","Army":{"Soldiers":{"Items":[{"Type":0,"Count":200}]},"Player":0},"DefaultArmy":{"Soldiers":{"Items":[{"Type":0,"Count":50},{"Type":4,"Count":1}]},"Player":0},"Earnings":50,"IsStart":false,"Actions":[]}
 {"Type":"S","Name":"Bodensee","Army":{"Soldiers":{"Items":[]},"Player":0},"DefaultArmy":{"Soldiers":{"Items":[]},"Player":0},"Actions":[]}
 {"Type":"L","Name":"Akvit\u00E1nie","Army":{"Soldiers":{"Items":[{"Type":0,"Count":100}]},"Player":0},"DefaultArmy":{"Soldiers":{"Items":[{"Type":0,"Count":100}]},"Player":0},"Earnings":20,"IsStart":false,"Actions":[]}
 {"Type":"P","Name":"Ben\u00E1tsko","Army":{"Soldiers":{"Items":[{"Type":0,"Count":125}]},"Player":0},"DefaultArmy":{"Soldiers":{"Items":[{"Type":0,"Count":125}]},"Player":0},"Earnings":25,"IsStart":false,"Actions":[]}

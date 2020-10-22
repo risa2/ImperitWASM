@@ -12,12 +12,13 @@ namespace ImperitWASM.Shared.State
 		public string Text => Description.Text;
 		public abstract int AttackPower { get; }
 		public abstract int DefensePower { get; }
+		public int Power => AttackPower + DefensePower;
 		public abstract int Weight { get; }
 		public abstract int Price { get; }
 		public abstract bool IsRecruitable(Province province);
 		public abstract int CanSustain(Province province);
-		public abstract int CanMove(IProvinces provinces, int from, int to);
-		public bool CanMoveAlone(IProvinces provinces, int from, int to) => CanMove(provinces, from, to) >= Weight;
+		public abstract int CanMove(PlayersAndProvinces pap, int from, int to);
+		public bool CanMoveAlone(PlayersAndProvinces pap, int from, int to) => CanMove(pap, from, to) >= Weight;
 		protected virtual IComparable Identity => (GetType(), Name, Symbol, Text, AttackPower, DefensePower, Weight, Price);
 		public int CompareTo(SoldierType? type) => Identity.CompareTo(type?.Identity);
 		public sealed override int GetHashCode() => Identity.GetHashCode();

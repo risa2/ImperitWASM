@@ -17,9 +17,9 @@ namespace ImperitWASM.Shared.State.SoldierTypes
 		}
 		protected override IComparable Identity => (base.Identity, Capacity, Speed, RecruitPlaces);
 		int Difficulty(Province to) => to is Land || to is Mountains ? 1 : Speed + 1;
-		public override int CanMove(IProvinces provinces, int from, int to)
+		public override int CanMove(PlayersAndProvinces pap, int from, int to)
 		{
-			return provinces[from] is Land && provinces[to] is Land && provinces.Passable(from, to, Speed, (_, dest) => Difficulty(dest)) ? Weight + Capacity : 0;
+			return pap.Province(from) is Land && pap.Province(to) is Land && pap.Passable(from, to, Speed, (_, dest) => Difficulty(dest)) ? Weight + Capacity : 0;
 		}
 		public override int CanSustain(Province province) => province is Land ? Capacity + Weight : 0;
 		public override bool IsRecruitable(Province province) => RecruitPlaces.Contains(province.Id);

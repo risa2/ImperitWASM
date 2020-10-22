@@ -36,6 +36,7 @@ namespace ImperitWASM.Shared.State
 		public IEnumerable<SoldierType> Types => soldiers.Select(p => p.Type);
 		public int AttackPower => soldiers.Sum(p => p.Count * p.Type.AttackPower);
 		public int DefensePower => soldiers.Sum(p => p.Count * p.Type.DefensePower);
+		public int Power => soldiers.Sum(p => p.Count * p.Type.Power);
 		public int Weight => soldiers.Sum(p => p.Count * p.Type.Weight);
 		public int Price => soldiers.Sum(p => p.Count * p.Type.Price);
 		public int Count => soldiers.Sum(p => p.Count);
@@ -44,13 +45,13 @@ namespace ImperitWASM.Shared.State
 		public int TypeCount => soldiers.Length;
 		public (SoldierType Type, int Count) this[int index] => soldiers[index];
 
-		public int Capacity(IProvinces provinces, int from, int to)
+		public int Capacity(PlayersAndProvinces pap, int from, int to)
 		{
-			return soldiers.Sum(p => p.Count * (p.Type.CanMove(provinces, from, to) - p.Type.Weight));
+			return soldiers.Sum(p => p.Count * (p.Type.CanMove(pap, from, to) - p.Type.Weight));
 		}
-		public bool CanMove(IProvinces provinces, int from, int to)
+		public bool CanMove(PlayersAndProvinces pap, int from, int to)
 		{
-			return Any && provinces[from].Soldiers.Contains(this) && Capacity(provinces, from, to) >= 0;
+			return Any && pap.Province(from).Soldiers.Contains(this) && Capacity(pap, from, to) >= 0;
 		}
 		public bool CanSurviveIn(Province province) => soldiers.Sum(p => (p.Type.CanSustain(province) - p.Type.Weight) * p.Count) >= 0;
 		static int[] Fight(ImmutableArray<(SoldierType Type, int Count)> soldiers, int me, int enemy, Func<SoldierType, int> powerof)
@@ -90,12 +91,12 @@ namespace ImperitWASM.Shared.State
 			var remaining = Fight(s, power1, power2, powerof).Select((count, i) => (s[i].Type, count));
 			return new Soldiers(remaining.Where(pair => pair.count > 0));
 		}
-		public Soldiers MaxAttackers(IProvinces provinces, int from, int to)
+		public Soldiers MaxAttackers(PlayersAndProvinces pap, int from, int to)
 		{
-			var result = new Soldiers(soldiers.Where(p => p.Type.CanMoveAlone(provinces, from, to)));
-			foreach (var p in soldiers.Where(p => !p.Type.CanMoveAlone(provinces, from, to)).OrderBy(p => p.Type.Weight - p.Type.CanMove(provinces, from, to)))
+			var result = new Soldiers(soldiers.Where(p => p.Type.CanMoveAlone(pap, from, to)));
+			foreach (var p in soldiers.Where(p => !p.Type.CanMoveAlone(pap, from, to)).OrderBy(p => p.Type.Weight - p.Type.CanMove(pap, from, to)))
 			{
-				result += new Soldiers(p.Type, Math.Min(result.Capacity(provinces, from, to) / (p.Type.Weight - p.Type.CanMove(provinces, from, to)), p.Count));
+				result += new Soldiers(p.Type, Math.Min(result.Capacity(pap, from, to) / (p.Type.Weight - p.Type.CanMove(pap, from, to)), p.Count));
 			}
 			return result;
 		}

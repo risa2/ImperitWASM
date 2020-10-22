@@ -1,7 +1,8 @@
 ﻿@inject HttpClient http;
 
 @code {
-	[Parameter] public Action<bool> Set { get; set; } = b => { };
+	[Parameter] public Action ToRegistration { get; set; } = () => { };
+	[Parameter] public Func<Task>? ReturnAsync { get; set; }
 	TimeSpan? TimeToStart = null;
 	Shared.Data.DisplayablePlayer[]? Players = null, Former = null;
 	PlayersPower[]? Powers = null;
@@ -14,17 +15,17 @@
 		Powers = await http.GetJsonAsync<PlayersPower[]>("api/Powers/List");
 		while (TimeToStart > TimeSpan.FromSeconds(1))
 		{
-			await Task.Delay(1000);
 			TimeToStart = TimeToStart - TimeSpan.FromSeconds(1);
 			this.StateHasChanged();
+			await Task.Delay(1000);
 		}
 		await Task.Delay(2000);
-		Set(false);
+		await ReturnAsync!();
 	}
 }
 <nav>
 	<a class="this">Úvod</a>
-	<a @onclick="() => Set(true)">Registrace</a>
+	<a @onclick="ToRegistration">Registrace</a>
 </nav>
 <main>
 	@if (TimeToStart is TimeSpan time && time > TimeSpan.Zero && time < TimeSpan.FromDays(1))

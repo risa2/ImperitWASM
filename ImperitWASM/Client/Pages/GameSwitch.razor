@@ -30,12 +30,20 @@
 			Map?.Update();
 		}
 	}
-	Shared.Data.PlayerInfo Info = new Shared.Data.PlayerInfo(false, new Color());
-	Shared.Data.DisplayableShape[]? Provinces = null;
-	protected override async Task OnInitializedAsync()
+	async Task CheckLoggedIn()
 	{
 		Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn);
+	}
+	Shared.Data.PlayerInfo Info = new Shared.Data.PlayerInfo(false, new Color());
+	Shared.Data.DisplayableShape[]? Provinces = null;
+	System.Timers.Timer? timer = null;
+	protected override async Task OnInitializedAsync()
+	{
+		await CheckLoggedIn();
 		Provinces = await http.GetJsonAsync<Shared.Data.DisplayableShape[]>("api/Provinces/Shapes");
+		timer = new System.Timers.Timer(400);
+		timer.Elapsed += async (sender, e) => await CheckLoggedIn();
+		timer.Start();
 	}
 	public void UpdateProvinces(Shared.Data.ProvinceVariables[] variables)
 	{
@@ -47,7 +55,7 @@
 				Provinces[i].T = Provinces[i].T.SkipLast(1).Append(variables[i].T).ToArray();
 			}
 		}
-		
+
 	}
 }
 

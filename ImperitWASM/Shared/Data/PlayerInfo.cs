@@ -12,6 +12,5 @@ namespace ImperitWASM.Shared.Data
 		public PlayerInfo() { }
 		public bool IsActive { get; set; }
 		public Color Color { get; set; }
-		public int Money { get; set; }
 	}
 }

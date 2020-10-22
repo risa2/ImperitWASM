@@ -1,6 +1,5 @@
 ﻿using ImperitWASM.Shared.Motion;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -8,7 +7,7 @@ using System.Linq;
 
 namespace ImperitWASM.Shared.State
 {
-	public class PlayersAndProvinces : IProvinces
+	public class PlayersAndProvinces
 	{
 		public readonly ImmutableArray<Player> Players;
 		public readonly Provinces Provinces;
@@ -68,8 +67,8 @@ namespace ImperitWASM.Shared.State
 			return new PlayersAndProvinces(Players.AddRange(starts.Select(s => s.Item1)), Provinces.With(new_provinces.MoveToImmutable()), active);
 		}
 		public PlayersAndProvinces Add(Player p) => new PlayersAndProvinces(Players.Add(p), Provinces, active);
-		public PlayersAndProvinces Next() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(active + 1, p => p.Alive && !(p is Savage)));
-		public PlayersAndProvinces ResetActive() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(0, p => p.Alive && !(p is Savage)));
+		public PlayersAndProvinces Next() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(active + 1, p => p.Alive && !(p is Savage), 0));
+		public PlayersAndProvinces ResetActive() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(0, p => p.Alive && !(p is Savage), 0));
 		public int LivingHumans => Players.Count(p => p.Alive &&!(p is Robot) && !(p is Savage));
 		public Player Active => Players[active];
 		public override string ToString() => active.ToString(CultureInfo.InvariantCulture);
@@ -82,11 +81,5 @@ namespace ImperitWASM.Shared.State
 			}
 			return builder.MoveToImmutable();
 		}
-
-		//IProvinces implementation -----------------------------------------------------
-		IEnumerator<Province> IEnumerable<Province>.GetEnumerator() => Provinces.GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() => Provinces.GetEnumerator();
-		int IReadOnlyCollection<Province>.Count => Provinces.Count;
-		Province IReadOnlyList<Province>.this[int index] => Provinces[index];
 	}
 }

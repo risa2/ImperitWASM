@@ -45,7 +45,7 @@ namespace ImperitWASM.Shared.State
 		public bool MajorityReached => pp.Any(pp => pp.Soldiers * 2 > SoldiersSum && pp.Lands * 2 > LandsSum);
 		static (int Soldiers, int Income, int Lands) SoldiersIncome(IEnumerable<Province> provinces)
 		{
-			return provinces.Aggregate((0, 0, 0), (pair, prov) => (pair.Item1 + prov.Soldiers.Price, pair.Item2 + prov.Earnings, pair.Item3 + 1));
+			return provinces.Aggregate((0, 0, 0), (pair, prov) => (pair.Item1 + prov.Soldiers.Power, pair.Item2 + prov.Earnings, pair.Item3 + 1));
 		}
 		public static PlayersPower Compute(PlayersAndProvinces pap)
 		{

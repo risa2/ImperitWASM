@@ -24,9 +24,15 @@ namespace ImperitWASM.Shared
 			return (result.ToImmutable(), init);
 		}
 		static int Mod(int x, int y) => ((x % y) + y) % y;
-		public static int FirstRotated<T>(this IReadOnlyList<T> arr, int shift, Func<T, bool> cond)
+		public static int FirstRotated<T>(this IReadOnlyList<T> arr, int shift, Func<T, bool> cond, int otherwise)
 		{
-			return Enumerable.Range(shift, arr.Count).Select(i => Mod(i, arr.Count)).Where(i => cond(arr[i])).FirstOr(-1);
+			return Enumerable.Range(shift, arr.Count).Select(i => Mod(i, arr.Count)).Where(i => cond(arr[i])).FirstOr(otherwise);
+		}
+		public static ImmutableList<T> Replace<T, TC>(this ImmutableList<T> lst, Predicate<TC> cond, Func<TC, TC, TC> join, TC init) where T : class where TC : T
+		{
+			var those = lst.OfType<TC>().Where(x => cond(x));
+			var result = lst.RemoveAll(x => x is TC tc && cond(tc));
+			return result.Add(those.Aggregate(init, join));
 		}
 		public static int Find<T>(this IList<T> ts, Func<T, bool> cond)
 		{

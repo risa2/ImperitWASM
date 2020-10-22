@@ -1,5 +1,6 @@
 using ImperitWASM.Shared.Motion;
 using System.Collections.Immutable;
+using System;
 
 namespace ImperitWASM.Shared.State
 {
@@ -26,6 +27,10 @@ namespace ImperitWASM.Shared.State
 		public virtual Player Die() => new Player(Id, Name, Color, Password, 0, false, ImmutableList<IPlayerAction>.Empty);
 		protected virtual Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Player(Id, Name, Color, Password, Money, Alive, new_actions);
 		public Player Add(params IPlayerAction[] actions) => WithActions(Actions.AddRange(actions));
+		public Player Replace<T>(Predicate<T> cond, T value, Func<T, T, T> interact) where T : IPlayerAction
+		{
+			return WithActions(Actions.Replace(cond, interact, value));
+		}
 		Player Action(PlayersAndProvinces pap)
 		{
 			var (a, p) = Actions.Fold(this, (player, action) => action.Perform(player, pap));

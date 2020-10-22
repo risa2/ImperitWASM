@@ -8,6 +8,11 @@
 		IsRegistration = mode;
 		this.StateHasChanged();
 	}
+	async Task ReturnAsync()
+	{
+		await this.OnInitializedAsync();
+		Set(false);
+	}
 	bool? IsActive = null;
 	protected override async Task OnInitializedAsync()
 	{
@@ -23,18 +28,18 @@
 		color: #000;
 	}
 </style>
-@if (IsRegistration)
+@if (IsActive is bool isActive)
 {
-	<Registration Return="() => Set(false)"/>
-}
-else if (IsActive is bool isActive)
-{
-	if(isActive)
+	if (isActive)
 	{
 		<Login LoginAsync="LoginAsync!"/>
 	}
+	else if (IsRegistration)
+	{
+		<Registration Return="() => Set(false)"/>
+	}
 	else
 	{
-		<BetweenGames Set="Set"/>
+		<BetweenGames ReturnAsync="ReturnAsync" ToRegistration="() => Set(true)"/>
 	}
 }

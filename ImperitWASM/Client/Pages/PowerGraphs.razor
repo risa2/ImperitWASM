@@ -38,7 +38,6 @@
 	}
 }
 </table>
-<p>Trvání: @Powers.Count tahů</p>
 <p>Síla:</p>
 <svg viewBox="-10 -10 1220 620" class="diagram">
 	@for (int i = 0; i < Players.Count; ++i)
@@ -56,15 +55,14 @@
 		{
 			@for (int c = 0; c < changes.Length && c < life[p] - 1; ++c)
 			{
-				<line y1="@ToString(300 - (300 * changes[c][p]))" y2="300"
-					x1="@(1200 * (2 * c + 1) / (2 * Powers.Count - 2))" x2="@(1200 * (2 * c + 1) / (2 * Powers.Count - 2))"
-					stroke="@Players[p].Color" stroke-width="@ToString(1200.0 / (Powers.Count - 1))"></line>
+				<circle cx="@(600 * (2 * c + 1) / (Powers.Count - 1))" cy="@ToString(300 - (300 * changes[c][p]))" 
+					fill="transparent" stroke="@Players[p].Color" r="@ToString(300.0 / Powers.Count)"></circle>
 			}
 		}
 	</svg>
 }
 <p>Počet vojáků a peněz v poměru k ostatním hráčům:</p>
-<svg viewBox="-10 -10 1220 620" class="diagram">
+<svg viewBox="0 0 1200 600" class="diagram">
 	@for (int i = 0; i < Players.Count; ++i)
 	{
 		<polyline points="@(Polyline(ratio_sums.Select(r => (int)(r * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600) + " " +

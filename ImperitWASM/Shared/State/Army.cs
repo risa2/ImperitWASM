@@ -24,7 +24,7 @@ namespace ImperitWASM.Shared.State
 			var soldiers = Soldiers.AttackedBy(another.Soldiers);
 			return DefensePower >= another.AttackPower ? new Army(soldiers, Player) : new Army(soldiers, another.Player);
 		}
-		public bool CanMove(IProvinces provinces, int from, int to) => Soldiers.CanMove(provinces, from, to);
+		public bool CanMove(PlayersAndProvinces pap, int from, int to) => Soldiers.CanMove(pap, from, to);
 		public override string ToString() => Soldiers.ToString();
 	}
 }

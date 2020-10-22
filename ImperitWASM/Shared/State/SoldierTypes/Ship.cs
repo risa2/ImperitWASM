@@ -21,9 +21,9 @@ namespace ImperitWASM.Shared.State.SoldierTypes
 		}
 		protected static bool IsPassable(Province p) => p is Port || p is Sea;
 		protected override IComparable Identity => (base.Identity, Capacity);
-		public override int CanMove(IProvinces provinces, int from, int dest)
+		public override int CanMove(PlayersAndProvinces pap, int from, int dest)
 		{
-			return provinces.Passable(from, dest, 1, (a, b) => IsPassable(a) && IsPassable(b) ? 1 : 2) ? Capacity + Weight : 0;
+			return pap.Passable(from, dest, 1, (a, b) => IsPassable(a) && IsPassable(b) ? 1 : 2) ? Capacity + Weight : 0;
 		}
 		public override bool IsRecruitable(Province province) => province is Port;
 		public override int CanSustain(Province province) => province is Sea ? Capacity + Weight : province is Port ? Weight : 0;

@@ -34,7 +34,7 @@ namespace ImperitWASM.Server.Load
 			await player_loader.Save(saved.Players);
 			await active_file.Write(saved.ToString());
 			var province_loader = new JsonWriter<JsonProvince, Province, (Settings, IReadOnlyList<Player>, IReadOnlyList<Shape>)>(provinces_file, (settings, saved.Players, shapes), JsonProvince.From);
-			await province_loader.Save(saved);
+			await province_loader.Save(saved.Provinces);
 		}
 	}
 }

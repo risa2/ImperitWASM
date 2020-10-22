@@ -132,7 +132,7 @@ svg a {
 
 svg.diagram {
 	width: 90%;
-	border: 5px dotted #777;
+	border: 1px dotted #777;
 }
 
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {

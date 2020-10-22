@@ -22,23 +22,28 @@
 		Return();
 	}
 }
-
-@if (TimeToStart is TimeSpan time && time > TimeSpan.Zero && time < TimeSpan.FromDays(1))
-{
-	<p>Hra začne za @time.ToString("mm\\:ss")</p>
-}
-else
-{
-	<p>Hra ještě nezačala</p>
-}
-<p>Zaregistrovaní hráči: 
-	@foreach (var player in Players.Try())
+<nav>
+	<a class="this">Úvod</a>
+	<a @onclick="Return">Registrace</a>
+</nav>
+<main>
+	@if (TimeToStart is TimeSpan time && time > TimeSpan.Zero && time < TimeSpan.FromDays(1))
 	{
-		<span style="color:@player.Color;">@player.Name </span>
+		<p>Hra začne za @time.ToString("mm\\:ss")</p>
 	}
-</p>
-@if (Powers != null && Powers.Length > 2)
-{
-	<p>Výsledek minulé hry:</p>
-	<PowerGraphs Players="Former" Powers="Powers"/>
-}
+	else
+	{
+		<p>Hra ještě nezačala</p>
+	}
+	<p>Zaregistrovaní hráči: 
+		@foreach (var player in Players.Try())
+		{
+			<span style="color:@player.Color;">@player.Name </span>
+		}
+	</p>
+	@if (Powers != null && Powers.Length > 2)
+	{
+		<p>Výsledek minulé hry:</p>
+		<PowerGraphs Players="Former" Powers="Powers"/>
+	}
+</main>

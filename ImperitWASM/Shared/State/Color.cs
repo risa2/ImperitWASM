@@ -7,10 +7,11 @@ namespace ImperitWASM.Shared.State
 	[JsonConverter(typeof(Conversion.ColorConverter))]
 	public readonly struct Color : IEquatable<Color>
 	{
+		static string ToHex(byte num) => num.ToString("x2", CultureInfo.InvariantCulture);
 		static byte FromHex(string s) => byte.Parse(s, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
 		public readonly byte r, g, b, a;
 		public Color(byte R, byte G, byte B, byte A = 255) => (r, g, b, a) = (R, G, B, A);
-		public override string ToString() => "#" + r.ToHexString() + g.ToHexString() + b.ToHexString() + a.ToHexString();
+		public override string ToString() => "#" + ToHex(r) + ToHex(g) + ToHex(b) + ToHex(a);
 		public static Color Parse(string str) => new Color(FromHex(str[1..3]), FromHex(str[3..5]), FromHex(str[5..7]), str.Length < 9 ? (byte)255 : FromHex(str[7..9]));
 		static byte Mix(byte a, byte b, int w1, int w2) => (byte)(((a * w1) + (b * w2)) / (w1 + w2));
 		static byte Supl(byte x, byte y) => (byte)(255 - ((255 - x) * (255 - y) / 255));

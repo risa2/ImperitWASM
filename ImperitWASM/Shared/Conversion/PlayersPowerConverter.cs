@@ -1,5 +1,6 @@
 ﻿using ImperitWASM.Shared.State;
 using System;
+using System.Globalization;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text.Json;
@@ -23,7 +24,7 @@ namespace ImperitWASM.Shared.Conversion
 			writer.WriteStartArray();
 			foreach (var pp in pps)
 			{
-				writer.WriteStringValue(string.Format(ExtMethods.Culture, "{0}/{1}/{2}/{3}/{4}", pp.Alive ? 1 : 0, pp.Income, pp.Lands, pp.Money, pp.Soldiers));
+				writer.WriteStringValue(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}/{3}/{4}", pp.Alive ? 1 : 0, pp.Income, pp.Lands, pp.Money, pp.Soldiers));
 			}
 			writer.WriteEndArray();
 		}

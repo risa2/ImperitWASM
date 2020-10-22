@@ -6,9 +6,9 @@ namespace ImperitWASM.Shared.Data
 	{
 		public string Name { get; set; } = "";
 		public Color Color { get; set; }
-		public double Instability { get; set; }
+		public Probability Instability { get; set; }
 		public ProvinceInstability() { }
-		public ProvinceInstability(string name, Color color, double instability)
+		public ProvinceInstability(string name, Color color, Probability instability)
 		{
 			Name = name;
 			Color = color;

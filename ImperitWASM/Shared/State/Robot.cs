@@ -46,13 +46,14 @@ namespace ImperitWASM.Shared.State
 		{
 			return settings.SoldierTypes.Where(type => type.IsRecruitable(p)).MinBy(type => -money / type.Price * type.DefensePower);
 		}
+		static int DivUp(int a, int b) => (a / b) + (a % b > 0 ? 1 : 0);
 		void DefensiveRecruits(ref PlayersAndProvinces pap, ref int spent, PInfo[] info, Province[] my)
 		{
 			foreach (var l in my)
 			{
 				if (BestDefender(l, Money - spent) is SoldierType type && info[l.Id].Bilance < 0 && info[l.Id].Bilance + ((Money - spent) / type.Price * type.DefensePower) >= 0)
 				{
-					Recruit(ref pap, ref spent, l, info, new Soldiers(type, (-info[l.Id].Bilance).DivUp(type.DefensePower)));
+					Recruit(ref pap, ref spent, l, info, new Soldiers(type, DivUp(-info[l.Id].Bilance, type.DefensePower)));
 				}
 			}
 		}
@@ -66,7 +67,7 @@ namespace ImperitWASM.Shared.State
 				}
 				if (BestDefender(l, Money - spent) is SoldierType type && info[l.Id].NextDefensePower < l.DefaultSoldiers.DefensePower)
 				{
-					Recruit(ref pap, ref spent, l, info, new Soldiers(type, Min((Money - spent) / type.Price, (l.DefaultSoldiers.DefensePower - info[l.Id].NextDefensePower).DivUp(type.DefensePower))));
+					Recruit(ref pap, ref spent, l, info, new Soldiers(type, Min((Money - spent) / type.Price, DivUp(l.DefaultSoldiers.DefensePower - info[l.Id].NextDefensePower, type.DefensePower))));
 				}
 			}
 		}

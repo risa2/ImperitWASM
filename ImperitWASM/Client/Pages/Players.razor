@@ -64,6 +64,6 @@
 	}
 	@foreach (var ins in Instabilities.Try())
 	{
-		<p>Riziko odtržení země <span style="color:@ins.Color;">@ins.Name</span>: @(ins.Instability.ProbabilityToString(prec: 1))</p>
+		<p>Riziko odtržení země <span style="color:@ins.Color;">@ins.Name</span>: @ins.Instability.ToString("{0}.{1} %", 100, 10)</p>
 	}
 </main>

@@ -21,7 +21,7 @@ namespace ImperitWASM.Server.Controllers
 		}
 		bool IsPossible(Switch s) => s.F is int from && s.T is int to && s.M switch
 		{
-			Mode.Recruit => sl.Settings.RecruitableTypes(pap.Province(to), pap.Active).Any(),
+			Mode.Recruit => sl.Settings.RecruitableTypes(pap.Province(to)).Any(),
 			Mode.Move => pap.Province(from).SoldierTypes.Any(t => t.CanMoveAlone(pap.PaP, from, to)),
 			Mode.Purchase => new Buy(pap.Active, pap.Province(to), 0).Allowed(pap.PaP),
 			_ => false

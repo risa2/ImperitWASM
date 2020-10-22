@@ -18,20 +18,22 @@
 		players = await http.GetJsonAsync<Shared.Data.PlayerId[]>("api/Player/Players");
 	}
 }
-
-@if (Wrong)
-{
-	<p>Zadané heslo není správné</p>
-}
-<EditForm Model="model" OnSubmit="LoginAction">
-	<DataAnnotationsValidator/><ValidationSummary/>
-	<label>
-		Hráč:<br/>
-		@if (players != null)
-		{
-			<IntSelect @bind-Value="model.Id" Options="players"/><br/>
-		}
-	</label>
-	<label>Heslo:<br/><InputText type="password" @bind-Value="model.Password"/><br/></label>
-	<button type="submit">Přihlásit se</button>
-</EditForm>
+<nav><a class="this">Přihlášení</a></nav>
+<main>
+	@if (Wrong)
+	{
+		<p>Zadané heslo není správné</p>
+	}
+	<EditForm Model="model" OnSubmit="LoginAction">
+		<DataAnnotationsValidator/><ValidationSummary/>
+		<label>
+			Hráč:<br/>
+			@if (players != null)
+			{
+				<IntSelect @bind-Value="model.Id" Options="players"/><br/>
+			}
+		</label>
+		<label>Heslo:<br/><InputText type="password" @bind-Value="model.Password"/><br/></label>
+		<button type="submit">Přihlásit se</button>
+	</EditForm>
+</main>

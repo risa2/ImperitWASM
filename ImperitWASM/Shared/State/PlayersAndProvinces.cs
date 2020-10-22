@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 
 namespace ImperitWASM.Shared.State
@@ -74,7 +75,7 @@ namespace ImperitWASM.Shared.State
 		public PlayersAndProvinces ResetActive() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(0, p => p.Alive && !(p is Savage)));
 		public int LivingHumans => Players.Count(p => !(p is Robot) && !(p is Savage));
 		public Player Active => Players[active];
-		public override string ToString() => active.ToString(ExtMethods.Culture);
+		public override string ToString() => active.ToString(CultureInfo.InvariantCulture);
 		public ImmutableArray<T> Compute<T, TP, TK>(Func<Player, TP> player, Func<IEnumerable<Province>, TK> province, Func<TP, TK, T> selector)
 		{
 			var builder = ImmutableArray.CreateBuilder<T>(PlayersCount);

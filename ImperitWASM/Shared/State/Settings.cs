@@ -7,13 +7,14 @@ namespace ImperitWASM.Shared.State
 {
 	public class Settings
 	{
-		public readonly double DefaultInstability, Interest;
+		public readonly Probability DefaultInstability;
+		public readonly double Interest;
 		public readonly int DebtLimit, DefaultMoney;
 		public readonly int MountainsWidth;
 		public readonly Color LandColor, MountainsColor, SeaColor;
 		public readonly ImmutableArray<string> RobotNames;
 		public readonly ImmutableArray<SoldierType> SoldierTypes;
-		public Settings(int debtLimit, double defaultInstability, int defaultMoney, double interest, Color landColor, Color mountainsColor, int mountainsWidth, ImmutableArray<string> robotNames, Color seaColor, ImmutableArray<SoldierType> soldierTypes)
+		public Settings(int debtLimit, Probability defaultInstability, int defaultMoney, double interest, Color landColor, Color mountainsColor, int mountainsWidth, ImmutableArray<string> robotNames, Color seaColor, ImmutableArray<SoldierType> soldierTypes)
 		{
 			DebtLimit = debtLimit;
 			DefaultInstability = defaultInstability;
@@ -26,7 +27,7 @@ namespace ImperitWASM.Shared.State
 			SeaColor = seaColor;
 			SoldierTypes = soldierTypes;
 		}
-		public double Instability(Soldiers now, Soldiers start) => DefaultInstability * Math.Max(start.DefensePower - now.DefensePower - 1, -1) / start.DefensePower;
-		public IEnumerable<SoldierType> RecruitableTypes(Province where, Player player) => SoldierTypes.Where(t => t.IsRecruitable(where) && t.Price <= player.Money);
+		public Probability Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower - 1, -1), start.DefensePower);
+		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
 	}
 }

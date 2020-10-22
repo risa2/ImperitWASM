@@ -20,9 +20,9 @@ namespace ImperitWASM.Server.Load
 		public SoldierType Convert(int i, bool _b) => Type switch
 		{
 			"P" => new Pedestrian(i, Description, AttackPower, DefensePower, Weight, Price),
-			"S" => new Ship(i, Description, AttackPower, DefensePower, Weight, Price, Capacity.Must()),
-			"E" => new Elephant(i, Description, AttackPower, DefensePower, Weight, Price, Capacity.Must(), Speed.Must(), RecruitPlaces!.ToImmutableArray()),
-			"ES" => new ElephantShip(i, Description, AttackPower, DefensePower, Weight, Price, Capacity.Must(), Speed.Must(), RecruitPlaces!.ToImmutableArray()),
+			"S" when Capacity is int cap => new Ship(i, Description, AttackPower, DefensePower, Weight, Price, cap),
+			"E" when Capacity is int cap && Speed is int s => new Elephant(i, Description, AttackPower, DefensePower, Weight, Price, cap, s, RecruitPlaces!.ToImmutableArray()),
+			"ES" when Capacity is int cap && Speed is int s => new ElephantShip(i, Description, AttackPower, DefensePower, Weight, Price, cap, s, RecruitPlaces!.ToImmutableArray()),
 			_ => throw new System.Exception("Unknown State.SoldierType type: " + Type)
 		};
 		public static JsonSoldierType From(SoldierType type) => type switch

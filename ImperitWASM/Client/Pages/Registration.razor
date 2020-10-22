@@ -29,11 +29,17 @@
 		return Selected;
 	}
 }
-@if (Provinces != null)
-{
+<nav>
+	<a @onclick="Return">Přihlášení</a>
+	<a class="this">Registrace</a>
+	<a @onclick="OnSubmit">Potvrdit</a>
+</nav>
+<main>
 	<p>Jméno:</p><p><input type="text" @bind-value="Username"/></p>
 	<p>Heslo:</p><p><input type="password" @bind-value="Password"/></p>
 	<p>Vyber si zemi, kde budeš začínat:</p>
-	<Map Width="1000" Height="1000" Provinces="Provinces" SelectedColor="NextColor" Select="Select" FontSize="9" />
-	<button @onclick="OnSubmit">Registrovat</button>
-}
+	@if (Provinces != null)
+	{
+		<Map Width="1000" Height="1000" Provinces="Provinces" SelectedColor="NextColor" Select="Select" FontSize="9" />
+	}
+</main>

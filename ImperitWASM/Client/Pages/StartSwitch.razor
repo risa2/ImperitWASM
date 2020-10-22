@@ -14,21 +14,24 @@
 		IsActive = await http.GetJsonAsync<bool>("api/Game/IsActive");
 	}
 }
-@if (IsActive is bool isActive)
+<style>
+	nav > a:hover {
+		background-color: #28a;
+	}
+	nav > a.this {
+		background-color: #5ef;
+		color: #000;
+	}
+</style>
+@if (IsRegistration)
 {
-	<StartMenu Set="Set" IsRegistration="IsRegistration" IsActive="isActive"/>
-	<main>
-		@if (IsRegistration)
-		{
-			<Registration Return="() => Set(false)"/>
-		}
-		else if (isActive)
-		{
-			<Login LoginAsync="LoginAsync!"/>
-		}
-		else
-		{
-			<BetweenGames/>
-		}
-	</main>
+	<Registration Return="() => Set(false)"/>
+}
+else if (IsActive ?? false)
+{
+	<Login LoginAsync="LoginAsync!"/>
+}
+else
+{
+	<BetweenGames Return="() => Set(true)"/>
 }

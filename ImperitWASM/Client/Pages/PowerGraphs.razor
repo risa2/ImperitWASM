@@ -7,7 +7,7 @@
 	{
 		return max_y == 0 || count == 0 ? "" : string.Join(' ', y_values.Select((y, i) => ((long)i * width / count + x_offset) + "," + ((long)height - y * height / max_y + y_offset)).Reverse(reverse));
 	}
-	static string ToString(double num) => num.ToString(ExtMethods.Culture);
+	static string ToString(double num) => num.ToString(CultureInfo.InvariantCulture);
 }
 @{
 	var sum_soldiers = Powers[^1].SoldiersSum;

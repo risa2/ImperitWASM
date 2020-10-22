@@ -51,16 +51,14 @@ namespace ImperitWASM.Server.Controllers
 				return Client.Pages.Move.Errors.NotPlaying;
 			}
 			var s = new Soldiers(m.Counts.Select((count, i) => (pap.Province(m.From).Soldiers[i].Type, count)));
-			if (!pap.Province(m.From).Soldiers.Contains(s))
+			var move = new Move(pap.Player(m.LoggedIn), pap.Province(m.From), pap.Province(m.To), new Army(s, pap.Player(m.LoggedIn)));
+			return pap.Do(move) switch
 			{
-				return Client.Pages.Move.Errors.FewSoldiers;
-			}
-			if (s.Capacity(pap.PaP, m.From, m.To) < 0)
-			{
-				return Client.Pages.Move.Errors.LittleCapacity;
-			}
-			return pap.Do(new Move(pap.Player(m.LoggedIn), pap.Province(m.From), pap.Province(m.To), new Army(s, pap.Player(m.LoggedIn))))
-					? Client.Pages.Move.Errors.Ok : Client.Pages.Move.Errors.Else;
+				true => Client.Pages.Move.Errors.Ok,
+				false when !pap.Province(m.From).Soldiers.Contains(s) => Client.Pages.Move.Errors.FewSoldiers,
+				false when s.Capacity(pap.PaP, m.From, m.To) < 0 => Client.Pages.Move.Errors.LittleCapacity,
+				_ => Client.Pages.Move.Errors.Else
+			};
 		}
 		[HttpPost("PurchaseInfo")]
 		public Shared.Data.PurchaseInfo PurchaseInfo([FromBody] Shared.Data.IntPair purchase)
@@ -83,7 +81,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("RecruitInfo")]
 		public Shared.Data.RecruitInfo RecruitInfo([FromBody] Shared.Data.IntPair p)
 		{
-			return new Shared.Data.RecruitInfo(pap.Province(p.A).Name, pap.Province(p.A).Soldiers.ToString(), sl.Settings.RecruitableTypes(pap.Province(p.A), pap.Active).Select(t => new Shared.Data.SoldiersItem(t.Description, t.Price)).ToArray(), pap.Player(p.B).Money);
+			return new Shared.Data.RecruitInfo(pap.Province(p.A).Name, pap.Province(p.A).Soldiers.ToString(), sl.Settings.RecruitableTypes(pap.Province(p.A)).Select(t => new Shared.Data.SoldiersItem(t.Description, t.Price)).ToArray(), pap.Player(p.B).Money);
 		}
 		[HttpPost("Recruit")]
 		public void Recruit([FromBody] Shared.Data.RecruitCmd r)

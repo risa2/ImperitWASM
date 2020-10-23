@@ -22,10 +22,13 @@ namespace ImperitWASM.Server.Services
 			file = io.Sessions;
 			logins = file.ReadJsons<string, string?>((x, i) => x ?? string.Empty).ToArray();
 		}
-		public string Get(int user) => logins[user];
+		public string Get(int user) => user < 0 || user >= logins.Length ? string.Empty : logins[user];
 		public Task Remove(int user)
 		{
-			logins[user] = rand.NextId(32);
+			if (user >= 0 && user < logins.Length)
+			{
+				logins[user] = rand.NextId(32);
+			}
 			return file.WriteJsons(logins, x => x);
 		}
 		public Task Reset(int len)

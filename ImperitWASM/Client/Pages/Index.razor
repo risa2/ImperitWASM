@@ -26,7 +26,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		LoggedIn = await cookies.ReadUser();
-		LoggedIn = LoggedIn != null && await http.PostJsonResponseAsync<Shared.Data.User, bool>("api/Player/FromId", LoggedIn!) ? LoggedIn : null;
+		LoggedIn = LoggedIn != null && await http.PostJsonResponseAsync<Shared.Data.User, bool>("api/Player/Correct", LoggedIn!) ? LoggedIn : null;
 	}
 }
 @if (LoggedIn != null)

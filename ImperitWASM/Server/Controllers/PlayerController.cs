@@ -52,7 +52,7 @@ namespace ImperitWASM.Server.Controllers
 			return pap.Players.Select(p => new Shared.Data.PlayerFullInfo(p.Id, !(p is Savage), p.Name, p.Color.ToString(), p.Alive, p.Money, pap.PaP.IncomeOf(p), p.Actions.OfType<Loan>().Sum(l => l.Debt)));
 		}
 		[HttpPost("Correct")]
-		public bool FromId([FromBody] Shared.Data.User user) => login.Get(user.U) == user.I;
+		public bool Correct([FromBody] Shared.Data.User user) => login.Get(user.U) == user.I;
 		[HttpPost("Login")]
 		public Shared.Data.StringValue Login([FromBody] Shared.Data.Login trial)
 		{

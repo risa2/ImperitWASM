@@ -19,25 +19,10 @@
 	var ratio_sums = new double[ratios.Length];
 	var life = Players.Select((_, i) => Math.Min(Powers.Count, Powers.Count(p => p[i].Alive) + 1)).ToArray();
 }
-<table class="players">
-@if (sum_soldiers > 0 && sum_lands > 0)
+@foreach (var (finals, player) in Powers[^1].Zip(Players, (a, b) => (a.Final, b)).Where(it => it.Final > 0))
 {
-	foreach (var (power, player) in Powers[^1].Zip(Players, (a, b) => (a, b)).Where(it => it.Item1.Alive))
-	{
-		<tr>
-			<td style="color:@player.Color;">
-				@player.Name
-				@if (sum_soldiers < 2 * power.Soldiers && sum_lands < 2 * power.Lands)
-				{
-					@Sym.Trophy
-				}
-			</td>
-			<td>@(power.Soldiers * 100 / sum_soldiers) % vojáků</td>
-			<td>@(power.Lands * 100 / sum_lands) % zemí</td>
-		</tr>
-	}
+	<p><span style="color:@player.Color;">@player.Name</span>@(new string(Sym.Star, finals))</p>
 }
-</table>
 <p>Síla:</p>
 <svg viewBox="-10 -10 1220 620" class="diagram">
 	@for (int i = 0; i < Players.Count; ++i)

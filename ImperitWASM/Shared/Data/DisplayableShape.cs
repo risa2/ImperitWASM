@@ -24,9 +24,9 @@ namespace ImperitWASM.Shared.Data
 			R = isStart;
 			T = text;
 		}
-		public DisplayableShape UpdateText(string prefix)
+		public DisplayableShape UpdateText()
 		{
-			return new DisplayableShape(B, C, F, S, W, R, R ? T.Select((t, i) => i == 0 ? prefix + t : t).ToArray() : T);
+			return new DisplayableShape(B, C, F, S, W, R, R ? T : T.Skip(1).ToArray());
 		}
 	}
 }

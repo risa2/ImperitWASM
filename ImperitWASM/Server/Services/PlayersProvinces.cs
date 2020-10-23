@@ -21,8 +21,8 @@ namespace ImperitWASM.Server.Services
 		bool Do(ICommand cmd);
 		void Next();
 		void ResetActive();
-		IReadOnlyList<Player> Players { get; }
-		Provinces Provinces { get; }
+		IEnumerable<Player> Players { get; }
+		IEnumerable<Province> Provinces { get; }
 		PlayersAndProvinces PaP { get; set; }
 		Player Active { get; }
 	}
@@ -53,8 +53,8 @@ namespace ImperitWASM.Server.Services
 		public void Next() => PaP = PaP.Do(new Shared.Motion.Commands.NextTurn()).Item1.Act().Next();
 		public void ResetActive() => PaP = PaP.ResetActive();
 		public int LivingHumans => PaP.LivingHumans;
-		public IReadOnlyList<Player> Players => PaP.Players;
-		public Provinces Provinces => PaP.Provinces;
+		public IEnumerable<Player> Players => PaP.Players;
+		public IEnumerable<Province> Provinces => PaP.Provinces;
 		public Player Active => PaP.Active;
 	}
 }

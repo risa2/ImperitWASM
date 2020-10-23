@@ -26,6 +26,7 @@ namespace ImperitWASM.Shared.State
 		}
 		public int NeighborCount(int id) => graph.NeighborCount(id);
 		public IEnumerable<Province> NeighborsOf(int id) => graph[id].Select(vertex => provinces[vertex]);
+		public IEnumerable<Province> ControlledBy(Player player) => provinces.Where(p => p.IsAllyOf(player));
 
 		public Province this[int key] => provinces[key];
 		public IEnumerator<Province> GetEnumerator() => (provinces as IEnumerable<Province>).GetEnumerator();

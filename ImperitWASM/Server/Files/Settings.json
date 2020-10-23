@@ -76,5 +76,6 @@
 			"Speed": 1,
 			"RecruitPlaces": [35,42,47]
 		}
-	]
+	],
+	"FinalLandsCount":4
 }

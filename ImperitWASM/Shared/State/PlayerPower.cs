@@ -9,17 +9,18 @@ namespace ImperitWASM.Shared.State
 	public class PlayerPower
 	{
 		public readonly bool Alive;
-		public readonly int Soldiers, Lands, Income, Money;
-		public PlayerPower(bool alive, int income, int lands, int money, int soldiers)
+		public readonly int Soldiers, Lands, Income, Money, Final;
+		public PlayerPower(bool alive, int income, int lands, int money, int soldiers, int final)
 		{
 			Alive = alive;
 			Soldiers = soldiers;
 			Lands = lands;
 			Income = income;
 			Money = money;
+			Final = final;
 		}
 
-		public int Total => Alive ? Soldiers + Money + (Income * 5) : 0;
+		public int Total => Alive ? Soldiers + Money + (Income * 5) + (Final * 25) : 0;
 	}
 	[JsonConverter(typeof(Conversion.PlayersPowerConverter))]
 	public class PlayersPower : IReadOnlyList<PlayerPower>, Conversion.IEntity<PlayersPower,bool>
@@ -43,13 +44,13 @@ namespace ImperitWASM.Shared.State
 		public int TotalAvg => TotalSum / Count;
 		public int TotalMax => pp.Max(pp => pp.Total);
 		public bool MajorityReached => pp.Any(pp => pp.Soldiers * 2 > SoldiersSum && pp.Lands * 2 > LandsSum);
-		static (int Soldiers, int Income, int Lands) SoldiersIncome(IEnumerable<Province> provinces)
+		static (int Soldiers, int Income, int Lands, int Finals) SoldiersIncome(IEnumerable<Province> provinces)
 		{
-			return provinces.Aggregate((0, 0, 0), (pair, prov) => (pair.Item1 + prov.Soldiers.Power, pair.Item2 + prov.Earnings, pair.Item3 + 1));
+			return provinces.Aggregate((0, 0, 0, 0), (pair, prov) => (pair.Item1 + prov.Soldiers.Power, pair.Item2 + prov.Earnings, pair.Item3 + 1, pair.Item4 + (prov is Land l && l.IsFinal ? 1 : 0)));
 		}
 		public static PlayersPower Compute(PlayersAndProvinces pap)
 		{
-			return new PlayersPower(pap.Compute(p => (p.Money, Alive: p.Alive && !(p is Savage)), ps => SoldiersIncome(ps), (x, y) => x.Alive ? new PlayerPower(true, y.Income, y.Lands, x.Money, y.Soldiers) : new PlayerPower(false, 0, 0, 0, 0)));
+			return new PlayersPower(pap.Compute(p => (p.Money, Alive: p.Alive && !(p is Savage)), ps => SoldiersIncome(ps), (x, y) => x.Alive ? new PlayerPower(true, y.Income, y.Lands, x.Money, y.Soldiers, y.Finals) : new PlayerPower(false, 0, 0, 0, 0, 0)));
 		}
 		public PlayersPower Convert(int _, bool __) => this;
 	}

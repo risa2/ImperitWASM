@@ -18,7 +18,7 @@
 	{
 		NextColor = await http.GetJsonAsync<Color>("api/Game/NextColor");
 		Provinces = (await http.GetJsonAsync<IEnumerable<Shared.Data.DisplayableShape>>("api/Provinces/Shapes"))
-								.Select(s => s.R ? s.UpdateText(Sym.Flag) : s).ToArray();
+								.Select(s => s.UpdateText()).ToArray();
 	}
 	async Task<int?> Select(int i, int? from)
 	{

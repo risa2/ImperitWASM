@@ -12,7 +12,7 @@ namespace ImperitWASM.Shared.Conversion
 	{
 		static PlayerPower Parse(string[] s)
 		{
-			return new PlayerPower(int.Parse(s[0]) != 0, int.Parse(s[1]), int.Parse(s[2]), int.Parse(s[3]), int.Parse(s[4]));
+			return new PlayerPower(int.Parse(s[0]) != 0, int.Parse(s[1]), int.Parse(s[2]), int.Parse(s[3]), int.Parse(s[4]), int.Parse(s[5]));
 		}
 		public override PlayersPower Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
@@ -24,7 +24,7 @@ namespace ImperitWASM.Shared.Conversion
 			writer.WriteStartArray();
 			foreach (var pp in pps)
 			{
-				writer.WriteStringValue(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}/{3}/{4}", pp.Alive ? 1 : 0, pp.Income, pp.Lands, pp.Money, pp.Soldiers));
+				writer.WriteStringValue(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}/{3}/{4}/{5}", pp.Alive ? 1 : 0, pp.Income, pp.Lands, pp.Money, pp.Soldiers, pp.Final));
 			}
 			writer.WriteEndArray();
 		}

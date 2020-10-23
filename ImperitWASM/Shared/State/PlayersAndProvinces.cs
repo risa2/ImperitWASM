@@ -21,8 +21,9 @@ namespace ImperitWASM.Shared.State
 		public bool Passable(int from, int to, int distance, Func<Province, Province, int> difficulty) => Provinces.Passable(from, to, distance, difficulty);
 		public int NeighborCount(Province prov) => Provinces.NeighborCount(prov.Id);
 		public IEnumerable<Province> NeighborsOf(Province prov) => Provinces.NeighborsOf(prov.Id);
-		public int IncomeOf(Player player) => Provinces.Where(p => p.IsAllyOf(player)).Sum(p => p.Earnings);
-		public bool HasAny(Player player) => Provinces.Any(p => p.IsAllyOf(player));
+		public int IncomeOf(Player player) => Provinces.ControlledBy(player).Sum(p => p.Earnings);
+		public bool HasAny(Player player) => Provinces.ControlledBy(player).Any();
+		public int? Victory(int finalCount) => Players.Find(p => !(p is Savage) && !(p is Robot) && Provinces.ControlledBy(p).Count(prov => prov is Land l && l.IsFinal) >= finalCount);
 		public int PlayersCount => Players.Length;
 		public int ProvincesCount => Provinces.Count;
 		public Player Player(int i) => Players[i];

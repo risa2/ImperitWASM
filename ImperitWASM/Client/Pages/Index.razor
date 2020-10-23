@@ -1,34 +1,37 @@
 ﻿@page "/"
 
-@inject HttpClient http;
-@inject ISessionStorageService cookies;
+@inject ImperitClient http;
+@inject SessionService cookies;
 
 @code{
-	int? LoggedIn = null;
-	async Task<bool> LoginAsync(int id, string password)
+	Shared.Data.User? LoggedIn = null;
+	async Task<bool> LoginAsync(int player, string password)
 	{
-		string? loginId = (await http.PostJsonResponseAsync<Shared.Data.Login, Shared.Data.StringValue>("api/Player/Login", new Shared.Data.Login(id, password))).Value;
-		await cookies.SetItemAsync("login", loginId);
-		bool success = !string.IsNullOrWhiteSpace(loginId);
-		LoggedIn = success ? (int?)id : null;
+		string? login = (await http.PostJsonResponseAsync<Shared.Data.Login, Shared.Data.StringValue>("api/Player/Login", new Shared.Data.Login(player, password))).Value;
+		LoggedIn = login is string ? new Shared.Data.User(player, login) : null;
+		await cookies.WriteUser(LoggedIn);
 		this.StateHasChanged();
-		return success;
+		return LoggedIn != null;
 	}
 	async Task LogoutAsync()
 	{
-		LoggedIn = null;
-		await http.PostJsonAsync<string>("api/Player/Logout", await cookies.GetStringAsync("login") ?? "");
-		await cookies.RemoveItemAsync("login");
-		this.StateHasChanged();
+		if (LoggedIn != null)
+		{
+			await http.PostJsonAsync<Shared.Data.User>("api/Player/Logout", LoggedIn);
+			await cookies.Clear();
+			LoggedIn = null;
+			this.StateHasChanged();
+		}
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		LoggedIn = await http.PostJsonResponseAsync<string, int?>("api/Player/FromId", await cookies.GetStringAsync("login") ?? "");
+		LoggedIn = await cookies.ReadUser();
+		LoggedIn = LoggedIn != null && await http.PostJsonResponseAsync<Shared.Data.User, bool>("api/Player/FromId", LoggedIn!) ? LoggedIn : null;
 	}
 }
-@if (LoggedIn is int loggedIn)
+@if (LoggedIn != null)
 {
-	<GameSwitch LogoutAsync="LogoutAsync" LoggedIn="loggedIn"/>
+	<GameSwitch LogoutAsync="LogoutAsync" LoggedIn="LoggedIn"/>
 }
 else
 {

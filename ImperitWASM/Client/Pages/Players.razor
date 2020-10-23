@@ -1,19 +1,18 @@
-@inject HttpClient http;
-@inject ISessionStorageService cookies;
+@inject ImperitClient http;
 
 @using Mode = Shared.Data.Switch.Mode;
 
 @code{
-	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Action<Mode, int?, int?, (int, int, string)?> Switch { get; set; } = ((a, x, y, z) => { });
 	void Donate(int player)
 	{
-		Switch(Mode.Donation, null, null, (PlayerInfos?[LoggedIn].Money ?? 0, player, PlayerInfos?[player].Name ?? ""));
+		Switch(Mode.Donation, null, null, (PlayerInfos?[LoggedIn.U].Money ?? 0, player, PlayerInfos?[player].Name ?? ""));
 	}
 	async Task DoGiveUp()
 	{
-		await http.PostJsonAsync<Shared.Data.User>("api/Command/GiveUp", new Shared.Data.User(LoggedIn, await cookies.GetStringAsync("login") ?? ""));
+		await http.PostJsonAsync<Shared.Data.User>("api/Command/GiveUp", LoggedIn);
 		await LogoutAsync!();
 	}
 
@@ -27,12 +26,12 @@
 }
 <nav>
 	<a @onclick="() => Switch(Mode.Map, null, null, null)">Zpět</a>
-	<a class="this">@PlayerInfos?[LoggedIn].Money@Sym.Money</a>
+	<a class="this">@PlayerInfos?[LoggedIn.U].Money@Sym.Money</a>
 </nav>
 <main>
 	@if (PlayerInfos != null)
 	{
-		<p>Přihlášen: <span style="color:@PlayerInfos[LoggedIn].Color;">@PlayerInfos[LoggedIn].Name</span></p><br/>
+		<p>Přihlášen: <span style="color:@PlayerInfos[LoggedIn.U].Color;">@PlayerInfos[LoggedIn.U].Name</span></p><br/>
 	}
 	<table class="players">
 		@foreach (var player in PlayerInfos.Try().Where(p => p.Display))
@@ -43,7 +42,7 @@
 				{
 					<td>@(player.Money)@Sym.Money</td>
 					<td>(+@(player.Income)@Sym.Money)</td>
-					@if (player.Id == LoggedIn)
+					@if (player.Id == LoggedIn.U)
 					{
 						<td class="link-like" @onclick="DoGiveUp">Vzdát se</td>
 					}
@@ -63,8 +62,15 @@
 	{
 		<p><span style="color:@info.Color;">@info.Name</span> dluží @info.Debt@Sym.Money</p>
 	}
-	@foreach (var ins in Instabilities.Try())
+	@if (Instabilities != null && Instabilities.Any())
 	{
-		<p>Riziko odtržení země <span style="color:@ins.Color;">@ins.Name</span>: @ins.Instability.ToString("{0}.{1} %", 100, 10)</p>
+		<p>Rizika odtržení provincie:</p>
+		<table class="players">
+			@foreach (var it in Instabilities.GroupBy(it => it.Color).SelectMany(g => g.OrderByDescending(it => it.Instability)))
+			{
+				<tr><td style="color:@it.Color;">@it.Name</td><td>@it.Instability.ToString("{0}.{1} %", 100, 10)</td></tr>
+			}
+		</table>
 	}
+	
 </main>

@@ -1,5 +1,4 @@
-@inject HttpClient http;
-@inject ISessionStorageService cookies;
+@inject ImperitClient http;
 
 @code{
 	public enum Errors { Ok, FewSoldiers, LittleCapacity, NotPlaying, Else }
@@ -7,7 +6,7 @@
 	[Parameter] public Action Return { get; set; } = (() => { });
 	[Parameter] public int From { get; set; }
 	[Parameter] public int To { get; set; }
-	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
 	MoveModel model = new MoveModel();
 	Shared.Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
@@ -21,7 +20,7 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostJsonResponseAsync<Shared.Data.MoveCmd, Errors>("api/Command/Move", new Shared.Data.MoveCmd(LoggedIn, await cookies.GetStringAsync("login") ?? "", From, To, model.Soldiers.Select(s => s.Value).ToArray()));
+		error = await http.PostJsonResponseAsync<Shared.Data.MoveCmd, Errors>("api/Command/Move", new Shared.Data.MoveCmd(LoggedIn.U, LoggedIn.I, From, To, model.Soldiers.Select(s => s.Value).ToArray()));
 		if (error == Errors.Ok || error == Errors.NotPlaying)
 		{
 			Return();

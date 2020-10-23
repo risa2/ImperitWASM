@@ -1,10 +1,9 @@
-@inject HttpClient http;
-@inject ISessionStorageService cookies;
+@inject ImperitClient http;
 
 @using Mode = Shared.Data.Switch.Mode;
 
 @code{
-	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	Mode Current;
 	int? From = null, To = null;
@@ -20,19 +19,19 @@
 	GameMap? Map { get; set; }
 	async Task NextTurnAsync()
 	{
-		if (await http.PostJsonResponseAsync<Shared.Data.User, bool>("api/Game/NextTurn", new Shared.Data.User(LoggedIn, await cookies.GetStringAsync("login") ?? "")))
+		if (await http.PostJsonResponseAsync<Shared.Data.User, bool>("api/Game/NextTurn", LoggedIn))
 		{
 			await LogoutAsync!();
 		}
 		else
 		{
-			Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn);
+			Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn.U);
 			Map?.Update();
 		}
 	}
 	async Task CheckLoggedIn()
 	{
-		Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn);
+		Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn.U);
 	}
 	Shared.Data.PlayerInfo Info = new Shared.Data.PlayerInfo(false, new Color());
 	Shared.Data.DisplayableShape[]? Provinces = null;
@@ -76,13 +75,21 @@ else if (Current == Mode.Preview)
 {
 	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" LoggedIn="LoggedIn" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
 }
-else if (Current == Mode.Powers)
+else if (Current == Mode.Donation && Player is (int Money, int Recipient, string Name))
 {
-	<Powers Return="() => Switch()"/>
+	<Donation LoggedIn="LoggedIn" Recipient="Recipient" RecipientName="@Name" Return="() => Switch()" PlayerMoney="Money"/>
 }
 else if (Current == Mode.Move && From is int from && To is int to)
 {
 	<Move LoggedIn="LoggedIn" From="from" To="to" Return="() => Switch()"/>
+}
+else if (Current == Mode.Players)
+{
+	<Players LoggedIn="LoggedIn" Switch="Switch" LogoutAsync="LogoutAsync!"/>
+}
+else if (Current == Mode.Powers)
+{
+	<Powers Return="() => Switch()"/>
 }
 else if (Current == Mode.Purchase && From is int from2)
 {
@@ -91,12 +98,4 @@ else if (Current == Mode.Purchase && From is int from2)
 else if (Current == Mode.Recruit && From is int from3)
 {
 	<Recruitment LoggedIn="LoggedIn" Land="from3" Switch="x => Switch(x, null, null, null)"/>
-}
-else if (Current == Mode.Donation && Player is (int Money, int Recipient, string Name))
-{
-	<Donation LoggedIn="LoggedIn" Recipient="Recipient" RecipientName="@Name" Return="() => Switch()" PlayerMoney="Money"/>
-}
-else if (Current == Mode.Players)
-{
-	<Players LoggedIn="LoggedIn" Switch="Switch" LogoutAsync="LogoutAsync!"/>
 }

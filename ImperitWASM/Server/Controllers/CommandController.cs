@@ -22,11 +22,11 @@ namespace ImperitWASM.Server.Controllers
 			this.sl = sl;
 			this.end = end;
 		}
-		bool Validate(int loggedIn, string loginId) => login.Get(loginId) == loggedIn && loggedIn == pap.Active.Id;
+		bool Validate(int loggedIn, string loginId) => login.Get(loggedIn) == loginId && loggedIn == pap.Active.Id;
 		[HttpPost("GiveUp")]
 		public async Task GiveUp([FromBody] Shared.Data.User player)
 		{
-			if (login.Get(player.I) == player.U)
+			if (login.Get(player.U) == player.I)
 			{
 				_ = pap.Do(new GiveUp(pap.Player(player.U)));
 				if (pap.Active.Id == player.U)
@@ -99,7 +99,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Donate")]
 		public bool Donate([FromBody] Shared.Data.DonationCmd donation)
 		{
-			return login.Get(donation.LoginId) == donation.LoggedIn && pap.Do(new Donate(pap.Player(donation.LoggedIn), pap.Player(donation.Recipient), donation.Amount));
+			return login.Get(donation.LoggedIn) == donation.LoginId && pap.Do(new Donate(pap.Player(donation.LoggedIn), pap.Player(donation.Recipient), donation.Amount));
 		}
 	}
 }

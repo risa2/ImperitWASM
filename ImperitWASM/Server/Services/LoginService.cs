@@ -1,40 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ImperitWASM.Server.Load;
 using ImperitWASM.Shared;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface ILoginService
 	{
-		string Add(int user);
-		void Update(string id, int user);
-		void Remove(string id);
-		int? Get(string? id);
-		void Clear();
+		string Get(int user);
+		Task Remove(int user);
+		Task Reset(int len);
 	}
 	public class LoginService : ILoginService
 	{
 		readonly Random rand = new Random();
-		readonly Dictionary<string, int> dict = new Dictionary<string, int>();
-
-		public string Add(int user)
+		readonly IFile file;
+		string[] logins;
+		public LoginService(IServiceIO io)
 		{
-			var key = rand.NextId(100);
-			while (dict.ContainsKey(key))
+			file = io.Sessions;
+			logins = file.ReadJsons<string, string?>((x, i) => x ?? string.Empty).ToArray();
+		}
+		public string Get(int user) => logins[user];
+		public Task Remove(int user)
+		{
+			logins[user] = rand.NextId(32);
+			return file.WriteJsons(logins, x => x);
+		}
+		public Task Reset(int len)
+		{
+			logins = new string[len];
+			for (int i = 0; i < len; ++i)
 			{
-				key = rand.NextId(100);
+				logins[i] = rand.NextId(32);
 			}
-			dict[key] = user;
-			return key;
+			return file.WriteJsons(logins, x => x);
 		}
-
-		public int? Get(string? id)
-		{
-			bool contains = dict.TryGetValue(id ?? "", out int value);
-			return contains ? (int?)value : null;
-		}
-		public void Remove(string id) => dict.Remove(id);
-		public void Update(string id, int user) => dict[id] = user;
-		public void Clear() => dict.Clear();
 	}
 }

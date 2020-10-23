@@ -1,17 +1,16 @@
-@inject HttpClient http;
-@inject ISessionStorageService cookies;
+@inject ImperitClient http;
 
 @using Mode = Shared.Data.Switch.Mode;
 
 @code{
 	[Parameter] public Action<Mode> Switch { get; set; } = (x => { });
 	[Parameter] public int Land { get; set; }
-	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
 	RecruitModel model = new RecruitModel();
 	Shared.Data.RecruitInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.RecruitInfo> ("api/Command/RecruitInfo", new Shared.Data.IntPair(Land, LoggedIn));
+		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.RecruitInfo> ("api/Command/RecruitInfo", new Shared.Data.IntPair(Land, LoggedIn.U));
 		model.Soldiers = IntModel.Array(Info.R.Length);
 	}
 	int Price => Info is null ? 0 : model.Soldiers.Zip(Info.R, (count, type) => count.Value * type.P).Sum();
@@ -20,7 +19,7 @@
 	{
 		if (Missing <= 0 || model.Borrow)
 		{
-			await http.PostJsonAsync<Shared.Data.RecruitCmd>("api/Command/Recruit", new Shared.Data.RecruitCmd(LoggedIn, await cookies.GetStringAsync("login") ?? "", Land, model.Soldiers.Select(s => s.Value).ToArray()));
+			await http.PostJsonAsync<Shared.Data.RecruitCmd>("api/Command/Recruit", new Shared.Data.RecruitCmd(LoggedIn.U, LoggedIn.I, Land, model.Soldiers.Select(s => s.Value).ToArray()));
 			Switch(Mode.Map);
 		}
 	}

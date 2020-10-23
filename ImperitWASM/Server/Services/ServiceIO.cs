@@ -7,47 +7,38 @@ namespace ImperitWASM.Server.Services
 		IFile Settings { get; }
 		IFile Players { get; }
 		IFile Provinces { get; }
-		IFile Actions { get; }
-		IFile Events { get; }
 		IFile Active { get; }
-		IFile Password { get; }
 		IFile Graph { get; }
-		IFile Mountains { get; }
 		IFile Shapes { get; }
 		IFile Powers { get; }
 		IFile Game { get; }
 		IFile FormerPlayers { get; }
+		IFile Sessions { get; }
 	}
 	public class ServiceIO : IServiceIO
 	{
 		public IFile Settings { get; }
 		public IFile Players { get; }
 		public IFile Provinces { get; }
-		public IFile Actions { get; }
-		public IFile Events { get; }
 		public IFile Active { get; }
-		public IFile Password { get; }
 		public IFile Graph { get; }
-		public IFile Mountains { get; }
 		public IFile Shapes { get; }
 		public IFile Powers { get; }
 		public IFile Game { get; }
 		public IFile FormerPlayers { get; }
-		public ServiceIO(IFile settings, IFile players, IFile provinces, IFile actions, IFile events, IFile active, IFile password, IFile graph, IFile mountains, IFile shapes, IFile powers, IFile game, IFile formerPlayers)
+		public IFile Sessions { get; }
+		public ServiceIO(IFile settings, IFile players, IFile provinces, IFile active, IFile graph, IFile shapes, IFile powers, IFile game, IFile formerPlayers, IFile sessions)
 		{
 			Settings = settings;
 			Players = players;
 			Provinces = provinces;
-			Actions = actions;
-			Events = events;
 			Active = active;
-			Password = password;
 			Graph = graph;
-			Mountains = mountains;
 			Shapes = shapes;
 			Powers = powers;
 			Game = game;
 			FormerPlayers = formerPlayers;
+			Sessions = sessions;
 		}
 	}
 }

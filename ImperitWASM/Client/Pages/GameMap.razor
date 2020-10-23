@@ -1,9 +1,9 @@
-@inject HttpClient http;
+@inject ImperitClient http;
 
 @using Mode = Shared.Data.Switch.Mode;
 
 @code{
-	[Parameter] public int LoggedIn { get; set; }
+	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
 	[Parameter] public bool IsActive { get; set; }
 	[Parameter] public Action<Mode, int?, int?> Switch { get; set; } = ((a, x, y) => { });
 	[Parameter] public bool Preview { get; set; }
@@ -13,7 +13,7 @@
 	[Parameter] public Action<Shared.Data.ProvinceVariables[]>? UpdateProvinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
-		var r = await http.PostJsonResponseAsync<Shared.Data.Click, Shared.Data.Switch>("api/Switch/Clicked", new Shared.Data.Click(LoggedIn, from, clicked));
+		var r = await http.PostJsonResponseAsync<Shared.Data.Click, Shared.Data.Switch>("api/Switch/Clicked", new Shared.Data.Click(LoggedIn.U, from, clicked));
 		Switch(r.M, r.F, r.T);
 		return r.S;
 	}
@@ -21,7 +21,7 @@
 	public async Task Update()
 	{
 		PowersCount = await http.GetJsonAsync<int>("api/Powers/Count");
-		PlayerMoney = await http.PostJsonResponseAsync<int, int>("api/Player/Money", LoggedIn);
+		PlayerMoney = await http.PostJsonResponseAsync<int, int>("api/Player/Money", LoggedIn.U);
 		UpdateProvinces!(await http.GetJsonAsync<Shared.Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current"));
 		this.StateHasChanged();
 	}

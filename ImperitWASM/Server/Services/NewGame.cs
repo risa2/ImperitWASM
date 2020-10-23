@@ -36,7 +36,7 @@ namespace ImperitWASM.Server.Services
 		public async Task Finish()
 		{
 			former.Reset(pap.Players);
-			login.Clear();
+			await login.Reset(0);
 			await game.Finish();
 			
 			pap.RemovePlayers();
@@ -65,6 +65,7 @@ namespace ImperitWASM.Server.Services
 			powers.Compute();
 			pap.ResetActive();
 			await pap.Save();
+			await login.Reset(pap.PlayersCount);
 		}
 		public async Task Registration(string name, Password password, Land land)
 		{

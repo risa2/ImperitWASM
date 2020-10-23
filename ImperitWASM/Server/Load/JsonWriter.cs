@@ -11,12 +11,9 @@ namespace ImperitWASM.Server.Load
 	{
 		protected Func<TK, T> cvt;
 		public JsonWriter(IFile input, TA arg, Func<TK, T> convertor) : base(input, arg) => cvt = convertor;
-		string Serialize(TK item) => JsonSerializer.Serialize(cvt(item), new JsonSerializerOptions() { IgnoreNullValues = true });
-		string ToWrite(IEnumerable<TK> e) => string.Join('\n', e.Select(Serialize));
-		public Task Save(IEnumerable<TK> saved) => io.Write(ToWrite(saved));
-		public Task Save(TK saved) => io.Write(Serialize(saved));
+		public Task Save(IEnumerable<TK> saved) => io.WriteJsons(saved, cvt);
+		public Task Save(TK saved) => io.WriteJson(saved, cvt);
 		public Task Clear() => io.Write(string.Empty);
-		public void Add(IEnumerable<TK> saved) => io.Append("\n" + ToWrite(saved));
-		public void Add(TK saved) => Add(new[] { saved });
+		public void Add(TK saved) => io.AppendJson(saved, cvt);
 	}
 }

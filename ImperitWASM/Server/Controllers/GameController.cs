@@ -52,7 +52,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("NextTurn")]
 		public async Task<bool> NextTurn([FromBody] Shared.Data.User loggedIn)
 		{
-			return pap.Active.Id == loggedIn.U && login.Get(loggedIn.I) == loggedIn.U && await end.NextTurn();
+			return pap.Active.Id == loggedIn.U && login.Get(loggedIn.U) == loggedIn.I && await end.NextTurn();
 		}
 	}
 }

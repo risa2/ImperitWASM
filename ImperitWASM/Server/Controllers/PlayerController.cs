@@ -4,6 +4,7 @@ using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -50,14 +51,17 @@ namespace ImperitWASM.Server.Controllers
 		{
 			return pap.Players.Select(p => new Shared.Data.PlayerFullInfo(p.Id, !(p is Savage), p.Name, p.Color.ToString(), p.Alive, p.Money, pap.PaP.IncomeOf(p), p.Actions.OfType<Loan>().Sum(l => l.Debt)));
 		}
-		[HttpPost("FromId")]
-		public string FromId([FromBody] string loginId) => login.Get(loginId)?.ToString() ?? "null";
+		[HttpPost("Correct")]
+		public bool FromId([FromBody] Shared.Data.User user) => login.Get(user.U) == user.I;
 		[HttpPost("Login")]
 		public Shared.Data.StringValue Login([FromBody] Shared.Data.Login trial)
 		{
-			return new Shared.Data.StringValue(pap.Player(trial.Id).Password.IsCorrect(trial.Password) ? login.Add(trial.Id) : null);
+			return new Shared.Data.StringValue(pap.Player(trial.Id).Password.IsCorrect(trial.Password) ? login.Get(trial.Id) : null);
 		}
 		[HttpPost("Logout")]
-		public void Logout([FromBody] string id) => login.Remove(id);
+		public Task Logout([FromBody] Shared.Data.User user)
+		{
+			return login.Get(user.U) == user.I ? login.Remove(user.U) : new Task(() => { });
+		}
 	}
 }

@@ -34,21 +34,31 @@ namespace ImperitWASM.Shared
 			var result = lst.RemoveAll(x => x is TC tc && cond(tc));
 			return result.Add(those.Aggregate(init, join));
 		}
-		public static int Find<T>(this IList<T> ts, Func<T, bool> cond)
+		public static int? Find<T>(this IList<T> ts, Func<T, bool> cond)
 		{
 			int i = 0;
 			while (i < ts.Count && !cond(ts[i]))
 			{
 				++i;
 			}
-			return i;
+			return i < ts.Count ? (int?)i : null;
+		}
+		public static void Replace<T>(this IList<T> ts, Func<T, bool> cond, T replacement)
+		{
+			for (int i = 0; i < ts.Count; ++i)
+			{
+				if (cond(ts[i]))
+				{
+					ts[i] = replacement;
+				}
+			}
 		}
 		public static void InsertMatch<T>(this IList<T> s1, IEnumerable<T> s2, Func<T, T, bool> eq, Func<T, T, T> match)
 		{
 			foreach (var t2 in s2)
 			{
-				var i = s1.Find(t1 => eq(t1, t2));
-				if (i < s1.Count)
+				var index = s1.Find(t1 => eq(t1, t2));
+				if (index is int i)
 				{
 					s1[i] = match(s1[i], t2);
 				}

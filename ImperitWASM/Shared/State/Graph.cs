@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	public class Graph : IReadOnlyList<IEnumerable<int>>
+	[JsonConverter(typeof(Conversion.GraphConverter))]
+	public class Graph : IReadOnlyList<IEnumerable<int>>, Conversion.IEntity<Graph, bool>
 	{
 		readonly int[] edges, starts;
 		public Graph(int[] edges, int[] starts)
@@ -40,5 +42,6 @@ namespace ImperitWASM.Shared.State
 		public int Count => starts.Length - 1;
 		public IEnumerator<IEnumerable<int>> GetEnumerator() => Enumerable.Range(0, Count).Select(i => this[i]).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+		public Graph Convert(int i, bool arg) => this;
 	}
 }

@@ -6,7 +6,6 @@
 	"LandColor": "#111111ff",
 	"MountainsColor": "#606060ff",
 	"MountainsWidth": 3,
-	"RobotNames": ["Thal\u00E9s","Parmenid\u00E9s","S\u00F3krat\u00E9s","Plat\u00F3n","Aristotel\u00E9s","Locke"],
 	"SeaColor": "#1188ffff",
 	"SoldierTypes":
 	[
@@ -52,7 +51,7 @@
 			"Description": {
 				"Name": "Fénická loď",
 				"Symbol": "f\u26F4",
-				"Text": "Hmotnost: 50\u003Cbr/\u003ENosnost: 300\u003Cbr/\u003ERychlost: 2\u003Cbr/\u003ELze koupit jen v Kar\u00E1gu"
+				"Text": "Hmotnost: 50\u003Cbr/\u003ENosnost: 400\u003Cbr/\u003ERychlost: 2\u003Cbr/\u003ELze koupit jen v Kar\u00E1gu"
 			},
 			"AttackPower": 0,
 			"DefensePower": 0,
@@ -64,7 +63,7 @@
 		},{
 			"Type": "ES",
 			"Description": {
-				"Name": "Germánská bojová loď",
+				"Name": "Germánská bojová veslice",
 				"Symbol": "\u2694\u26F4",
 				"Text": "S\u00EDla v \u00FAtoku: 130\u003Cbr/\u003ES\u00EDla v obran\u011B: 150\u003Cbr/\u003EHmotnost: 150\u003Cbr/\u003ENosnost: 120\u003Cbr/\u003ELze koupit jen u Bodensee"
 			},

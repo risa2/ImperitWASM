@@ -16,7 +16,6 @@ namespace ImperitWASM.Server.Services
 	}
 	public class NewGame : INewGame
 	{
-		static readonly Random rand = new Random();
 		readonly ISettingsLoader sl;
 		readonly IPlayersProvinces pap;
 		readonly IPowersLoader powers;
@@ -45,16 +44,14 @@ namespace ImperitWASM.Server.Services
 		}
 		public Color NextColorFn(int i) => new Color(120.0 + (137.507764050037854 * (pap.PlayersCount - 1 + i)), 1.0, 1.0);
 		public Color NextColor => NextColorFn(0);
-		Province[] UnoccupiedStartLands(int max) => pap.Provinces.Where(p => p is Land L1 && L1.IsStart && !L1.Occupied).Take(max).ToArray();
+		Province[] RemainingStarts => pap.Provinces.Where(p => p is Land L1 && L1.IsStart && !L1.Occupied).ToArray();
 		Robot GetRobot(int earnings, int i)
 		{
-			return new Robot(pap.PlayersCount + i, sl.Settings.RobotNames[i], NextColorFn(i), new Password(""), sl.Settings.DefaultMoney - (earnings * 2), true, sl.Settings, Actions);
+			return new Robot(pap.PlayersCount + i, NextColorFn(i), sl.Settings.DefaultMoney - (earnings * 2), true, Actions, sl.Settings);
 		}
 		void AddRobots()
 		{
-			var starts = UnoccupiedStartLands(sl.Settings.RobotNames.Length);
-			rand.Shuffle(starts);
-			pap.Add(starts.Select((start, i) => (GetRobot(start.Earnings, i) as Player, start.Soldiers, start.Id)));
+			pap.Add(RemainingStarts.Select((start, i) => (GetRobot(start.Earnings, i) as Player, start.Soldiers, start.Id)));
 		}
 		public async Task Start()
 		{
@@ -69,7 +66,7 @@ namespace ImperitWASM.Server.Services
 		}
 		public async Task Registration(string name, Password password, Land land)
 		{
-			var player = new Player(pap.PlayersCount, name, NextColor, password, sl.Settings.DefaultMoney - (land.Earnings * 2), true, Actions);
+			var player = new Human(pap.PlayersCount, NextColor, sl.Settings.DefaultMoney - (land.Earnings * 2), true, Actions, name, password);
 			pap.Add(player, land.DefaultSoldiers, land.Id);
 			await pap.Save();
 			await game.Register();

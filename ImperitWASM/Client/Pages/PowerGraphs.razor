@@ -10,9 +10,6 @@
 	static string ToString(double num) => num.ToString(CultureInfo.InvariantCulture);
 }
 @{
-	var sum_soldiers = Powers[^1].SoldiersSum;
-	var sum_lands = Powers[^1].LandsSum;
-
 	var total_avg = Powers.Select(p => p.TotalAvg);
 	var total_max = Powers.Max(p => p.TotalMax);
 	var ratios = Powers.Select(p => p.GetRatios()).ToArray();

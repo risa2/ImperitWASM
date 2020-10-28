@@ -10,12 +10,11 @@ namespace ImperitWASM.Shared.State
 	public class Robot : Player
 	{
 		readonly Settings settings;
-		readonly System.Random rand = new System.Random();
-		public Robot(int id, string name, Color color, Password password, int money, bool alive, Settings settings, ImmutableList<IPlayerAction> actions)
-			: base(id, name, color, password, money, alive, actions) => this.settings = settings;
-		public override Player ChangeMoney(int amount) => new Robot(Id, Name, Color, Password, Money + amount, Alive, settings, Actions);
-		public override Player Die() => new Robot(Id, Name, Color, Password, 0, false, settings, ImmutableList<IPlayerAction>.Empty);
-		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Robot(Id, Name, Color, Password, Money, Alive, settings, new_actions);
+		public Robot(int id, Color color, int money, bool alive, ImmutableList<IPlayerAction> actions, Settings settings)
+			: base(id, color, money, alive, actions) => this.settings = settings;
+		public override Player ChangeMoney(int amount) => new Robot(Id, Color, Money + amount, Alive, Actions, settings);
+		public override Player Die() => new Robot(Id, Color, 0, false, ImmutableList<IPlayerAction>.Empty, settings);
+		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Robot(Id, Color, Money, Alive, new_actions, settings);
 		class PInfo
 		{
 			public Soldiers Soldiers;
@@ -74,7 +73,6 @@ namespace ImperitWASM.Shared.State
 		void Recruits(ref PlayersAndProvinces pap, PInfo[] info, Province[] my)
 		{
 			int spent = 0;
-			rand.Shuffle(my);
 			DefensiveRecruits(ref pap, ref spent, info, my);
 			StabilisatingRecruits(ref pap, ref spent, info, my);
 			if (my.Any() && BestDefender(my[0], Money - spent) is SoldierType type && Money - spent > 0)

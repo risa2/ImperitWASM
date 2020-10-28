@@ -12,10 +12,9 @@ namespace ImperitWASM.Shared.State
 		public readonly int DebtLimit, DefaultMoney;
 		public readonly int MountainsWidth;
 		public readonly Color LandColor, MountainsColor, SeaColor;
-		public readonly ImmutableArray<string> RobotNames;
 		public readonly ImmutableArray<SoldierType> SoldierTypes;
 		public readonly int FinalLandsCount;
-		public Settings(int debtLimit, Probability defaultInstability, int defaultMoney, double interest, Color landColor, Color mountainsColor, int mountainsWidth, ImmutableArray<string> robotNames, Color seaColor, ImmutableArray<SoldierType> soldierTypes, int finalLandsCount)
+		public Settings(int debtLimit, Probability defaultInstability, int defaultMoney, double interest, Color landColor, Color mountainsColor, int mountainsWidth, Color seaColor, ImmutableArray<SoldierType> soldierTypes, int finalLandsCount)
 		{
 			DebtLimit = debtLimit;
 			DefaultInstability = defaultInstability;
@@ -24,7 +23,6 @@ namespace ImperitWASM.Shared.State
 			LandColor = landColor;
 			MountainsColor = mountainsColor;
 			MountainsWidth = mountainsWidth;
-			RobotNames = robotNames;
 			SeaColor = seaColor;
 			SoldierTypes = soldierTypes;
 			FinalLandsCount = finalLandsCount;

@@ -21,11 +21,10 @@ namespace ImperitWASM.Server.Services
 			this.newGame = newGame;
 			this.sl = sl;
 		}
-		public bool Continue => pap.LivingHumans > 0 && !powers.Last.MajorityReached;
 		public async Task<bool> NextTurn()
 		{
 			pap.Next();
-			while (pap.Active is Robot robot && Continue && pap.Active.Alive)
+			while (pap.Active is Robot robot && pap.LivingHumans > 0 && pap.Active.Alive)
 			{
 				pap.PaP = robot.Think(pap.PaP);
 				pap.Next();

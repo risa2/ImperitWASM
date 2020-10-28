@@ -4,28 +4,24 @@ using System;
 
 namespace ImperitWASM.Shared.State
 {
-	public class Player
+	public abstract class Player : IEquatable<Player>
 	{
 		public int Id { get; }
-		public string Name { get; }
 		public Color Color { get; }
-		public Password Password { get; }
 		public int Money { get; }
 		public bool Alive { get; }
 		public ImmutableList<IPlayerAction> Actions { get; }
-		public Player(int id, string name, Color color, Password password, int money, bool alive, ImmutableList<IPlayerAction> actions)
+		public Player(int id, Color color, int money, bool alive, ImmutableList<IPlayerAction> actions)
 		{
 			Id = id;
-			Name = name;
 			Color = color;
-			Password = password;
 			Money = money;
 			Alive = alive;
 			Actions = actions;
 		}
-		public virtual Player ChangeMoney(int amount) => new Player(Id, Name, Color, Password, Money + amount, Alive, Actions);
-		public virtual Player Die() => new Player(Id, Name, Color, Password, 0, false, ImmutableList<IPlayerAction>.Empty);
-		protected virtual Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Player(Id, Name, Color, Password, Money, Alive, new_actions);
+		public abstract Player ChangeMoney(int amount);
+		public abstract Player Die();
+		protected abstract Player WithActions(ImmutableList<IPlayerAction> new_actions);
 		public Player Add(params IPlayerAction[] actions) => WithActions(Actions.AddRange(actions));
 		public Player Replace<T>(Predicate<T> cond, T value, Func<T, T, T> interact) where T : IPlayerAction
 		{
@@ -53,7 +49,8 @@ namespace ImperitWASM.Shared.State
 			}
 			return (new_provinces, player);
 		}
-		public override bool Equals(object? obj) => obj is Player p && p.Id == Id;
+		public bool Equals(Player? obj) => obj != null && obj.Id == Id;
+		public override bool Equals(object? obj) => Equals(obj as Player);
 		public override int GetHashCode() => Id.GetHashCode();
 		public static bool operator ==(Player? a, Player? b) => (a is null && b is null) || (a is Player x && x.Equals(b));
 		public static bool operator !=(Player? a, Player? b) => ((a is null) != (b is null)) || (a is Player x && !x.Equals(b));

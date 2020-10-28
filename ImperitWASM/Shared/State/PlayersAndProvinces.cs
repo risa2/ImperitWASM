@@ -23,7 +23,7 @@ namespace ImperitWASM.Shared.State
 		public IEnumerable<Province> NeighborsOf(Province prov) => Provinces.NeighborsOf(prov.Id);
 		public int IncomeOf(Player player) => Provinces.ControlledBy(player).Sum(p => p.Earnings);
 		public bool HasAny(Player player) => Provinces.ControlledBy(player).Any();
-		public int? Victory(int finalCount) => Players.Find(p => !(p is Savage) && !(p is Robot) && Provinces.ControlledBy(p).Count(prov => prov is Land l && l.IsFinal) >= finalCount);
+		public int? Victory(int finalCount) => Players.Find(p => p is Human && Provinces.ControlledBy(p).OfType<Land>().Count(l => l.IsFinal) >= finalCount);
 		public int PlayersCount => Players.Length;
 		public int ProvincesCount => Provinces.Count;
 		public Player Player(int i) => Players[i];
@@ -70,7 +70,7 @@ namespace ImperitWASM.Shared.State
 		public PlayersAndProvinces Add(Player p) => new PlayersAndProvinces(Players.Add(p), Provinces, active);
 		public PlayersAndProvinces Next() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(active + 1, p => p.Alive && !(p is Savage), 0));
 		public PlayersAndProvinces ResetActive() => new PlayersAndProvinces(Players, Provinces, Players.FirstRotated(0, p => p.Alive && !(p is Savage), 0));
-		public int LivingHumans => Players.Count(p => p.Alive &&!(p is Robot) && !(p is Savage));
+		public int LivingHumans => Players.Count(p => p.Alive && p is Human);
 		public Player Active => Players[active];
 		public override string ToString() => active.ToString(CultureInfo.InvariantCulture);
 		public ImmutableArray<T> Compute<T, TP, TK>(Func<Player, TP> player, Func<IEnumerable<Province>, TK> province, Func<TP, TK, T> selector)

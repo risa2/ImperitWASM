@@ -15,10 +15,9 @@ namespace ImperitWASM.Server.Load
 		public string LandColor { get; set; } = "";
 		public string MountainsColor { get; set; } = "";
 		public int MountainsWidth { get; set; }
-		public ImmutableArray<string> RobotNames { get; set; }
 		public string SeaColor { get; set; } = "";
 		public IEnumerable<JsonSoldierType>? SoldierTypes { get; set; }
 		public int FinalLandsCount { get; set; }
-		public Settings Convert(int _, bool __) => new Settings(DebtLimit, new Probability(DefaultInstability), DefaultMoney, Interest, Color.Parse(LandColor), Color.Parse(MountainsColor), MountainsWidth, RobotNames, Color.Parse(SeaColor), SoldierTypes.Select((t, i) => t.Convert(i, false)).ToImmutableArray(), FinalLandsCount);
+		public Settings Convert(int _, bool __) => new Settings(DebtLimit, new Probability(DefaultInstability), DefaultMoney, Interest, Color.Parse(LandColor), Color.Parse(MountainsColor), MountainsWidth, Color.Parse(SeaColor), SoldierTypes.Select((t, i) => t.Convert(i, false)).ToImmutableArray(), FinalLandsCount);
 	}
 }

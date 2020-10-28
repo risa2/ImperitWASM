@@ -18,7 +18,7 @@ namespace ImperitWASM.Server.Load
 			settings = set;
 			player_loader = new JsonWriter<JsonPlayer, Player, Settings>(players, settings, JsonPlayer.From);
 			shapes = new JsonLoader<JsonShape, Shape, bool>(shape_file, false).Load().ToImmutableArray();
-			graph = new JsonLoader<JsonGraph, Graph, bool>(graph_file, false).LoadOne();
+			graph = new JsonLoader<Graph, Graph, bool>(graph_file, false).LoadOne();
 			(active_file, provinces_file) = (active, provinces);
 		}
 		public PlayersAndProvinces Load()

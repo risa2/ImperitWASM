@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using ImperitWASM.Shared.Conversion;
 using ImperitWASM.Shared.State;
-using System.Collections.Generic;
 
 namespace ImperitWASM.Server.Load
 {

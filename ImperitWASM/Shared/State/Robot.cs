@@ -1,8 +1,8 @@
-﻿using ImperitWASM.Shared.Motion;
-using ImperitWASM.Shared.Motion.Commands;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using ImperitWASM.Shared.Motion;
+using ImperitWASM.Shared.Motion.Commands;
 using static System.Math;
 
 namespace ImperitWASM.Shared.State

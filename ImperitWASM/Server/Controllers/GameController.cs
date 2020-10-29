@@ -1,8 +1,8 @@
-﻿using ImperitWASM.Server.Services;
+﻿using System;
+using System.Threading.Tasks;
+using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -27,7 +27,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpGet("IsActive")]
 		public async Task<bool> IsActive()
 		{
-			if (!game.IsActive && TimeToStart() < 0)
+			if (!game.IsActive && game.TimeToStart <= TimeSpan.Zero)
 			{
 				await newGame.Start();
 				return true;
@@ -46,9 +46,9 @@ namespace ImperitWASM.Server.Controllers
 		}
 		[HttpGet("NextColor")]
 		public Color NextColor() => newGame.NextColor;
-		static int TimeSpanToSec(TimeSpan time) => time > TimeSpan.FromDays(1) ? int.MaxValue : time < TimeSpan.FromDays(-1) ? int.MinValue : (int)time.TotalSeconds;
+		static int TimeSpanToSec(TimeSpan time) => time > TimeSpan.FromDays(1) ? 86400 : time < TimeSpan.FromDays(-1) ? -86400 : (int)time.TotalSeconds;
 		[HttpGet("TimeToStart")]
-		public int TimeToStart() => TimeSpanToSec(TimeSpan.FromMinutes(4) - game.TimeSinceFirstRegistration);
+		public int TimeToStart() => TimeSpanToSec(game.TimeToStart);
 		[HttpPost("NextTurn")]
 		public async Task<bool> NextTurn([FromBody] Shared.Data.User loggedIn)
 		{

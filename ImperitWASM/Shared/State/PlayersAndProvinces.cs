@@ -1,9 +1,9 @@
-﻿using ImperitWASM.Shared.Motion;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
@@ -73,14 +73,6 @@ namespace ImperitWASM.Shared.State
 		public int LivingHumans => Players.Count(p => p.Alive && p is Human);
 		public Player Active => Players[active];
 		public override string ToString() => active.ToString(CultureInfo.InvariantCulture);
-		public ImmutableArray<T> Compute<T, TP, TK>(Func<Player, TP> player, Func<IEnumerable<Province>, TK> province, Func<TP, TK, T> selector)
-		{
-			var builder = ImmutableArray.CreateBuilder<T>(PlayersCount);
-			for (int i = 0; i < PlayersCount; ++i)
-			{
-				builder.Add(selector(player(Players[i]), province(Provinces.Where(p => p.IsAllyOf(Players[i])))));
-			}
-			return builder.MoveToImmutable();
-		}
+		public IEnumerable<(Player Player, IEnumerable<Province> Provinces)> PlayersProvinces => Players.Select(p => (p, Provinces.ControlledBy(p)));
 	}
 }

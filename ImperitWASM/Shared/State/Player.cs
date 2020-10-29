@@ -1,6 +1,6 @@
-using ImperitWASM.Shared.Motion;
-using System.Collections.Immutable;
 using System;
+using System.Collections.Immutable;
+using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {

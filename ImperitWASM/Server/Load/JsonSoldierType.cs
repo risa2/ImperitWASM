@@ -1,8 +1,8 @@
-﻿using ImperitWASM.Shared.Conversion;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using ImperitWASM.Shared.Conversion;
 using ImperitWASM.Shared.State;
 using ImperitWASM.Shared.State.SoldierTypes;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace ImperitWASM.Server.Load
 {

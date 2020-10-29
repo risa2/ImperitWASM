@@ -1,7 +1,7 @@
-﻿using ImperitWASM.Server.Services;
+﻿using System.Collections.Generic;
+using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
 namespace ImperitWASM.Server.Controllers
 {

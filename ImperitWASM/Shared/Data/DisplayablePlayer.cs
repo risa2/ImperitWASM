@@ -1,16 +1,16 @@
-﻿namespace ImperitWASM.Shared.Data
+﻿using ImperitWASM.Shared.State;
+
+namespace ImperitWASM.Shared.Data
 {
 	public class DisplayablePlayer
 	{
 		public string Name { get; set; } = "";
-		public string Color { get; set; } = "";
-		public bool Savage { get; set; }
+		public Color Color { get; set; }
 		public DisplayablePlayer() { }
-		public DisplayablePlayer(string name, string color, bool savage)
+		public DisplayablePlayer(string name, Color color)
 		{
 			Name = name;
 			Color = color;
-			Savage = savage;
 		}
 	}
 }

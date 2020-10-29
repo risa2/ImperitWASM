@@ -32,6 +32,10 @@
 	async Task CheckLoggedIn()
 	{
 		Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn.U);
+		if (!await http.GetJsonAsync<bool>("api/Game/IsActive"))
+		{
+			await LogoutAsync!();
+		}
 	}
 	Shared.Data.PlayerInfo Info = new Shared.Data.PlayerInfo(false, new Color());
 	Shared.Data.DisplayableShape[]? Provinces = null;

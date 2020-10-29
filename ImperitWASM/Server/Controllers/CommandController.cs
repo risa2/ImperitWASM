@@ -1,9 +1,9 @@
-﻿using ImperitWASM.Server.Services;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Controllers
 {

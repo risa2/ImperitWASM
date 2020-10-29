@@ -1,10 +1,10 @@
-﻿using ImperitWASM.Server.Services;
+﻿using System.Linq;
+using ImperitWASM.Server.Services;
+using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using Switch = ImperitWASM.Shared.Data.Switch;
 using Mode = ImperitWASM.Shared.Data.Switch.Mode;
-using System.Linq;
-using ImperitWASM.Shared.Motion.Commands;
+using Switch = ImperitWASM.Shared.Data.Switch;
 
 namespace ImperitWASM.Server.Controllers
 {

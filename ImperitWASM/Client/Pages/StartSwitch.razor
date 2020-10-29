@@ -14,10 +14,7 @@
 		Set(false);
 	}
 	bool? IsActive = null;
-	protected override async Task OnInitializedAsync()
-	{
-		IsActive = await http.GetJsonAsync<bool>("api/Game/IsActive");
-	}
+	protected override async Task OnInitializedAsync() => IsActive = await http.GetJsonAsync<bool>("api/Game/IsActive");
 }
 <style>
 	nav > a:hover {

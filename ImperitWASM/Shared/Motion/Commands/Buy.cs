@@ -1,6 +1,5 @@
-using ImperitWASM.Shared.Motion;
-using ImperitWASM.Shared.State;
 using System.Linq;
+using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion.Commands
 {

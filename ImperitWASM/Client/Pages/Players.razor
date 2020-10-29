@@ -40,8 +40,8 @@
 				<td style="color:@player.Color;">@player.Name</td>
 				@if (player.Alive)
 				{
-					<td>@(player.Money)@Sym.Money</td>
-					<td>(+@(player.Income)@Sym.Money)</td>
+					<td>@player.Money@Sym.Money</td>
+					<td>(+@player.Income@Sym.Money)</td>
 					@if (player.Id == LoggedIn.U)
 					{
 						<td class="link-like" @onclick="DoGiveUp">Vzdát se</td>

@@ -1,7 +1,7 @@
-﻿using ImperitWASM.Shared.State;
-using System;
+﻿using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Conversion
 {

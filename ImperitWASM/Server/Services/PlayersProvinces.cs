@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.State;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Services
 {

@@ -9,7 +9,7 @@
 			Land = land;
 		}
 		public PurchaseCmd() { }
-		public int LoggedIn{ get; set; }
+		public int LoggedIn { get; set; }
 		public string LoginId { get; set; } = "";
 		public int Land { get; set; }
 	}

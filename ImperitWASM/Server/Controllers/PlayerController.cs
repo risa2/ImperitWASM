@@ -1,10 +1,10 @@
-﻿using ImperitWASM.Server.Services;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -24,7 +24,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpGet("Display")]
 		public IEnumerable<Shared.Data.DisplayablePlayer> Display()
 		{
-			return pap.Players.Select(p => new Shared.Data.DisplayablePlayer((p as Human)?.Name ?? "", p.Color.ToString(), p is Savage));
+			return pap.Players.OfType<Human>().Select(p => new Shared.Data.DisplayablePlayer(p.Name, p.Color));
 		}
 		[HttpGet("Players")]
 		public IEnumerable<Shared.Data.PlayerId> Players()
@@ -34,12 +34,12 @@ namespace ImperitWASM.Server.Controllers
 		[HttpGet("Former")]
 		public IEnumerable<Shared.Data.DisplayablePlayer> Former()
 		{
-			return former.Select(p => new Shared.Data.DisplayablePlayer((p as Human)?.Name ?? "", p.Color.ToString(), p is Savage));
+			return former.OfType<Human>().Select(p => new Shared.Data.DisplayablePlayer(p.Name, p.Color));
 		}
 		[HttpPost("Info")]
 		public Shared.Data.PlayerInfo Info([FromBody] int player)
 		{
-			return new Shared.Data.PlayerInfo(player == pap.Active.Id, player >= 0 && player < pap.PlayersCount ? pap.Player(player).Color : new Color());
+			return new Shared.Data.PlayerInfo(player == pap.Active.Id, pap.Player(player).Color);
 		}
 		[HttpPost("Money")]
 		public int Money([FromBody] int player)

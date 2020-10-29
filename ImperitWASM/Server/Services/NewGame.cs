@@ -1,9 +1,8 @@
-using ImperitWASM.Shared.Motion;
-using ImperitWASM.Shared.State;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using ImperitWASM.Shared.Motion;
+using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Services
 {
@@ -37,7 +36,7 @@ namespace ImperitWASM.Server.Services
 			former.Reset(pap.Players);
 			await login.Reset(0);
 			await game.Finish();
-			
+
 			pap.RemovePlayers();
 			pap.Add(new Savage(0));
 			await pap.Save();
@@ -58,7 +57,7 @@ namespace ImperitWASM.Server.Services
 			AddRobots();
 			await powers.Clear();
 			await game.Start();
-			
+
 			powers.Compute();
 			pap.ResetActive();
 			await pap.Save();
@@ -69,7 +68,10 @@ namespace ImperitWASM.Server.Services
 			var player = new Human(pap.PlayersCount, NextColor, sl.Settings.DefaultMoney - (land.Earnings * 2), true, Actions, name, password);
 			pap.Add(player, land.DefaultSoldiers, land.Id);
 			await pap.Save();
-			await game.Register();
+			if (pap.PlayersCount == 3)
+			{
+				await game.StartCountdown();
+			}
 		}
 	}
 }

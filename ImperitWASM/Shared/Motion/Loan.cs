@@ -1,5 +1,5 @@
-using ImperitWASM.Shared.State;
 using System;
+using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion
 {

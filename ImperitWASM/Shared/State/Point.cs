@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
@@ -11,6 +12,12 @@ namespace ImperitWASM.Shared.State
 		public bool Equals(Point p2) => (x, y) == (p2.x, p2.y);
 		public override bool Equals(object? obj) => obj is Color col && Equals(col);
 		public override int GetHashCode() => System.HashCode.Combine(x, y);
+		public static Point Parse(string s)
+		{
+			var split = s.IndexOf('/');
+			return new Point(double.Parse(s.Substring(0, s.IndexOf('/')), CultureInfo.InvariantCulture), double.Parse(s.Substring(split + 1), CultureInfo.InvariantCulture));
+		}
+		public override string ToString() => x.ToString(CultureInfo.InvariantCulture) + "/" + y.ToString(CultureInfo.InvariantCulture);
 		public static bool operator ==(Point left, Point right) => left.Equals(right);
 		public static bool operator !=(Point left, Point right) => !left.Equals(right);
 	}

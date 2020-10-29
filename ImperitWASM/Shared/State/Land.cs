@@ -14,6 +14,6 @@ namespace ImperitWASM.Shared.State
 		public int Price => (Earnings * 2) + Soldiers.Price;
 		public override Color Fill => Army.Color.Over(settings.LandColor);
 		public override string[] Text => new[] { Name, Earnings + "\uD83D\uDCB0", Army.ToString() };
-		public Probability Instability => settings.Instability(Soldiers, DefaultArmy.Soldiers);
+		public Ratio Instability => settings.Instability(Soldiers, DefaultArmy.Soldiers);
 	}
 }

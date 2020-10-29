@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
+	[JsonConverter(typeof(Conversion.SoldierTypeConverter))]
 	public abstract class SoldierType : IEquatable<SoldierType>, IComparable<SoldierType>
 	{
 		public readonly int Id;

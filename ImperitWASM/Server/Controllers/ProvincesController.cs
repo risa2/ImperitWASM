@@ -31,7 +31,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpGet("Instabilities")]
 		public IEnumerable<Shared.Data.ProvinceInstability> Instabilities()
 		{
-			return pap.Provinces.OfType<Land>().Where(l => l.Occupied && l.Instability.Possible).Select(l => new Shared.Data.ProvinceInstability(l.Name, l.Fill, l.Instability));
+			return pap.Provinces.OfType<Land>().Where(l => l.Occupied && l.Instability.IsZero).Select(l => new Shared.Data.ProvinceInstability(l.Name, l.Fill, l.Instability));
 		}
 	}
 }

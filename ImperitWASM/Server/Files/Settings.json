@@ -10,6 +10,7 @@
 	"SeaColor":"#1188ffff",
 	"SoldierTypes":[
 		{
+			"Id":0,
 			"Type":"P",
 			"Description":{
 				"Name":"P\u011B\u0161\u00E1k",
@@ -21,6 +22,7 @@
 			"Weight":1,
 			"Price":1
 		},{
+			"Id":1,
 			"Type":"S",
 			"Description":{
 				"Name":"Lo\u010F",
@@ -33,6 +35,7 @@
 			"Price":100,
 			"Capacity":200
 		},{
+			"Id":2,
 			"Type":"E",
 			"Description":{
 				"Name":"Slon",
@@ -49,6 +52,7 @@
 				88
 			]
 		},{
+			"Id":3,
 			"Type":"ES",
 			"Description":{
 				"Name":"Fénická loď",
@@ -65,6 +69,7 @@
 				88
 			]
 		},{
+			"Id":4,
 			"Type":"ES",
 			"Description":{
 				"Name":"Germánská bojová veslice",

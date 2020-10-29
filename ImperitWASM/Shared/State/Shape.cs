@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
+	[JsonConverter(typeof(Conversion.ShapeConverter))]
 	public class Shape : IEnumerable<Point>
 	{
 		readonly ImmutableArray<Point> border;

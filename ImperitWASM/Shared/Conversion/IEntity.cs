@@ -2,6 +2,6 @@
 {
 	public interface IEntity<TResult, TArg>
 	{
-		TResult Convert(int i, TArg arg);
+		TResult Convert(TArg arg);
 	}
 }

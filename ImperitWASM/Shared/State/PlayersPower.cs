@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace ImperitWASM.Shared.State
 {
 	[JsonConverter(typeof(Conversion.PlayersPowerConverter))]
-	public class PlayersPower : IReadOnlyList<PlayerPower>, Conversion.IEntity<PlayersPower, bool>
+	public class PlayersPower : IReadOnlyList<PlayerPower>
 	{
 		readonly ImmutableArray<PlayerPower> arr;
 		public PlayersPower(ImmutableArray<PlayerPower> pp) => arr = pp;
@@ -31,6 +31,5 @@ namespace ImperitWASM.Shared.State
 		{
 			return new PlayersPower(pap.PlayersProvinces.Where(pp => pp.Player is Human).Select(pp => ComputeOne(pp.Player, pp.Provinces)).ToImmutableArray());
 		}
-		public PlayersPower Convert(int x, bool y) => this;
 	}
 }

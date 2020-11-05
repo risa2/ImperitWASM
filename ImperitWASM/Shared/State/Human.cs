@@ -5,16 +5,11 @@ namespace ImperitWASM.Shared.State
 {
 	public class Human : Player
 	{
-		public readonly string Name;
 		public readonly Password Password;
-		public Human(int id, Color color, int money, bool alive, ImmutableList<IPlayerAction> actions, string name, Password pw)
-			: base(id, color, money, alive, actions)
-		{
-			Name = name;
-			Password = pw;
-		}
-		public override Player ChangeMoney(int amount) => new Human(Id, Color, Money + amount, Alive, Actions, Name, Password);
-		public override Player Die() => new Human(Id, Color, 0, false, ImmutableList<IPlayerAction>.Empty, Name, Password);
-		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Human(Id, Color, Money, Alive, new_actions, Name, Password);
+		public Human(Color color, string name, int money, bool alive, ImmutableList<IPlayerAction> actions, Password pw)
+			: base(color, new Description(name), money, alive, actions) => Password = pw;
+		public override Player ChangeMoney(int amount) => new Human(Color, Name, Money + amount, Alive, Actions, Password);
+		public override Player Die() => new Human(Color, Name, 0, false, ImmutableList<IPlayerAction>.Empty, Password);
+		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Human(Color, Name, Money, Alive, new_actions, Password);
 	}
 }

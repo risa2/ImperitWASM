@@ -12,10 +12,10 @@
 			model.Password = "";
 		}
 	}
-	Shared.Data.PlayerId[]? players = null;
+	Server.PlayerId[]? players = null;
 	protected override async Task OnInitializedAsync()
 	{
-		players = await http.GetJsonAsync<Shared.Data.PlayerId[]>("api/Player/Players");
+		players = await http.GetJsonAsync<Server.PlayerId[]>("api/Player/Players");
 	}
 }
 <nav><a class="this">Přihlášení</a></nav>

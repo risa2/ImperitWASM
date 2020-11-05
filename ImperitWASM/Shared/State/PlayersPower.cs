@@ -25,7 +25,7 @@ namespace ImperitWASM.Shared.State
 		public int TotalMax => arr.Max(pp => pp.Total);
 		static PlayerPower ComputeOne(Player p, IEnumerable<Province> provinces)
 		{
-			return new PlayerPower(p.Alive, provinces.Sum(p => p.Earnings), provinces.Count(), p.Money, provinces.Sum(p => p.Soldiers.Power), provinces.Count(p => p is Land));
+			return new PlayerPower(p.Alive, provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(), p.Money, provinces.Sum(p => p.Soldiers.Power), provinces.Count(p => p is Land));
 		}
 		public static PlayersPower Compute(PlayersAndProvinces pap)
 		{

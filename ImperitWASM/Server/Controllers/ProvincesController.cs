@@ -11,27 +11,32 @@ namespace ImperitWASM.Server.Controllers
 	public class ProvincesController : ControllerBase
 	{
 		readonly IPlayersProvinces pap;
-		public ProvincesController(IPlayersProvinces pp) => pap = pp;
-		[HttpGet("Shapes")]
-		public IEnumerable<Shared.Data.DisplayableShape> Shapes()
+		readonly IActive active;
+		public ProvincesController(IPlayersProvinces pap, IActive active)
 		{
-			return pap.Provinces.Select(p => new Shared.Data.DisplayableShape(p.ToArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart, p.Text));
+			this.pap = pap;
+			this.active = active;
+		}
+		[HttpGet("Shapes")]
+		public IEnumerable<Client.Server.DisplayableShape> Shapes([FromBody] int gameId)
+		{
+			return pap[gameId].Provinces.Select(p => new Client.Server.DisplayableShape(p.ToArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart, p.Text));
 		}
 		[HttpGet("Current")]
-		public IEnumerable<Shared.Data.ProvinceVariables> Current()
+		public IEnumerable<Client.Server.ProvinceVariables> Current([FromBody] int gameId)
 		{
-			return pap.Provinces.Select(p => new Shared.Data.ProvinceVariables(p.Text.LastOrDefault(), p.Fill));
+			return pap[gameId].Provinces.Select(p => new Client.Server.ProvinceVariables(p.Text, p.Fill));
 		}
-		[HttpGet("Preview")]
-		public IEnumerable<Shared.Data.ProvinceVariables> Preview()
+		[HttpPost("Preview")]
+		public IEnumerable<Client.Server.ProvinceVariables> Preview([FromBody] int gameId)
 		{
-			var preview = pap.PaP.Act(false).Provinces;
-			return preview.Select(p => new Shared.Data.ProvinceVariables(p.Text.LastOrDefault(), p.Fill));
+			var preview = pap[gameId].Act(active[gameId], false).Provinces;
+			return preview.Select(p => new Client.Server.ProvinceVariables(p.Text, p.Fill));
 		}
 		[HttpGet("Instabilities")]
-		public IEnumerable<Shared.Data.ProvinceInstability> Instabilities()
+		public IEnumerable<Client.Server.ProvinceInstability> Instabilities([FromBody] int gameId)
 		{
-			return pap.Provinces.OfType<Land>().Where(l => l.Occupied && l.Instability.IsZero).Select(l => new Shared.Data.ProvinceInstability(l.Name, l.Fill, l.Instability));
+			return pap[gameId].Provinces.OfType<Land>().Where(l => l.Occupied && l.Instability.IsZero).Select(l => new Client.Server.ProvinceInstability(l.Name, l.Fill, l.Instability));
 		}
 	}
 }

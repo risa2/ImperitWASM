@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.Conversion
 		public override Description Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var doc = JsonDocument.ParseValue(ref reader).RootElement;
-			return new Description(doc.GetProperty("Name").GetString(), doc.GetProperty("Symbol").GetString(), doc.GetProperty("Text").GetString());
+			return new Description(doc.GetProperty("Name").GetString(), doc.GetProperty("Text").GetString(), doc.GetProperty("Symbol").GetString());
 		}
 		public override void Write(Utf8JsonWriter writer, Description d, JsonSerializerOptions options)
 		{

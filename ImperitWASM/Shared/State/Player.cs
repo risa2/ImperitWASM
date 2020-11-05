@@ -6,19 +6,20 @@ namespace ImperitWASM.Shared.State
 {
 	public abstract class Player : IEquatable<Player>
 	{
-		public int Id { get; }
 		public Color Color { get; }
+		public Description Description { get; }
 		public int Money { get; }
 		public bool Alive { get; }
 		public ImmutableList<IPlayerAction> Actions { get; }
-		public Player(int id, Color color, int money, bool alive, ImmutableList<IPlayerAction> actions)
+		public Player(Color color, Description description, int money, bool alive, ImmutableList<IPlayerAction> actions)
 		{
-			Id = id;
 			Color = color;
+			Description = description;
 			Money = money;
 			Alive = alive;
 			Actions = actions;
 		}
+		public string Name => Description.Name;
 		public abstract Player ChangeMoney(int amount);
 		public abstract Player Die();
 		protected abstract Player WithActions(ImmutableList<IPlayerAction> new_actions);
@@ -41,18 +42,19 @@ namespace ImperitWASM.Shared.State
 		{
 			var player = Action(pap);
 			var new_provinces = ImmutableArray.CreateBuilder<Province>(pap.ProvincesCount);
-			for (int i = 0; i < pap.ProvincesCount; ++i)
+			foreach (var province in pap.Provinces)
 			{
-				var (new_province, new_player) = player.Action(pap.Province(i), pap);
+				var (new_province, new_player) = player.Action(province, pap);
 				player = new_player;
 				new_provinces.Add(new_province);
 			}
 			return (new_provinces, player);
 		}
-		public bool Equals(Player? obj) => obj != null && obj.Id == Id;
+		public bool IsLivingHuman => this is Human && Alive;
+		public bool Equals(Player? obj) => obj != null && obj.Description == obj.Description;
 		public override bool Equals(object? obj) => Equals(obj as Player);
-		public override int GetHashCode() => Id.GetHashCode();
-		public static bool operator ==(Player? a, Player? b) => (a is null && b is null) || (a is Player x && x.Equals(b));
-		public static bool operator !=(Player? a, Player? b) => ((a is null) != (b is null)) || (a is Player x && !x.Equals(b));
+		public override int GetHashCode() => Description.GetHashCode();
+		public static bool operator ==(Player? a, Player? b) => a?.Description == b?.Description;
+		public static bool operator !=(Player? a, Player? b) => a?.Description != b?.Description;
 	}
 }

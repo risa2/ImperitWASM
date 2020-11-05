@@ -4,11 +4,16 @@ namespace ImperitWASM.Shared.Motion
 {
 	public class Manoeuvre : IProvinceAction
 	{
-		public readonly Army Army;
-		public Manoeuvre(Army army) => Army = army;
-		public (Province, IProvinceAction?) Perform(Province province, Player active, PlayersAndProvinces pap)
+		public readonly Player Player;
+		public readonly Soldiers Soldiers;
+		public Manoeuvre(Player player, Soldiers soldiers)
 		{
-			return (province.IsAllyOf(Army) ? province.ReinforcedBy(Army.Soldiers) : province.AttackedBy(Army), null);
+			Player = player;
+			Soldiers = soldiers;
+		}
+		public (Province, IProvinceAction?) Perform(Province province, PlayersAndProvinces pap)
+		{
+			return (province.IsAllyOf(Player) ? province.ReinforcedBy(Soldiers) : province.AttackedBy(Player, Soldiers), null);
 		}
 	}
 }

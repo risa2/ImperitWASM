@@ -1,60 +1,77 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Collections.Immutable;
+using System.Linq;
 using ImperitWASM.Server.Load;
+using ImperitWASM.Shared;
 using ImperitWASM.Shared.Motion;
+using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface IPlayersProvinces
 	{
-		Player Player(int i);
-		Province Province(int i);
-		int PlayersCount { get; }
-		int ProvincesCount { get; }
-		int LivingHumans { get; }
-		Task Save();
-		void RemovePlayers();
-		void Add(Player player);
-		void Add(Player player, Soldiers soldiers, int start);
-		void Add(IEnumerable<(Player, Soldiers, int)> starts);
-		bool Do(ICommand cmd);
-		void Next();
-		void ResetActive();
-		IEnumerable<Player> Players { get; }
-		IEnumerable<Province> Provinces { get; }
-		PlayersAndProvinces PaP { get; set; }
-		Player Active { get; }
+		int PlayersCount(int gameId);
+		void Add(int gameId, Player player);
+		void Add(int gameId, Player player, Soldiers soldiers, int start);
+		bool Do(int gameId, ICommand cmd);
+		void ResetActive(int gameId);
+		ImmutableArray<Player> Players(int gameId);
+		PlayersAndProvinces Next(int gameId);
+		PlayersAndProvinces this[int gameId] { get; set; }
+		void AddPaP(int gameId, PlayersAndProvinces pap);
+		Player Player(int gameId, int i);
+		Player Active(int gameId);
 	}
 	public class PlayersProvinces : IPlayersProvinces
 	{
-		readonly PlayersAndProvincesLoader loader;
-		public PlayersAndProvinces PaP { get; set; }
-		public PlayersProvinces(IServiceIO io, ISettingsLoader sl)
+		readonly IContextService ctx;
+		readonly IConfig cfg;
+		readonly IActive active;
+		public PlayersProvinces(IContextService ctx, IConfig cfg, IActive active)
 		{
-			loader = new PlayersAndProvincesLoader(io.Provinces, io.Graph, io.Shapes, io.Players, io.Active, sl.Settings);
-			PaP = loader.Load();
+			this.ctx = ctx;
+			this.cfg = cfg;
+			this.active = active;
 		}
-		public int PlayersCount => PaP.PlayersCount;
-		public int ProvincesCount => PaP.ProvincesCount;
-		public Player Player(int i) => i >= 0 && i < PlayersCount ? PaP.Player(i) : new Savage(i);
-		public Province Province(int i) => PaP.Province(i);
-		public Task Save() => loader.Save(PaP);
-		public void Add(IEnumerable<(Player, Soldiers, int)> starts) => PaP = PaP.Add(starts);
-		public void Add(Player player, Soldiers soldiers, int start) => Add(new[] { (player, soldiers, start) });
-		public void Add(Player player) => PaP = PaP.Add(player);
-		public void RemovePlayers() => PaP = PaP.RemovePlayers();
-		public bool Do(ICommand cmd)
+		public void Add(int gameId, Player player, Soldiers soldiers, int start)
 		{
-			var (new_pap, success) = PaP.Do(cmd);
-			PaP = new_pap;
+			Add(gameId, player);
+			var province = ctx.Provinces.Single(p => p.GameId == gameId && p.Index == start);
+			province.Soldiers = EntitySoldiers.From(soldiers, cfg.Settings.SoldierTypeIndices);
+		}
+		public void Add(int gameId, Player player) => ctx.Players.Add(EntityPlayer.From(player, PlayersCount(gameId), gameId));
+		public bool Do(int gameId, ICommand cmd)
+		{
+			var (new_pap, success) = this[gameId].Do(cmd);
+			this[gameId] = new_pap;
 			return success;
 		}
-		public void Next() => PaP = PaP.Do(new Shared.Motion.Commands.NextTurn()).Item1.Act().Next();
-		public void ResetActive() => PaP = PaP.ResetActive();
-		public int LivingHumans => PaP.LivingHumans;
-		public IEnumerable<Player> Players => PaP.Players;
-		public IEnumerable<Province> Provinces => PaP.Provinces;
-		public Player Active => PaP.Active;
+		public PlayersAndProvinces Next(int gameId)
+		{
+			var i = active[gameId];
+			var pap = this[gameId] = this[gameId].Do(new NextTurn()).Item1.Act(i);
+			active[gameId] = GetNextActive(gameId, i);
+			return pap;
+		}
+		public void ResetActive(int gameId) => active[gameId] = GetNextActive(gameId, 0);
+		public Player Player(int gameId, int i) => ctx.Players.Single(p => p.Index == i && p.GameId == gameId).Convert(cfg.Settings);
+		public Player Active(int gameId) => Player(gameId, ctx.Games.Find(gameId).Active);
+		int GetNextActive(int gameId, int active)
+		{
+			return ctx.Players.Where(p => p.GameId == gameId && p.Convert(cfg.Settings).IsLivingHuman).Select(p => p.Index).OrderBy(i => i).ToArray().FirstIfOrFirst(i => i > active);
+		}
+		public PlayersAndProvinces this[int gameId]
+		{
+			get
+			{
+				var players = ctx.GetPlayers(gameId);
+				var provinces = ctx.GetProvinces(gameId, players);
+				return new PlayersAndProvinces(players, new Provinces(provinces, cfg.Graph, provinces.Lookup()));
+			}
+			set => ctx.SetPlayers(gameId, value.Players).SetProvinces(gameId, value.Provinces);
+		}
+		public void AddPaP(int gameId, PlayersAndProvinces pap) => ctx.AddPlayers(gameId, pap.Players).AddProvinces(gameId, pap.Provinces);
+		public int PlayersCount(int gameId) => ctx.Players.Count(p => p.GameId == gameId);
+		public ImmutableArray<Player> Players(int gameId) => ctx.GetPlayers(gameId);
 	}
 }

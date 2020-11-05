@@ -8,6 +8,7 @@
 	"MountainsColor":"#606060ff",
 	"MountainsWidth":3,
 	"SeaColor":"#1188ffff",
+	"CountdownTime":180,
 	"SoldierTypes":[
 		{
 			"Id":0,
@@ -47,13 +48,10 @@
 			"Weight":10,
 			"Price":6,
 			"Capacity":3,
-			"Speed":2,
-			"RecruitPlaces":[
-				88
-			]
+			"Speed":2
 		},{
 			"Id":3,
-			"Type":"ES",
+			"Type":"O",
 			"Description":{
 				"Name":"Fénická loď",
 				"Symbol":"f\u26F4",
@@ -64,13 +62,10 @@
 			"Weight":50,
 			"Price":50,
 			"Capacity":400,
-			"Speed":2,
-			"RecruitPlaces":[
-				88
-			]
+			"Speed":2
 		},{
 			"Id":4,
-			"Type":"ES",
+			"Type":"O",
 			"Description":{
 				"Name":"Germánská bojová veslice",
 				"Symbol":"\u2694\u26F4",
@@ -81,12 +76,7 @@
 			"Weight":150,
 			"Price":130,
 			"Capacity":120,
-			"Speed":1,
-			"RecruitPlaces":[
-				35,
-				42,
-				47
-			]
+			"Speed":1
 		}
 	]
 }

@@ -1,9 +1,9 @@
 @inject ImperitClient http;
 
-@using Mode = Shared.Data.Switch.Mode;
+@using Mode = Server.Switch.Mode;
 
 @code{
-	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
+	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Action<Mode, int?, int?, (int, int, string)?> Switch { get; set; } = ((a, x, y, z) => { });
 	void Donate(int player)
@@ -12,16 +12,16 @@
 	}
 	async Task DoGiveUp()
 	{
-		await http.PostJsonAsync<Shared.Data.User>("api/Command/GiveUp", LoggedIn);
+		await http.PostJsonAsync<Server.Session>("api/Command/GiveUp", LoggedIn);
 		await LogoutAsync!();
 	}
 
-	Shared.Data.PlayerFullInfo[]? PlayerInfos = null;
-	Shared.Data.ProvinceInstability[]? Instabilities = null;
+	Server.PlayerFullInfo[]? PlayerInfos = null;
+	Server.ProvinceInstability[]? Instabilities = null;
 	protected override async Task OnInitializedAsync()
 	{
-		PlayerInfos = await http.GetJsonAsync<Shared.Data.PlayerFullInfo[]>("api/Player/Infos");
-		Instabilities = await http.GetJsonAsync<Shared.Data.ProvinceInstability[]>("api/Provinces/Instabilities");
+		PlayerInfos = await http.GetJsonAsync<Server.PlayerFullInfo[]>("api/Player/Infos");
+		Instabilities = await http.GetJsonAsync<Server.ProvinceInstability[]>("api/Provinces/Instabilities");
 	}
 }
 <nav>

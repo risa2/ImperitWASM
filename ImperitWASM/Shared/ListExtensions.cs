@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ImperitWASM.Shared
 {
@@ -23,16 +24,48 @@ namespace ImperitWASM.Shared
 			}
 			return (result.ToImmutable(), init);
 		}
-		static int Mod(int x, int y) => ((x % y) + y) % y;
+		public static ImmutableDictionary<T, int> Lookup<T>(this IEnumerable<T> e) => e.Select((a, i) => (a, i)).ToImmutableDictionary(it => it.a, it => it.i);
 		public static int FirstRotated<T>(this IReadOnlyList<T> arr, int shift, Func<T, bool> cond, int otherwise)
 		{
-			return Enumerable.Range(shift, arr.Count).Select(i => Mod(i, arr.Count)).Where(i => cond(arr[i])).FirstOr(otherwise);
+			return Enumerable.Range(shift, arr.Count).Where(i => cond(arr[i % arr.Count])).FirstOr(otherwise) % arr.Count;
 		}
 		public static ImmutableList<T> Replace<T, TC>(this ImmutableList<T> lst, Predicate<TC> cond, Func<TC, TC, TC> join, TC init) where T : class where TC : T
 		{
 			var those = lst.OfType<TC>().Where(x => cond(x));
 			var result = lst.RemoveAll(x => x is TC tc && cond(tc));
 			return result.Add(those.Aggregate(init, join));
+		}
+		public static void Each<T>(this IEnumerable<T> e, Action<T> action)
+		{
+			foreach (var item in e)
+			{
+				action(item);
+			}
+		}
+		public static void Each<T>(this IEnumerable<T> e, Action<T, int> action)
+		{
+			int i = 0;
+			foreach (var item in e)
+			{
+				action(item, i);
+				++i;
+			}
+		}
+		public static async Task EachAsync<T>(this IEnumerable<T> e, Func<T, Task> action)
+		{
+			foreach (var item in e)
+			{
+				await action(item);
+			}
+		}
+		public static async Task EachAsync<T>(this IEnumerable<T> e, Func<T, int, Task> action)
+		{
+			int i = 0;
+			foreach (var item in e)
+			{
+				await action(item, i);
+				++i;
+			}
 		}
 		public static int? Find<T>(this IList<T> ts, Func<T, bool> cond)
 		{
@@ -42,16 +75,6 @@ namespace ImperitWASM.Shared
 				++i;
 			}
 			return i < ts.Count ? (int?)i : null;
-		}
-		public static void Replace<T>(this IList<T> ts, Func<T, bool> cond, T replacement)
-		{
-			for (int i = 0; i < ts.Count; ++i)
-			{
-				if (cond(ts[i]))
-				{
-					ts[i] = replacement;
-				}
-			}
 		}
 		public static void InsertMatch<T>(this IList<T> s1, IEnumerable<T> s2, Func<T, T, bool> eq, Func<T, T, T> match)
 		{
@@ -66,18 +89,6 @@ namespace ImperitWASM.Shared
 				{
 					s1.Add(t2);
 				}
-			}
-		}
-		public static void Shuffle<T>(this Random rand, IList<T> list)
-		{
-			int n = list.Count;
-			while (n > 1)
-			{
-				n--;
-				int k = rand.Next(n + 1);
-				var value = list[k];
-				list[k] = list[n];
-				list[n] = value;
 			}
 		}
 	}

@@ -1,9 +1,9 @@
 @inject ImperitClient http;
 
-@using Mode = Shared.Data.Switch.Mode;
+@using Mode = Server.Switch.Mode;
 
 @code{
-	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
+	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	Mode Current;
 	int? From = null, To = null;
@@ -19,46 +19,41 @@
 	GameMap? Map { get; set; }
 	async Task NextTurnAsync()
 	{
-		if (await http.PostJsonResponseAsync<Shared.Data.User, bool>("api/Game/NextTurn", LoggedIn))
+		if (await http.PostJsonResponseAsync<Server.Session, bool>("api/Game/NextTurn", LoggedIn))
 		{
 			await LogoutAsync!();
 		}
 		else
 		{
-			Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn.U);
+			Info = await http.PostJsonResponseAsync<int, Server.BasicInfo>("api/Game/Info", LoggedIn.U);
 			Map?.Update();
 		}
 	}
 	async Task CheckLoggedIn()
 	{
-		Info = await http.PostJsonResponseAsync<int, Shared.Data.PlayerInfo>("api/Player/Info", LoggedIn.U);
-		if (!await http.GetJsonAsync<bool>("api/Game/IsActive"))
+		Info = await http.PostJsonResponseAsync<int, Server.BasicInfo>("api/Game/Info", LoggedIn.U);
+		if (!Info.IsGameActive)
 		{
 			await LogoutAsync!();
 		}
 	}
-	Shared.Data.PlayerInfo Info = new Shared.Data.PlayerInfo(false, new Color());
-	Shared.Data.DisplayableShape[]? Provinces = null;
+	Server.BasicInfo Info = new Server.BasicInfo(0, new Color(), true, 1);
+	Server.DisplayableShape[]? Provinces = null;
 	System.Timers.Timer? timer = null;
 	protected override async Task OnInitializedAsync()
 	{
 		await CheckLoggedIn();
-		Provinces = await http.GetJsonAsync<Shared.Data.DisplayableShape[]>("api/Provinces/Shapes");
+		Provinces = await http.GetJsonAsync<Server.DisplayableShape[]>("api/Provinces/Shapes");
 		timer = new System.Timers.Timer(400);
 		timer.Elapsed += async (sender, e) => await CheckLoggedIn();
 		timer.Start();
 	}
-	public void UpdateProvinces(Shared.Data.ProvinceVariables[] variables)
+	public void UpdateProvinces(Server.ProvinceVariables[] variables)
 	{
 		if (Provinces != null && variables.Length <= Provinces.Length)
 		{
-			for (int i = 0; i < variables.Length; ++i)
-			{
-				Provinces[i].F = variables[i].F;
-				Provinces[i].T = Provinces[i].T.SkipLast(1).Append(variables[i].T).ToArray();
-			}
+			variables.Each((variable, i) => (Provinces[i].F, Provinces[i].T) = (variable.F, variable.T));
 		}
-
 	}
 }
 

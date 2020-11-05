@@ -1,16 +1,42 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using ImperitWASM.Shared.Conversion;
-using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load
 {
-	public class EntityGame : IEntity<Game, bool>
+	public class EntityGame : IEntity
 	{
+		public enum State { Created, Countdown, Started, Finished }
 		[Key] public int Id { get; set; }
-		public bool IsActive { get; set; }
-		public DateTime CountdownStart { get; set; }
-		public Game Convert(bool i) => new Game(IsActive, CountdownStart);
-		public static EntityGame From(Game game) => new EntityGame { IsActive = game.IsActive, CountdownStart = game.CountdownStart };
+		[Required] public int Active { get; set; }
+		[Required] public State Current { get; set; }
+		[Required] public DateTime LastChange { get; set; }
+		public bool Created => Current == State.Created;
+		public bool Countdown => Current == State.Countdown;
+		public bool Started => Current == State.Started;
+		public bool Finished => Current == State.Finished;
+		public static EntityGame Create => new EntityGame { Current = State.Created, LastChange = DateTime.UtcNow };
+		public EntityGame StartCountdown()
+		{
+			LastChange = Countdown ? LastChange : DateTime.UtcNow;
+			Current = State.Countdown;
+			return this;
+		}
+		public EntityGame Start()
+		{
+			LastChange = Started ? LastChange : DateTime.UtcNow;
+			Current = State.Started;
+			return this;
+		}
+		public EntityGame Finish()
+		{
+			LastChange = Finished ? LastChange : DateTime.UtcNow;
+			Current = State.Started;
+			return this;
+		}
+		public EntityGame SetActive(int i)
+		{
+			Active = i;
+			return this;
+		}
 	}
 }

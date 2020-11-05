@@ -12,94 +12,102 @@ namespace ImperitWASM.Server.Controllers
 	public class CommandController : ControllerBase
 	{
 		readonly IPlayersProvinces pap;
-		readonly ILoginService login;
-		readonly ISettingsLoader sl;
+		readonly ISessionService login;
+		readonly IConfig cfg;
 		readonly IEndOfTurn end;
-		public CommandController(IPlayersProvinces pap, ILoginService login, ISettingsLoader sl, IEndOfTurn end)
+		readonly IActive active;
+		public CommandController(IPlayersProvinces pap, ISessionService login, IConfig cfg, IEndOfTurn end, IActive active)
 		{
 			this.pap = pap;
 			this.login = login;
-			this.sl = sl;
+			this.cfg = cfg;
 			this.end = end;
+			this.active = active;
 		}
-		bool Validate(int loggedIn, string loginId) => login.Get(loggedIn) == loginId && loggedIn == pap.Active.Id;
+		bool Validate(int playerId, int gameId, string loginId) => login.IsValid(playerId, gameId, loginId) && playerId == active[gameId];
 		[HttpPost("GiveUp")]
-		public async Task GiveUp([FromBody] Shared.Data.User player)
+		public async Task GiveUp([FromBody] Client.Server.Session player)
 		{
-			if (login.Get(player.U) == player.I)
+			if (login.IsValid(player.U, player.G, player.I))
 			{
-				_ = pap.Do(new GiveUp(pap.Player(player.U)));
-				if (pap.Active.Id == player.U)
+				_ = pap.Do(player.G, new GiveUp(pap.Player(player.G, player.U)));
+				if (active[player.G] == player.U)
 				{
-					_ = await end.NextTurn();
+					_ = await end.NextTurnAsync(player.G);
 				}
 			}
 		}
 		[HttpPost("MoveInfo")]
-		public Shared.Data.MoveInfo MoveInfo([FromBody] Shared.Data.IntPair move)
+		public Client.Server.MoveInfo MoveInfo([FromBody] Client.Server.CmdData move)
 		{
-			var (from, to) = move;
-			var possible = pap.Province(from).SoldierTypes.Any(type => type.CanMoveAlone(pap.PaP, from, to));
-			var types = pap.Province(from).SoldierTypes.Select(type => type.Description).ToArray();
-			return new Shared.Data.MoveInfo(possible, !pap.Province(from).IsAllyOf(pap.Province(to)), pap.Province(to).Occupied, pap.Province(from).Name, pap.Province(to).Name, pap.Province(from).Soldiers.ToString(), pap.Province(to).Soldiers.ToString(), types);
+			var (from, to, game) = move;
+			var p_p = pap[game];
+			var possible = p_p.Province(from).SoldierTypes.Any(type => type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to)));
+			var types = p_p.Province(from).SoldierTypes.Select(type => type.Description).ToArray();
+			return new Client.Server.MoveInfo(possible, !p_p.Province(from).IsAllyOf(p_p.Province(to)), p_p.Province(to).Occupied, p_p.Province(from).Name, p_p.Province(to).Name, p_p.Province(from).Soldiers.ToString(), p_p.Province(to).Soldiers.ToString(), types);
 		}
 		[HttpPost("Move")]
-		public Client.Pages.Move.Errors Move([FromBody] Shared.Data.MoveCmd m)
+		public Client.Pages.Move.Errors Move([FromBody] Client.Server.MoveCmd m)
 		{
-			if (!Validate(m.LoggedIn, m.LoginId))
+			if (!Validate(m.LoggedIn, m.Game, m.LoginId))
 			{
 				return Client.Pages.Move.Errors.NotPlaying;
 			}
-			var s = new Soldiers(m.Counts.Select((count, i) => (pap.Province(m.From).Soldiers[i].Type, count)));
-			var move = new Move(pap.Player(m.LoggedIn), pap.Province(m.From), pap.Province(m.To), new Army(s, pap.Player(m.LoggedIn)));
-			return pap.Do(move) switch
+			var p_p = pap[m.Game];
+			var (from, to) = (p_p.Province(m.From), p_p.Province(m.To));
+			var move = new Move(p_p.Player(m.LoggedIn), from, to, new Soldiers(m.Counts.Select((count, i) => (from.Soldiers[i].Type, count))));
+			return pap.Do(m.Game, move) switch
 			{
 				true => Client.Pages.Move.Errors.Ok,
-				false when !pap.Province(m.From).Soldiers.Contains(s) => Client.Pages.Move.Errors.FewSoldiers,
-				false when s.Capacity(pap.PaP, m.From, m.To) < 0 => Client.Pages.Move.Errors.LittleCapacity,
+				false when !from.Soldiers.Contains(move.Soldiers) => Client.Pages.Move.Errors.FewSoldiers,
+				false when move.Soldiers.Capacity(p_p, from, to) < 0 => Client.Pages.Move.Errors.LittleCapacity,
 				_ => Client.Pages.Move.Errors.Else
 			};
 		}
 		[HttpPost("PurchaseInfo")]
-		public Shared.Data.PurchaseInfo PurchaseInfo([FromBody] Shared.Data.IntPair purchase)
+		public Client.Server.PurchaseInfo PurchaseInfo([FromBody] Client.Server.CmdData purchase)
 		{
-			var (player, land) = purchase;
-			return new Shared.Data.PurchaseInfo(new Buy(pap.Player(player), pap.Province(land), 0).Allowed(pap.PaP), pap.Province(land).Name, (pap.Province(land) as Land)?.Price ?? int.MaxValue, pap.Player(player).Money);
+			var (player, land, gameId) = purchase;
+			var p_p = pap[gameId];
+			return new Client.Server.PurchaseInfo(new Buy(p_p.Player(player), p_p.Province(land), 0).Allowed(p_p), p_p.Province(land).Name, (p_p.Province(land) as Land)?.Price ?? int.MaxValue, p_p.Player(player).Money);
 		}
 		[HttpPost("Purchase")]
-		public void Purchase([FromBody] Shared.Data.PurchaseCmd purchase)
+		public void Purchase([FromBody] Client.Server.PurchaseCmd purchase)
 		{
-			if (Validate(purchase.LoggedIn, purchase.LoginId) && pap.Province(purchase.Land) is Land Land)
+			var p_p = pap[purchase.Game];
+			if (Validate(purchase.LoggedIn, purchase.Game, purchase.LoginId) && p_p.Province(purchase.Land) is Land Land)
 			{
-				if (Land.Price > pap.Player(purchase.LoggedIn).Money)
+				if (Land.Price > p_p.Player(purchase.LoggedIn).Money)
 				{
-					_ = pap.Do(new Borrow(pap.Player(purchase.LoggedIn), Land.Price - pap.Player(purchase.LoggedIn).Money, sl.Settings));
+					(p_p, _) = p_p.Do(new Borrow(p_p.Player(purchase.LoggedIn), Land.Price - p_p.Player(purchase.LoggedIn).Money, cfg.Settings));
 				}
-				_ = pap.Do(new Buy(pap.Player(purchase.LoggedIn), pap.Province(purchase.Land), Land.Price));
+				(pap[purchase.Game], _) = p_p.Do(new Buy(p_p.Player(purchase.LoggedIn), p_p.Province(purchase.Land), Land.Price));
 			}
 		}
 		[HttpPost("RecruitInfo")]
-		public Shared.Data.RecruitInfo RecruitInfo([FromBody] Shared.Data.IntPair p)
+		public Client.Server.RecruitInfo RecruitInfo([FromBody] Client.Server.CmdData p)
 		{
-			return new Shared.Data.RecruitInfo(pap.Province(p.A).Name, pap.Province(p.A).Soldiers.ToString(), sl.Settings.RecruitableTypes(pap.Province(p.A)).Select(t => new Shared.Data.SoldiersItem(t.Description, t.Price)).ToArray(), pap.Player(p.B).Money);
+			var p_p = pap[p.G];
+			return new Client.Server.RecruitInfo(p_p.Province(p.A).Name, p_p.Province(p.A).Soldiers.ToString(), cfg.Settings.RecruitableTypes(p_p.Province(p.A)).Select(t => new Client.Server.SoldiersItem(t.Description, t.Price)).ToArray(), p_p.Player(p.B).Money);
 		}
 		[HttpPost("Recruit")]
-		public void Recruit([FromBody] Shared.Data.RecruitCmd r)
+		public void Recruit([FromBody] Client.Server.RecruitCmd r)
 		{
-			if (Validate(r.LoggedIn, r.LoginId))
+			if (Validate(r.LoggedIn, r.Game, r.LoginId))
 			{
-				var soldiers = new Soldiers(r.Counts.Select((count, i) => (sl.Settings.SoldierTypes[i], count)));
-				if (soldiers.Price > pap.Player(r.LoggedIn).Money)
+				var soldiers = new Soldiers(r.Counts.Select((count, i) => (cfg.Settings.SoldierTypes[i], count)));
+				var p_p = pap[r.Game];
+				if (soldiers.Price > p_p.Player(r.LoggedIn).Money)
 				{
-					_ = pap.Do(new Borrow(pap.Player(r.LoggedIn), soldiers.Price - pap.Player(r.LoggedIn).Money, sl.Settings));
+					(p_p, _) = p_p.Do(new Borrow(p_p.Player(r.LoggedIn), soldiers.Price - p_p.Player(r.LoggedIn).Money, cfg.Settings));
 				}
-				_ = pap.Do(new Recruit(pap.Player(r.LoggedIn), pap.Province(r.Province), soldiers));
+				(pap[r.Game], _) = p_p.Do(new Recruit(p_p.Player(r.LoggedIn), p_p.Province(r.Province), soldiers));
 			}
 		}
 		[HttpPost("Donate")]
-		public bool Donate([FromBody] Shared.Data.DonationCmd donation)
+		public bool Donate([FromBody] Client.Server.DonationCmd donation)
 		{
-			return login.Get(donation.LoggedIn) == donation.LoginId && pap.Do(new Donate(pap.Player(donation.LoggedIn), pap.Player(donation.Recipient), donation.Amount));
+			return login.IsValid(donation.LoggedIn, donation.Game, donation.LoginId) && pap.Do(donation.Game, new Donate(pap.Player(donation.Game, donation.LoggedIn), pap.Player(donation.Game, donation.Recipient), donation.Amount));
 		}
 	}
 }

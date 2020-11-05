@@ -2,17 +2,17 @@
 
 @code{
 	[Parameter] public Action Return { get; set; } = (() => { });
-	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
+	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
 	[Parameter] public int Land { get; set; }
 	async Task DoPurchase()
 	{
-		await http.PostJsonAsync<Shared.Data.PurchaseCmd>("api/Command/Purchase", new Shared.Data.PurchaseCmd(LoggedIn.U, LoggedIn.I, Land));
+		await http.PostJsonAsync<Server.PurchaseCmd>("api/Command/Purchase", new Server.PurchaseCmd(LoggedIn.U, LoggedIn.I, Land, LoggedIn.G));
 		Return();
 	}
-	Shared.Data.PurchaseInfo? Info = null;
+	Server.PurchaseInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Shared.Data.IntPair, Shared.Data.PurchaseInfo>("api/Command/PurchaseInfo", new Shared.Data.IntPair(LoggedIn.U, Land));
+		Info = await http.PostJsonResponseAsync<Server.CmdData, Server.PurchaseInfo>("api/Command/PurchaseInfo", new Server.CmdData(LoggedIn.U, Land, LoggedIn.G));
 		if (!Info.Possible)
 		{
 			Return();
@@ -24,7 +24,7 @@
 	<a class="this">Koupě</a>
 </nav>
 <main>
-	@if (Info is Shared.Data.PurchaseInfo)
+	@if (Info is Server.PurchaseInfo)
 	{
 		@if (Info.Price > Info.Money)
 		{

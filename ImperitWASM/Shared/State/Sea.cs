@@ -5,12 +5,11 @@ namespace ImperitWASM.Shared.State
 {
 	public class Sea : Province
 	{
-		public Sea(int id, string name, Shape shape, Army army, Army defaultArmy, ImmutableList<IProvinceAction> actions, Settings settings)
-			: base(id, name, shape, army, defaultArmy, 0, actions, settings) { }
-		public override Province GiveUpTo(Army army) => new Sea(Id, Name, Shape, army, DefaultArmy, Actions, settings);
-		protected override Province WithActions(ImmutableList<IProvinceAction> new_actions) => new Sea(Id, Name, Shape, Army, DefaultArmy, new_actions, settings);
-
-		public override Color Fill => Army.Color.Mix(settings.SeaColor);
-		public override string[] Text => new[] { Name, Army.ToString() };
+		readonly Settings settings;
+		public Sea(string name, Shape shape, Player player, Soldiers soldiers, Soldiers defaultSoldiers, ImmutableList<IProvinceAction> actions, Settings settings)
+			: base(new Description(name, string.Format("{0}<br/>{1}", name, soldiers)), shape, player, soldiers, defaultSoldiers, actions) => this.settings = settings;
+		public override Province GiveUpTo(Player p, Soldiers s) => new Sea(Name, Shape, p, s, DefaultSoldiers, Actions, settings);
+		protected override Province WithActions(ImmutableList<IProvinceAction> new_actions) => new Sea(Name, Shape, Player, Soldiers, DefaultSoldiers, new_actions, settings);
+		public override Color Fill => Player.Color.Mix(settings.SeaColor);
 	}
 }

@@ -6,15 +6,18 @@ namespace ImperitWASM.Shared.State
 	[JsonConverter(typeof(Conversion.DescriptionConverter))]
 	public class Description : IEquatable<Description>
 	{
-		public readonly string Name, Symbol, Text;
-		public Description(string name = "", string symbol = "", string text = "")
+		public readonly string Name, Text, Symbol;
+		public Description(string? name = null, string? text = null, string? symbol = null)
 		{
-			Name = name;
-			Symbol = symbol;
-			Text = text;
+			Name = name ?? "";
+			Text = text ?? "";
+			Symbol = symbol ?? "";
 		}
-		public bool Equals(Description? d2) => (Name, Symbol, Text) == (d2?.Name, d2?.Symbol, d2?.Text);
-		public override bool Equals(object? obj) => obj is Description d2 && Equals(d2);
-		public override int GetHashCode() => (Name, Symbol, Text).GetHashCode();
+		public bool Equals(Description? obj) => Name == obj?.Name;
+		public override bool Equals(object? obj) => Equals(obj as Description);
+		public override int GetHashCode() => Name.GetHashCode();
+		public override string ToString() => Name;
+		public static bool operator ==(Description? a, Description? b) => a?.Name == b?.Name;
+		public static bool operator !=(Description? a, Description? b) => a?.Name != b?.Name;
 	}
 }

@@ -6,22 +6,21 @@ namespace ImperitWASM.Shared.Motion.Commands
 	{
 		public readonly Player Player;
 		public readonly Province From, To;
-		public readonly Army Army;
-		public Move(Player player, Province from, Province to, Army army)
+		public readonly Soldiers Soldiers;
+		public Move(Player player, Province from, Province to, Soldiers soldiers)
 		{
 			Player = player;
 			From = from;
 			To = to;
-			Army = army;
+			Soldiers = soldiers;
 		}
 		public virtual bool Allowed(PlayersAndProvinces pap)
 		{
-			return From.IsAllyOf(Player) && Army.CanMove(pap, From.Id, To.Id) && To.Subtract(Army.Soldiers).CanSoldiersSurvive;
+			return From.IsAllyOf(Player) && Soldiers.CanMove(pap, From, To) && To.Subtract(Soldiers).CanSoldiersSurvive;
 		}
 		public Province Perform(Province province)
 		{
-			return province == From ? province.Subtract(Army.Soldiers) : province == To ? province.Add(new Manoeuvre(Army)) : province;
+			return province == From ? province.Subtract(Soldiers) : province == To ? province.Add(new Manoeuvre(Player, Soldiers)) : province;
 		}
-		public Soldiers Soldiers => Army.Soldiers;
 	}
 }

@@ -1,19 +1,19 @@
 @inject ImperitClient http;
 
-@using Mode = Shared.Data.Switch.Mode;
+@using Mode = Server.Switch.Mode;
 
 @code{
-	[Parameter] public Shared.Data.User LoggedIn { get; set; } = new Shared.Data.User();
+	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
 	[Parameter] public bool IsActive { get; set; }
 	[Parameter] public Action<Mode, int?, int?> Switch { get; set; } = ((a, x, y) => { });
 	[Parameter] public bool Preview { get; set; }
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
-	[Parameter] public Shared.Data.DisplayableShape[]? Provinces { get; set; }
-	[Parameter] public Action<Shared.Data.ProvinceVariables[]>? UpdateProvinces { get; set; }
+	[Parameter] public Server.DisplayableShape[]? Provinces { get; set; }
+	[Parameter] public Action<Server.ProvinceVariables[]>? UpdateProvinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
-		var r = await http.PostJsonResponseAsync<Shared.Data.Click, Shared.Data.Switch>("api/Switch/Clicked", new Shared.Data.Click(LoggedIn.U, from, clicked));
+		var r = await http.PostJsonResponseAsync<Server.Click, Server.Switch>("api/Switch/Clicked", new Server.Click(LoggedIn.U, from, clicked, LoggedIn.G));
 		Switch(r.M, r.F, r.T);
 		return r.S;
 	}
@@ -22,7 +22,7 @@
 	{
 		PowersCount = await http.GetJsonAsync<int>("api/Powers/Count");
 		PlayerMoney = await http.PostJsonResponseAsync<int, int>("api/Player/Money", LoggedIn.U);
-		UpdateProvinces!(await http.GetJsonAsync<Shared.Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current"));
+		UpdateProvinces!(await http.GetJsonAsync<Server.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current"));
 		this.StateHasChanged();
 	}
 	protected override Task OnInitializedAsync() => Update();

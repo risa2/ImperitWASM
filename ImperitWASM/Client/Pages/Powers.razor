@@ -2,11 +2,11 @@
 
 @code{
 	[Parameter] public Action Return { get; set; } = (() => { });
-	Shared.Data.DisplayablePlayer[]? Players = null;
+	Server.DisplayablePlayer[]? Players = null;
 	PlayersPower[]? PowersArray = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Players = await http.GetJsonAsync<Shared.Data.DisplayablePlayer[]>("api/Player/Display");
+		Players = await http.GetJsonAsync<Server.DisplayablePlayer[]>("api/Player/Display");
 		PowersArray = (await http.GetJsonAsync<PlayersPower[]>("api/Powers/List"));
 	}
 }

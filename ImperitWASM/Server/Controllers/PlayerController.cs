@@ -12,56 +12,45 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class PlayerController : ControllerBase
 	{
-		readonly ILoginService login;
+		readonly ISessionService login;
 		readonly IPlayersProvinces pap;
-		readonly IFormerPlayers former;
-		public PlayerController(IPlayersProvinces pap, IFormerPlayers former, ILoginService login)
+		public PlayerController(IPlayersProvinces pap, ISessionService login)
 		{
 			this.pap = pap;
-			this.former = former;
 			this.login = login;
 		}
-		[HttpGet("Display")]
-		public IEnumerable<Shared.Data.DisplayablePlayer> Display()
+		[HttpPost("Display")]
+		public IEnumerable<Client.Server.DisplayablePlayer> Display([FromBody] int gameId)
 		{
-			return pap.Players.OfType<Human>().Select(p => new Shared.Data.DisplayablePlayer(p.Name, p.Color));
+			return pap.Players(gameId).OfType<Human>().Select(p => new Client.Server.DisplayablePlayer(p.Name, p.Color));
 		}
-		[HttpGet("Players")]
-		public IEnumerable<Shared.Data.PlayerId> Players()
+		[HttpPost("Players")]
+		public IEnumerable<Client.Server.PlayerId> Players([FromBody] int gameId)
 		{
-			return pap.Players.OfType<Human>().Select(p => new Shared.Data.PlayerId(p.Id, p.Name));
-		}
-		[HttpGet("Former")]
-		public IEnumerable<Shared.Data.DisplayablePlayer> Former()
-		{
-			return former.OfType<Human>().Select(p => new Shared.Data.DisplayablePlayer(p.Name, p.Color));
-		}
-		[HttpPost("Info")]
-		public Shared.Data.PlayerInfo Info([FromBody] int player)
-		{
-			return new Shared.Data.PlayerInfo(player == pap.Active.Id, pap.Player(player).Color);
+			return pap.Players(gameId).Select((p, i) => (p is Human, new Client.Server.PlayerId(i, p.Name))).Where(p => p.Item1).Select(p => p.Item2);
 		}
 		[HttpPost("Money")]
-		public int Money([FromBody] int player)
+		public int Money([FromBody] Client.Server.PlayerKey p)
 		{
-			return pap.Player(player).Money;
+			return pap.Player(p.G, p.I).Money;
 		}
-		[HttpGet("Infos")]
-		public IEnumerable<Shared.Data.PlayerFullInfo> Infos()
+		[HttpPost("Infos")]
+		public IEnumerable<Client.Server.PlayerFullInfo> Infos([FromBody] int gameId)
 		{
-			return pap.Players.Select(p => new Shared.Data.PlayerFullInfo(p.Id, p is Human, (p as Human)?.Name ?? "", p.Color.ToString(), p.Alive, p.Money, pap.PaP.IncomeOf(p), p.Actions.OfType<Loan>().Sum(l => l.Debt)));
+			var p_p = pap[gameId];
+			return p_p.Players.Select((p, i) => new Client.Server.PlayerFullInfo(i, p is Human, p.Name, p.Color.ToString(), p.Alive, p.Money, p_p.IncomeOf(p), p.Actions.OfType<Loan>().Sum(l => l.Debt)));
 		}
 		[HttpPost("Correct")]
-		public bool Correct([FromBody] Shared.Data.User user) => login.Get(user.U) == user.I;
+		public bool Correct([FromBody] Client.Server.Session user) => login.IsValid(user.U, user.G, user.I);
 		[HttpPost("Login")]
-		public Shared.Data.StringValue Login([FromBody] Shared.Data.Login trial)
+		public async Task<Client.Server.StringValue> Login([FromBody] Client.Server.Login trial)
 		{
-			return new Shared.Data.StringValue(pap.Player(trial.Id) is Human h && h.Password.IsCorrect(trial.Password) ? login.Get(trial.Id) : null);
+			return new Client.Server.StringValue(pap.Player(trial.G, trial.I) is Human h && h.Password.IsCorrect(trial.P) ? await login.Add(trial.I, trial.G) : null);
 		}
 		[HttpPost("Logout")]
-		public Task Logout([FromBody] Shared.Data.User user)
+		public Task Logout([FromBody] Client.Server.Session user)
 		{
-			return login.Get(user.U) == user.I ? login.Remove(user.U) : new Task(() => { });
+			return login.Remove(user.U, user.G, user.I);
 		}
 	}
 }

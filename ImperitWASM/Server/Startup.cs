@@ -18,11 +18,11 @@ namespace ImperitWASM.Server
 			string p = System.AppDomain.CurrentDomain.BaseDirectory ?? ".";
 			_ = services.AddControllersWithViews();
 			_ = services.AddRazorPages();
-			_ = services.AddSingleton<IServiceIO>(s => new ServiceIO(File.Path(p, "Files/Settings.json"), File.Path(p, "Files/Players.json"), File.Path(p, "Files/Provinces.json"), File.Path(p, "Files/Active.json"), File.Path(p, "Files/Graph.json"), File.Path(p, "Files/Shapes.json"), File.Path(p, "Files/Powers.json"), File.Path(p, "Files/Game.json"), File.Path(p, "Files/FormerPlayers.json"), File.Path(p, "Files/Sessions.json")))
-					.AddSingleton<ILoginService, LoginService>().AddSingleton<ISettingsLoader, SettingsLoader>()
-					.AddSingleton<IPlayersProvinces, PlayersProvinces>().AddSingleton<IFormerPlayers, FormerPlayers>()
-					.AddSingleton<IPowersLoader, PowersLoader>().AddSingleton<IGameLoader, GameLoader>()
-					.AddTransient<INewGame, NewGame>().AddTransient<IEndOfTurn, EndOfTurn>();
+			_ = services.AddSingleton<IConfig, Config>(s => new Config(File.Path(p, "Files/Shapes.json"), File.Path(p, "Files/Graph.json"), File.Path(p, "Files/Settings.json")))			
+					.AddSingleton<ISessionService, SessionService>().AddSingleton<IPlayersProvinces, PlayersProvinces>()
+					.AddSingleton<IContextService, ContextService>().AddSingleton<IPowers, Powers>()
+					.AddSingleton<IGameService, GameService>().AddTransient<INewGame, GameCreator>()
+					.AddTransient<IEndOfTurn, EndOfTurn>().AddSingleton<IActive, Active>();
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{

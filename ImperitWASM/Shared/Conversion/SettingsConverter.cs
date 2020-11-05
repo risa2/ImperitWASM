@@ -11,7 +11,7 @@ namespace ImperitWASM.Shared.Conversion
 		public override Settings Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var root = JsonDocument.ParseValue(ref reader).RootElement;
-			return new Settings(root.GetProperty("DebtLimit").GetInt32(), new Ratio(root.GetProperty("DefaultInstability").GetInt32()), root.GetProperty("DefaultMoney").GetInt32(), root.GetProperty("Interest").GetDouble(), Color.Parse(root.GetProperty("LandColor").GetString()), Color.Parse(root.GetProperty("MountainsColor").GetString()), root.GetProperty("MountainsWidth").GetInt32(), Color.Parse(root.GetProperty("SeaColor").GetString()), JsonSerializer.Deserialize<ImmutableArray<SoldierType>>(root.GetProperty("SoldierTypes").GetRawText()), root.GetProperty("FinalLandsCount").GetInt32());
+			return new Settings(root.GetProperty("DebtLimit").GetInt32(), new Ratio(root.GetProperty("DefaultInstability").GetInt32()), root.GetProperty("DefaultMoney").GetInt32(), root.GetProperty("Interest").GetDouble(), Color.Parse(root.GetProperty("LandColor").GetString()), Color.Parse(root.GetProperty("MountainsColor").GetString()), root.GetProperty("MountainsWidth").GetInt32(), Color.Parse(root.GetProperty("SeaColor").GetString()), JsonSerializer.Deserialize<ImmutableArray<SoldierType>>(root.GetProperty("SoldierTypes").GetRawText()), root.GetProperty("FinalLandsCount").GetInt32(), TimeSpan.FromSeconds(root.GetProperty("CountdownTime").GetInt32()));
 		}
 		public override void Write(Utf8JsonWriter writer, Settings s, JsonSerializerOptions options)
 		{
@@ -23,6 +23,7 @@ namespace ImperitWASM.Shared.Conversion
 			writer.WriteString("LandColor", s.LandColor.ToString());
 			writer.WriteString("MountainsColor", s.MountainsColor.ToString());
 			writer.WriteNumber("MountainsWidth", s.MountainsWidth);
+			writer.WriteNumber("CountdownTime", (int)s.CountdownTime.TotalSeconds);
 			writer.WritePropertyName("SoldierTypes");
 			writer.WriteStartArray();
 			var stc = new SoldierTypeConverter();

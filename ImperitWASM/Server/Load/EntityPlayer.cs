@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ImperitWASM.Shared.Conversion;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load
@@ -11,26 +10,32 @@ namespace ImperitWASM.Server.Load
 	public class EntityPlayer : IEntity<Player, Settings>
 	{
 		[Key] public int Id { get; set; }
-		public int Index { get; set; }
-		public string Name { get; set; } = "";
-		public Color Color { get; set; }
-		public string Type { get; set; } = "";
-		public string Password { get; set; } = "";
-		public int Money { get; set; }
-		public bool Alive { get; set; }
+		[Required] public int GameId { get; set; }
+		[Required] public int Index { get; set; }
+		[Required] public string Name { get; set; } = "";
+		[Required] public string Color { get; set; } = "";
+		[Required] public string Type { get; set; } = "";
+		[Required] public string Password { get; set; } = "";
+		[Required] public int Money { get; set; }
+		[Required] public bool Alive { get; set; }
 		public IEnumerable<EntityPlayerAction>? Actions { get; set; }
 		public Player Convert(Settings settings) => Type switch
 		{
-			"H" => new Human(Index, Color, Money, Alive, Actions!.Select(a => a.Convert(settings)).ToImmutableList(), Name, Shared.State.Password.Parse(Password)),
-			"R" => new Robot(Index, Color, Money, Alive, Actions!.Select(a => a.Convert(settings)).ToImmutableList(), settings),
-			"S" => new Savage(Index),
+			"H" => new Human(Shared.State.Color.Parse(Color), Name, Money, Alive, Actions!.Select(a => a.Convert(settings)).ToImmutableList(), Shared.State.Password.Parse(Password)),
+			"R" => new Robot(Shared.State.Color.Parse(Color), Money, Alive, Actions!.Select(a => a.Convert(settings)).ToImmutableList(), settings),
+			"S" => new Savage(),
 			_ => throw new Exception("Unknown Player type: " + Type)
 		};
-		public static EntityPlayer From(Player p) => p switch
+		public EntityPlayer Assign(Player p)
 		{
-			Human H => new EntityPlayer { Type = "H", Index = p.Id, Name = H.Name, Color = H.Color, Money = H.Money, Alive = H.Alive, Actions = H.Actions.Select(EntityPlayerAction.From), Password = H.Password.ToString() },
-			Robot R => new EntityPlayer { Type = "R", Index = p.Id, Color = R.Color, Money = R.Money, Alive = R.Alive, Actions = R.Actions.Select(EntityPlayerAction.From) },
-			_ => new EntityPlayer { Type = "S", Index = p.Id },
-		};
+			_ = p switch
+			{
+				Human H => (Type = "H", Color = H.Color.ToString(), Name = H.Name, Money = H.Money, Alive = H.Alive, Actions = H.Actions.Select(EntityPlayerAction.From), Password = H.Password.ToString()),
+				Robot R => (Type = "R", Color = R.Color.ToString(), Name = R.Name, Money = R.Money, Alive = R.Alive, Actions = R.Actions.Select(EntityPlayerAction.From)),
+				_ => (object)(Type = "S"),
+			};
+			return this;
+		}
+		public static EntityPlayer From(Player p, int index, int gameId) => new EntityPlayer { Index = index, GameId = gameId }.Assign(p);
 	}
 }

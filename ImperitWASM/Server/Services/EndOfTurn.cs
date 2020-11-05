@@ -5,36 +5,38 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IEndOfTurn
 	{
-		Task<bool> NextTurn();
+		Task<bool> NextTurnAsync(int gameId);
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
+		readonly IContextService ctx;
 		readonly IPlayersProvinces pap;
-		readonly IPowersLoader powers;
+		readonly IPowers powers;
 		readonly INewGame newGame;
-		readonly ISettingsLoader sl;
-		public EndOfTurn(IPlayersProvinces pap, IPowersLoader powers, INewGame newGame, ISettingsLoader sl)
+		readonly IConfig cfg;
+		public EndOfTurn(IPlayersProvinces pap, IPowers powers, INewGame newGame, IConfig cfg, IContextService ctx)
 		{
 			this.pap = pap;
 			this.powers = powers;
 			this.newGame = newGame;
-			this.sl = sl;
+			this.cfg = cfg;
+			this.ctx = ctx;
 		}
-		public async Task<bool> NextTurn()
+		public async Task<bool> NextTurnAsync(int gameId)
 		{
-			pap.Next();
-			while (pap.Active is Robot robot && pap.LivingHumans > 0 && pap.Active.Alive)
+			var p = pap.Next(gameId);
+			while (pap.Active(gameId) is Robot robot && p.LivingHumans > 0)
 			{
-				pap.PaP = robot.Think(pap.PaP);
-				pap.Next();
+				pap[gameId] = robot.Think(p);
+				p = pap.Next(gameId);
 			}
-			powers.Compute();
-			if (pap.LivingHumans <= 0 || pap.PaP.Victory(sl.Settings.FinalLandsCount) is int)
+			powers.Add(gameId);
+			if (p.LivingHumans <= 0 || p.Winner(cfg.Settings.FinalLandsCount) is Human)
 			{
-				await newGame.Finish();
+				await newGame.FinishAsync(gameId);
 				return true;
 			}
-			await pap.Save();
+			await ctx.SaveAsync();
 			return false;
 		}
 	}

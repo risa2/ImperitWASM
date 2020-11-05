@@ -5,15 +5,23 @@ namespace ImperitWASM.Shared.State
 {
 	public class Land : Province
 	{
-		public readonly bool IsStart, IsFinal;
-		public Land(int id, string name, Shape shape, Army army, Army defaultArmy, bool isStart, int earnings, ImmutableList<IProvinceAction> actions, Settings settings, bool isFinal)
-			: base(id, name, shape, army, defaultArmy, earnings, actions, settings) => (IsStart, IsFinal) = (isStart, isFinal);
-		public override Province GiveUpTo(Army army) => new Land(Id, Name, Shape, army, DefaultArmy, IsStart, Earnings, Actions, settings, IsFinal);
-		protected override Province WithActions(ImmutableList<IProvinceAction> new_actions) => new Land(Id, Name, Shape, Army, DefaultArmy, IsStart, Earnings, new_actions, settings, IsFinal);
+		protected readonly Settings settings;
+		public readonly int Earnings;
+		public readonly bool IsStart, IsFinal, HasPort;
+		public Land(string name, Shape shape, Player player, Soldiers soldiers, Soldiers defaultSoldiers, ImmutableList<IProvinceAction> actions, Settings settings, int earnings, bool isStart, bool isFinal, bool hasPort)
+			: base(new Description(name, string.Format("{0}<br/>{1}", name + (hasPort ? "\u2693" : ""), soldiers)), shape, player, soldiers, defaultSoldiers, actions)
+		{
+			this.settings = settings;
+			Earnings = earnings;
+			IsStart = isStart;
+			IsFinal = isFinal;
+			HasPort = hasPort;
+		}
+		public override Province GiveUpTo(Player p, Soldiers s) => new Land(Name, Shape, p, s, DefaultSoldiers, Actions, settings, Earnings, IsStart, IsFinal, HasPort);
+		protected override Province WithActions(ImmutableList<IProvinceAction> new_actions) => new Land(Name, Shape, Player, Soldiers, DefaultSoldiers, new_actions, settings, Earnings, IsStart, IsFinal, HasPort);
 
 		public int Price => (Earnings * 2) + Soldiers.Price;
-		public override Color Fill => Army.Color.Over(settings.LandColor);
-		public override string[] Text => new[] { Name, Earnings + "\uD83D\uDCB0", Army.ToString() };
-		public Ratio Instability => settings.Instability(Soldiers, DefaultArmy.Soldiers);
+		public override Color Fill => Player.Color.Over(settings.LandColor);
+		public Ratio Instability => settings.Instability(Soldiers, DefaultSoldiers);
 	}
 }

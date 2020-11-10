@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ImperitWASM.Client.Server
+namespace ImperitWASM.Client.Data
 {
 	public class RecruitCmd
 	{

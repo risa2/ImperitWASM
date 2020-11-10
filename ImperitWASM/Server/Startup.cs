@@ -18,7 +18,7 @@ namespace ImperitWASM.Server
 			string p = System.AppDomain.CurrentDomain.BaseDirectory ?? ".";
 			_ = services.AddControllersWithViews();
 			_ = services.AddRazorPages();
-			_ = services.AddSingleton<IConfig, Config>(s => new Config(File.Path(p, "Files/Shapes.json"), File.Path(p, "Files/Graph.json"), File.Path(p, "Files/Settings.json")))			
+			_ = services.AddSingleton<IConfig, Config>(s => new Config(File.Path(p, "Files/Shapes.json"), File.Path(p, "Files/Graph.json"), File.Path(p, "Files/Settings.json")))
 					.AddSingleton<ISessionService, SessionService>().AddSingleton<IPlayersProvinces, PlayersProvinces>()
 					.AddSingleton<IContextService, ContextService>().AddSingleton<IPowers, Powers>()
 					.AddSingleton<IGameService, GameService>().AddTransient<INewGame, GameCreator>()
@@ -26,18 +26,7 @@ namespace ImperitWASM.Server
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage().UseWebAssemblyDebugging();
-			}
-			else
-			{
-				_ = app.UseExceptionHandler("/Error").UseHsts();
-			}
-
-			_ = app.UseHttpsRedirection().UseBlazorFrameworkFiles().UseStaticFiles().UseRouting();
-
-			_ = app.UseEndpoints(endpoints =>
+			_ = (env.IsDevelopment() ? app.UseDeveloperExceptionPage() : app.UseExceptionHandler("/Error").UseHsts()).UseHttpsRedirection().UseBlazorFrameworkFiles().UseStaticFiles().UseRouting().UseEndpoints(endpoints =>
 			{
 				_ = endpoints.MapRazorPages();
 				_ = endpoints.MapControllers();

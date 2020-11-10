@@ -1,5 +1,5 @@
 ﻿@code{
-	[Parameter] public IReadOnlyList<Server.DisplayablePlayer> Players { get; set; } = Array.Empty<Server.DisplayablePlayer>();
+	[Parameter] public IReadOnlyList<Data.DisplayablePlayer> Players { get; set; } = Array.Empty<Data.DisplayablePlayer>();
 	[Parameter] public IReadOnlyList<PlayersPower> Powers { get; set; } = Array.Empty<PlayersPower>();
 	static IEnumerable<string> Parts(IEnumerable<int> y_values, int count, int max_y, int x_offset, int y_offset, int width, int height)
 	{

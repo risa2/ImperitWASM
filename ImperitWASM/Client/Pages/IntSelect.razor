@@ -1,7 +1,7 @@
 ﻿@inherits InputBase<int>
 
 @code {
-    [Parameter] public IEnumerable<Server.PlayerId>? Options { get; set; }
+    [Parameter] public IEnumerable<Data.PlayerId>? Options { get; set; }
     protected override bool TryParseValueFromString(string value, out int result, out string? errorMsg)
     {
         if (int.TryParse(value, out result))

@@ -2,20 +2,20 @@
 
 @code{
 	[Parameter] public Func<int, int, string, Task<bool>>? LoginAsync { get; set; }
-	LoginModel model = new LoginModel();
+	Data.Login model = new Data.Login();
 	bool Wrong = false;
 	async Task LoginAction()
 	{
-		if(!await LoginAsync!(model.Id, model.Game, model.Password))
+		if(!await LoginAsync!(model.I, model.G, model.P))
 		{
 			Wrong = true;
-			model.Password = "";
+			model.P = "";
 		}
 	}
-	Server.PlayerId[]? players = null;
+	Data.PlayerId[]? players = null;
 	protected override async Task OnInitializedAsync()
 	{
-		players = await http.GetJsonAsync<Server.PlayerId[]>("api/Player/Players");
+		players = await http.GetJsonAsync<Data.PlayerId[]>("api/Player/Players");
 	}
 }
 <nav><a class="this">Přihlášení</a></nav>
@@ -30,10 +30,10 @@
 			Hráč:<br/>
 			@if (players != null)
 			{
-				<IntSelect @bind-Value="model.Id" Options="players"/><br/>
+				<IntSelect @bind-Value="model.I" Options="players"/><br/>
 			}
 		</label>
-		<label>Heslo:<br/><InputText type="password" @bind-Value="model.Password"/><br/></label>
+		<label>Heslo:<br/><InputText type="password" @bind-Value="model.P"/><br/></label>
 		<button type="submit">Přihlásit se</button>
 	</EditForm>
 </main>

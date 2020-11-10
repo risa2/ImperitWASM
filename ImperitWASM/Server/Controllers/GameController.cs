@@ -26,9 +26,9 @@ namespace ImperitWASM.Server.Controllers
 			this.active = active;
 		}
 		[HttpPost("Info")]
-		public Client.Server.BasicInfo Info([FromBody] Client.Server.PlayerKey p)
+		public Client.Data.BasicInfo Info([FromBody] Client.Data.PlayerKey p)
 		{
-			return new Client.Server.BasicInfo(p.I, pap.Player(p.G, p.I).Color, game.Started(p.G), active[p.G]);
+			return new Client.Data.BasicInfo(p.I, pap.Player(p.G, p.I).Color, game.Started(p.G), active[p.G]);
 		}
 
 		[HttpGet("ActiveGame")]
@@ -38,7 +38,7 @@ namespace ImperitWASM.Server.Controllers
 			return game.StartedGames;
 		}
 		[HttpPost("Register")]
-		public async Task<bool> Register([FromBody] Client.Server.RegisteredPlayer player)
+		public async Task<bool> Register([FromBody] Client.Data.RegisteredPlayer player)
 		{
 			var gameId = game.RegistrableGame;
 			var p_p = pap[gameId];
@@ -52,7 +52,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpGet("NextColor")]
 		public Color NextColor() => newGame.NextColor(game.RegistrableGame);
 		[HttpPost("NextTurn")]
-		public async Task<bool> NextTurn([FromBody] Client.Server.Session loggedIn)
+		public async Task<bool> NextTurn([FromBody] Client.Data.Session loggedIn)
 		{
 			return active[loggedIn.G] == loggedIn.U && login.IsValid(loggedIn.U, loggedIn.G, loggedIn.I) && await end.NextTurnAsync(loggedIn.G);
 		}

@@ -3,8 +3,8 @@ using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using Mode = ImperitWASM.Client.Server.Switch.Mode;
-using Switch = ImperitWASM.Client.Server.Switch;
+using Mode = ImperitWASM.Client.Data.Switch.Mode;
+using Switch = ImperitWASM.Client.Data.Switch;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -37,7 +37,7 @@ namespace ImperitWASM.Server.Controllers
 			_ => new Switch(null, Mode.Map, null, null)
 		};
 		[HttpPost("Clicked")]
-		public Switch Clicked([FromBody] Client.Server.Click c)
+		public Switch Clicked([FromBody] Client.Data.Click c)
 		{
 			var (p_p, player) = (pap[c.G], active[c.G]);
 			return IfPossible(p_p, player, c.U == player ? ClickedResult(p_p, c.U, c.F, c.C) : new Switch(null, Mode.Map, null, null));

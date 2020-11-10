@@ -7,8 +7,8 @@ namespace ImperitWASM.Client.Services
 	{
 		readonly ISessionStorageService iss;
 		public SessionService(ISessionStorageService iss) => this.iss = iss;
-		public Task<Server.Session?> GetAsync() => iss.GetItemAsync<Server.Session?>("session");
-		public Task SetAsync(Server.Session? session) => iss.SetItemAsync("session", session);
+		public Task<Data.Session?> GetAsync() => iss.GetItemAsync<Data.Session?>("session");
+		public Task SetAsync(Data.Session? session) => iss.SetItemAsync("session", session);
 		public Task RemoveAsync() => iss.RemoveItemAsync("session");
 	}
 }

@@ -5,11 +5,11 @@
 	string Username { get; set; } = "";
 	string Password { get; set; } = "";
 	int? Selected = null;
-	Server.DisplayableShape[]? Provinces = null;
+	Data.DisplayableShape[]? Provinces = null;
 	Color NextColor;
 	async Task OnSubmit()
 	{
-		if (Selected is int selected && await http.PostJsonResponseAsync<Server.RegisteredPlayer, bool>("api/Game/Register", new Server.RegisteredPlayer(Username, Password, selected)))
+		if (Selected is int selected && await http.PostJsonResponseAsync<Data.RegisteredPlayer, bool>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, selected)))
 		{
 			Return();
 		}
@@ -17,7 +17,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		NextColor = await http.GetJsonAsync<Color>("api/Game/NextColor");
-		Provinces = (await http.GetJsonAsync<IEnumerable<Server.DisplayableShape>>("api/Provinces/Shapes"))
+		Provinces = (await http.GetJsonAsync<IEnumerable<Data.DisplayableShape>>("api/Provinces/Shapes"))
 								.Select(s => s.UpdateText()).ToArray();
 	}
 	async Task<int?> Select(int i, int? from)

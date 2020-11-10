@@ -18,25 +18,25 @@ namespace ImperitWASM.Server.Controllers
 			this.active = active;
 		}
 		[HttpGet("Shapes")]
-		public IEnumerable<Client.Server.DisplayableShape> Shapes([FromBody] int gameId)
+		public IEnumerable<Client.Data.DisplayableShape> Shapes([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new Client.Server.DisplayableShape(p.ToArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart, p.Text));
+			return pap[gameId].Provinces.Select(p => new Client.Data.DisplayableShape(p.ToArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart, p.Text));
 		}
 		[HttpGet("Current")]
-		public IEnumerable<Client.Server.ProvinceVariables> Current([FromBody] int gameId)
+		public IEnumerable<Client.Data.ProvinceVariables> Current([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new Client.Server.ProvinceVariables(p.Text, p.Fill));
+			return pap[gameId].Provinces.Select(p => new Client.Data.ProvinceVariables(p.Text, p.Fill));
 		}
 		[HttpPost("Preview")]
-		public IEnumerable<Client.Server.ProvinceVariables> Preview([FromBody] int gameId)
+		public IEnumerable<Client.Data.ProvinceVariables> Preview([FromBody] int gameId)
 		{
 			var preview = pap[gameId].Act(active[gameId], false).Provinces;
-			return preview.Select(p => new Client.Server.ProvinceVariables(p.Text, p.Fill));
+			return preview.Select(p => new Client.Data.ProvinceVariables(p.Text, p.Fill));
 		}
 		[HttpGet("Instabilities")]
-		public IEnumerable<Client.Server.ProvinceInstability> Instabilities([FromBody] int gameId)
+		public IEnumerable<Client.Data.ProvinceInstability> Instabilities([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.OfType<Land>().Where(l => l.Occupied && l.Instability.IsZero).Select(l => new Client.Server.ProvinceInstability(l.Name, l.Fill, l.Instability));
+			return pap[gameId].Provinces.OfType<Land>().Where(l => l.Occupied && l.Instability.IsZero).Select(l => new Client.Data.ProvinceInstability(l.Name, l.Fill, l.Instability));
 		}
 	}
 }

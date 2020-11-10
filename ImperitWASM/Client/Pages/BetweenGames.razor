@@ -4,14 +4,14 @@
 	[Parameter] public Action ToRegistration { get; set; } = () => { };
 	[Parameter] public Func<Task>? ReturnAsync { get; set; }
 	TimeSpan? TimeToStart = null;
-	Server.DisplayablePlayer[]? Players = null, Former = null;
+	Data.DisplayablePlayer[]? Players = null, Former = null;
 	PlayersPower[]? Powers = null;
 	protected override async Task OnInitializedAsync()
 	{
 		TimeToStart = TimeSpan.FromSeconds(await http.GetJsonAsync<int>("api/Game/TimeToStart"));
-		Players = await http.GetJsonAsync<Server.DisplayablePlayer[]>("api/Player/Display");
+		Players = await http.GetJsonAsync<Data.DisplayablePlayer[]>("api/Player/Display");
 		this.StateHasChanged();
-		Former = await http.GetJsonAsync<Server.DisplayablePlayer[]>("api/Player/Former");
+		Former = await http.GetJsonAsync<Data.DisplayablePlayer[]>("api/Player/Former");
 		Powers = await http.GetJsonAsync<PlayersPower[]>("api/Powers/List");
 		while (TimeToStart > TimeSpan.FromSeconds(1))
 		{

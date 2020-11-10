@@ -6,13 +6,13 @@
 	[Parameter] public Action Return { get; set; } = (() => { });
 	[Parameter] public int From { get; set; }
 	[Parameter] public int To { get; set; }
-	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
-	MoveModel model = new MoveModel();
-	Server.MoveInfo? Info = null;
+	[Parameter] public Data.Session LoggedIn { get; set; } = new Data.Session();
+	Data.Move model = new Data.Move();
+	Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Server.CmdData, Server.MoveInfo>("api/Command/MoveInfo", new Server.CmdData(From, To, LoggedIn.G));
-		model.Soldiers = IntModel.Array(Info.Soldiers.Length);
+		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.MoveInfo>("api/Command/MoveInfo", new Data.CmdData(From, To, LoggedIn.G));
+		model.Soldiers = Data.Int.Array(Info.Soldiers.Length);
 		if (!Info.Possible)
 		{
 			Return();
@@ -20,7 +20,7 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostJsonResponseAsync<Server.MoveCmd, Errors>("api/Command/Move", new Server.MoveCmd(LoggedIn.U, LoggedIn.I, From, To, model.Soldiers.Select(s => s.Value).ToArray(), LoggedIn.G));
+		error = await http.PostJsonResponseAsync<Data.MoveCmd, Errors>("api/Command/Move", new Data.MoveCmd(LoggedIn.U, LoggedIn.I, From, To, model.Soldiers.Select(s => s.Value).ToArray(), LoggedIn.G));
 		if (error == Errors.Ok || error == Errors.NotPlaying)
 		{
 			Return();
@@ -46,7 +46,7 @@
 	{
 		<p>Přesun není možný</p>
 	}
-	@if (Info is Server.MoveInfo)
+	@if (Info is Data.MoveInfo)
 	{
 		<EditForm Model="@model" OnValidSubmit="DoMove">
 			<DataAnnotationsValidator /><ValidationSummary />

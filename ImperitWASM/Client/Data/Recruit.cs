@@ -1,11 +1,11 @@
 ﻿using ImperitWASM.Shared.State;
 
-namespace ImperitWASM.Client.Pages
+namespace ImperitWASM.Client.Data
 {
-	public class RecruitModel
+	public class Recruit
 	{
 		public SoldierType[] SoldierTypes = System.Array.Empty<SoldierType>();
-		public IntModel[] Soldiers = System.Array.Empty<IntModel>();
+		public Int[] Soldiers = System.Array.Empty<Int>();
 		public bool Borrow { get; set; }
 	}
 }

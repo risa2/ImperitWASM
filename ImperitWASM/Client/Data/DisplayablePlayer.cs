@@ -1,6 +1,6 @@
 ﻿using ImperitWASM.Shared.State;
 
-namespace ImperitWASM.Client.Server
+namespace ImperitWASM.Client.Data
 {
 	public class DisplayablePlayer
 	{

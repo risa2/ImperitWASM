@@ -2,17 +2,17 @@
 
 @code{
 	[Parameter] public Action Return { get; set; } = (() => { });
-	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
+	[Parameter] public Data.Session LoggedIn { get; set; } = new Data.Session();
 	[Parameter] public int Land { get; set; }
 	async Task DoPurchase()
 	{
-		await http.PostJsonAsync<Server.PurchaseCmd>("api/Command/Purchase", new Server.PurchaseCmd(LoggedIn.U, LoggedIn.I, Land, LoggedIn.G));
+		await http.PostJsonAsync<Data.PurchaseCmd>("api/Command/Purchase", new Data.PurchaseCmd(LoggedIn.U, LoggedIn.I, Land, LoggedIn.G));
 		Return();
 	}
-	Server.PurchaseInfo? Info = null;
+	Data.PurchaseInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Server.CmdData, Server.PurchaseInfo>("api/Command/PurchaseInfo", new Server.CmdData(LoggedIn.U, Land, LoggedIn.G));
+		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.CmdData(LoggedIn.U, Land, LoggedIn.G));
 		if (!Info.Possible)
 		{
 			Return();
@@ -24,7 +24,7 @@
 	<a class="this">Koupě</a>
 </nav>
 <main>
-	@if (Info is Server.PurchaseInfo)
+	@if (Info is Data.PurchaseInfo)
 	{
 		@if (Info.Price > Info.Money)
 		{

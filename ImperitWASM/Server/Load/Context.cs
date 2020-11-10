@@ -13,7 +13,7 @@ namespace ImperitWASM.Server.Load
 		public DbSet<EntityPlayerPower>? EntityPlayerPowers { get; set; }
 		protected override void OnConfiguring(DbContextOptionsBuilder opt)
 		{
-
+			_ = opt.UseSqlite("Data Source=~\\imperit.db");
 		}
 		protected override void OnModelCreating(ModelBuilder mod)
 		{

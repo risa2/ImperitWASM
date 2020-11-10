@@ -1,21 +1,23 @@
 @inject ImperitClient http;
 
 @code{
-	[Parameter] public Func<int, string, Task<bool>>? LoginAsync { get; set; }
+	[Parameter] public Func<int, int, string, Task<bool>>? LoginAsync { get; set; }
 	LoginModel model = new LoginModel();
 	bool Wrong = false;
 	async Task LoginAction()
 	{
-		if(!await LoginAsync!(model.Id, model.Password))
+		if(!await LoginAsync!(model.Id, model.GameId, model.Password))
 		{
 			Wrong = true;
 			model.Password = "";
 		}
 	}
-	Server.PlayerId[]? players = null;
+	ImmutableDictionary<int, Client.Server.PlayerId[]>? players = null;
+	int[]? games = null;
 	protected override async Task OnInitializedAsync()
 	{
-		players = await http.GetJsonAsync<Server.PlayerId[]>("api/Player/Players");
+		games = await http.GetJsonAsync<int[]?>("api/Game/Login");
+		players = await http.GetJsonAsync<ImmutableDictionary<int, Client.Server.PlayerId[]>>("api/Player/Login");
 	}
 }
 <nav><a class="this">Přihlášení</a></nav>
@@ -26,14 +28,18 @@
 	}
 	<EditForm Model="model" OnSubmit="LoginAction">
 		<DataAnnotationsValidator/><ValidationSummary/>
-		<label>
-			Hráč:<br/>
-			@if (players != null)
-			{
-				<IntSelect @bind-Value="model.Id" Options="players"/><br/>
-			}
-		</label>
-		<label>Heslo:<br/><InputText type="password" @bind-Value="model.Password"/><br/></label>
+		<p>Hra:</p>
+		@if (games != null)
+		{
+			<IntSelect @bind-Value="model.Id" Options="games" Id="g => g" Name="g => g.ToString()"/><br/>
+		}
+		<p>Hráč:</p>
+		@if (players != null)
+		{
+			<IntSelect @bind-Value="model.Id" Options="players[model.GameId]" Id="p => p.I" Name="p => p.N"/><br/>
+		}
+		<p>Heslo:</p>
+		<InputText type="password" @bind-Value="model.Password"/><br/>
 		<button type="submit">Přihlásit se</button>
 	</EditForm>
 </main>

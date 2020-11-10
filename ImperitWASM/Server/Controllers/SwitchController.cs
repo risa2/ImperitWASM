@@ -1,7 +1,8 @@
 ﻿using System.Linq;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.Motion.Commands;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Cmd;
+using ImperitWASM.Shared.Entities;
+using ImperitWASM.Shared.Func;
 using Microsoft.AspNetCore.Mvc;
 using Mode = ImperitWASM.Client.Server.Switch.Mode;
 using Switch = ImperitWASM.Client.Server.Switch;
@@ -24,8 +25,8 @@ namespace ImperitWASM.Server.Controllers
 		bool IsPossible(PlayersAndProvinces p_p, int player, Switch s) => s.F is int from && s.T is int to && s.M switch
 		{
 			Mode.Recruit => cfg.Settings.RecruitableTypes(p_p.Province(to)).Any(),
-			Mode.Move => p_p.Province(from).SoldierTypes.Any(t => t.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to))),
-			Mode.Purchase => new Buy(p_p.Player(player), p_p.Province(to), 0).Allowed(p_p),
+			Mode.Move => p_p.Province(from).Soldiers.Any(reg => reg.Type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to))),
+			Mode.Purchase => new Buy(p_p.Player(player), p_p.Province(to), 0).Allowed(cfg.Settings, p_p),
 			_ => false
 		};
 		Switch IfPossible(PlayersAndProvinces p_p, int player, Switch s) => IsPossible(p_p, player, s) ? s : new Switch(s.S, Mode.Map, null, null);

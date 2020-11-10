@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Func;
+using ImperitWASM.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
+using ImperitWASM.Shared.Cfg;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -25,20 +26,19 @@ namespace ImperitWASM.Server.Controllers
 			this.end = end;
 			this.active = active;
 		}
+		[HttpGet("Login")]
+		public async Task<int[]> LoginAsync()
+		{
+			await game.ShouldStart.EachAsync(g => newGame.StartAsync(g));
+			return game.StartedGames;
+		}
 		[HttpPost("Info")]
 		public Client.Server.BasicInfo Info([FromBody] Client.Server.PlayerKey p)
 		{
 			return new Client.Server.BasicInfo(p.I, pap.Player(p.G, p.I).Color, game.Started(p.G), active[p.G]);
 		}
-
-		[HttpGet("ActiveGame")]
-		public async Task<int[]> IsActive()
-		{
-			await game.ShouldStart.EachAsync(g => newGame.StartAsync(g));
-			return game.StartedGames;
-		}
 		[HttpPost("Register")]
-		public async Task<bool> Register([FromBody] Client.Server.RegisteredPlayer player)
+		public async Task<bool> RegisterAsync([FromBody] Client.Server.RegisteredPlayer player)
 		{
 			var gameId = game.RegistrableGame;
 			var p_p = pap[gameId];
@@ -52,7 +52,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpGet("NextColor")]
 		public Color NextColor() => newGame.NextColor(game.RegistrableGame);
 		[HttpPost("NextTurn")]
-		public async Task<bool> NextTurn([FromBody] Client.Server.Session loggedIn)
+		public async Task<bool> NextTurnAsync([FromBody] Client.Server.Session loggedIn)
 		{
 			return active[loggedIn.G] == loggedIn.U && login.IsValid(loggedIn.U, loggedIn.G, loggedIn.I) && await end.NextTurnAsync(loggedIn.G);
 		}

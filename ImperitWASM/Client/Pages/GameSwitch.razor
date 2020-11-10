@@ -3,7 +3,7 @@
 @using Mode = Server.Switch.Mode;
 
 @code{
-	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
+	[Parameter] public Server.Session Session { get; set; } = new Server.Session();
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	Mode Current;
 	int? From = null, To = null;
@@ -19,19 +19,19 @@
 	GameMap? Map { get; set; }
 	async Task NextTurnAsync()
 	{
-		if (await http.PostJsonResponseAsync<Server.Session, bool>("api/Game/NextTurn", LoggedIn))
+		if (await http.PostJsonResponseAsync<Server.Session, bool>("api/Game/NextTurn", Session))
 		{
 			await LogoutAsync!();
 		}
 		else
 		{
-			Info = await http.PostJsonResponseAsync<int, Server.BasicInfo>("api/Game/Info", LoggedIn.U);
+			Info = await http.PostJsonResponseAsync<int, Server.BasicInfo>("api/Game/Info", Session.U);
 			Map?.Update();
 		}
 	}
-	async Task CheckLoggedIn()
+	async Task CheckSession()
 	{
-		Info = await http.PostJsonResponseAsync<int, Server.BasicInfo>("api/Game/Info", LoggedIn.U);
+		Info = await http.PostJsonResponseAsync<int, Server.BasicInfo>("api/Game/Info", Session.U);
 		if (!Info.IsGameActive)
 		{
 			await LogoutAsync!();
@@ -42,10 +42,10 @@
 	System.Timers.Timer? timer = null;
 	protected override async Task OnInitializedAsync()
 	{
-		await CheckLoggedIn();
+		await CheckSession();
 		Provinces = await http.GetJsonAsync<Server.DisplayableShape[]>("api/Provinces/Shapes");
 		timer = new System.Timers.Timer(400);
-		timer.Elapsed += async (sender, e) => await CheckLoggedIn();
+		timer.Elapsed += async (sender, e) => await CheckSession();
 		timer.Start();
 	}
 	public void UpdateProvinces(Server.ProvinceVariables[] variables)
@@ -68,33 +68,33 @@
 
 @if (Current == Mode.Map)
 {
-	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" LoggedIn="LoggedIn" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Preview)
 {
-	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" LoggedIn="LoggedIn" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Donation && Player is (int Money, int Recipient, string Name))
 {
-	<Donation LoggedIn="LoggedIn" Recipient="Recipient" RecipientName="@Name" Return="() => Switch()" PlayerMoney="Money"/>
+	<Donation Session="Session" Recipient="Recipient" RecipientName="@Name" Return="() => Switch()" PlayerMoney="Money"/>
 }
 else if (Current == Mode.Move && From is int from && To is int to)
 {
-	<Move LoggedIn="LoggedIn" From="from" To="to" Return="() => Switch()"/>
+	<Move Session="Session" From="from" To="to" Return="() => Switch()"/>
 }
 else if (Current == Mode.Players)
 {
-	<Players LoggedIn="LoggedIn" Switch="Switch" LogoutAsync="LogoutAsync!"/>
+	<Players Session="Session" Switch="Switch" LogoutAsync="LogoutAsync!"/>
 }
 else if (Current == Mode.Powers)
 {
-	<Powers Return="() => Switch()"/>
+	<Powers Session="Session" Return="() => Switch()"/>
 }
 else if (Current == Mode.Purchase && From is int from2)
 {
-	<Purchase LoggedIn="LoggedIn" Land="from2" Return="() => Switch()"/>
+	<Purchase Session="Session" Land="from2" Return="() => Switch()"/>
 }
 else if (Current == Mode.Recruit && From is int from3)
 {
-	<Recruitment LoggedIn="LoggedIn" Land="from3" Switch="x => Switch(x, null, null, null)"/>
+	<Recruitment Session="Session" Land="from3" Switch="x => Switch(x, null, null, null)"/>
 }

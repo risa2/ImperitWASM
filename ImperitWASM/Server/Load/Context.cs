@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using ImperitWASM.Shared.Entities;
 
 namespace ImperitWASM.Server.Load
 {
 	public class Context : DbContext
 	{
-		public DbSet<EntitySession>? EntitySessions { get; set; }
-		public DbSet<EntityGame>? EntityGames { get; set; }
-		public DbSet<EntityPlayer>? EntityPlayers { get; set; }
-		public DbSet<EntityProvince>? EntityProvinces { get; set; }
-		public DbSet<EntityPlayerPower>? EntityPlayerPowers { get; set; }
+		public DbSet<Session>? Sessions { get; set; }
+		public DbSet<Game>? Games { get; set; }
+		public DbSet<Player>? Players { get; set; }
+		public DbSet<Province>? Provinces { get; set; }
+		public DbSet<PlayerPower>? PlayerPowers { get; set; }
 		protected override void OnConfiguring(DbContextOptionsBuilder opt)
 		{
 

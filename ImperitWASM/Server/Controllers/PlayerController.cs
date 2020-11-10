@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ImperitWASM.Server.Load;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.Motion;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Entities;
+using ImperitWASM.Shared.Cfg;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperitWASM.Server.Controllers
@@ -12,27 +13,29 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class PlayerController : ControllerBase
 	{
+		readonly IContextService ctx;
 		readonly ISessionService login;
 		readonly IPlayersProvinces pap;
-		public PlayerController(IPlayersProvinces pap, ISessionService login)
+		public PlayerController(IPlayersProvinces pap, ISessionService login, IContextService ctx)
 		{
 			this.pap = pap;
 			this.login = login;
+			this.ctx = ctx;
+		}
+		[HttpGet("Login")]
+		public IReadOnlyDictionary<int, IEnumerable<Client.Server.PlayerId>> Players()
+		{
+			return ctx.Players.Where(p => p is Human).GroupBy(p => p.GameId).ToDictionary(g => g.Key, g => g.Select(p => new Client.Server.PlayerId(p.Index, p.Name)));
 		}
 		[HttpPost("Display")]
 		public IEnumerable<Client.Server.DisplayablePlayer> Display([FromBody] int gameId)
 		{
-			return pap.Players(gameId).OfType<Human>().Select(p => new Client.Server.DisplayablePlayer(p.Name, p.Color));
-		}
-		[HttpPost("Players")]
-		public IEnumerable<Client.Server.PlayerId> Players([FromBody] int gameId)
-		{
-			return pap.Players(gameId).Select((p, i) => (p is Human, new Client.Server.PlayerId(i, p.Name))).Where(p => p.Item1).Select(p => p.Item2);
+			return ctx.Players.Where(p => p is Human && p.GameId == gameId).Select(p => new Client.Server.DisplayablePlayer(p.Name, Color.Parse(p.Color)));
 		}
 		[HttpPost("Money")]
-		public int Money([FromBody] Client.Server.PlayerKey p)
+		public int Money([FromBody] Client.Server.PlayerKey key)
 		{
-			return pap.Player(p.G, p.I).Money;
+			return ctx.Players.Single(p => p.Index == key.I && p.GameId == key.G).Money;
 		}
 		[HttpPost("Infos")]
 		public IEnumerable<Client.Server.PlayerFullInfo> Infos([FromBody] int gameId)

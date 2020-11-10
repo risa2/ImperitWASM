@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Server.Load;
-using ImperitWASM.Shared;
-using ImperitWASM.Shared.Motion;
-using ImperitWASM.Shared.Motion.Commands;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Cfg;
+using ImperitWASM.Shared.Func;
+using ImperitWASM.Shared.Cmd;
+using ImperitWASM.Shared.Entities;
 
 namespace ImperitWASM.Server.Services
 {

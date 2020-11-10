@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using ImperitWASM.Shared.Motion;
-using ImperitWASM.Shared.State;
-using ImperitWASM.Shared;
+using ImperitWASM.Shared.Entities;
+using ImperitWASM.Shared.Func;
+using ImperitWASM.Shared.Cfg;
 using System.Collections.Generic;
 using System;
 
@@ -23,7 +23,7 @@ namespace ImperitWASM.Server.Services
 		readonly IGameService game;
 		readonly IConfig cfg;
 		readonly IContextService ctx;
-		readonly static ImmutableList<IPlayerAction> Actions = ImmutableList.Create<IPlayerAction>(new Default(), new Instability());
+		readonly static ImmutableList<PlayerAction> Actions = ImmutableList.Create<PlayerAction>(new Default(), new Instability());
 		public GameCreator(IPlayersProvinces pap, IPowers powers, IGameService game, IConfig cfg, IContextService ctx)
 		{
 			this.pap = pap;

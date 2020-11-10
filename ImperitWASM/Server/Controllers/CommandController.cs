@@ -1,8 +1,9 @@
-﻿using System.Linq;
+﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.Motion.Commands;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Cmd;
+using ImperitWASM.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperitWASM.Server.Controllers
@@ -42,8 +43,8 @@ namespace ImperitWASM.Server.Controllers
 		{
 			var (from, to, game) = move;
 			var p_p = pap[game];
-			var possible = p_p.Province(from).SoldierTypes.Any(type => type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to)));
-			var types = p_p.Province(from).SoldierTypes.Select(type => type.Description).ToArray();
+			var possible = p_p.Province(from).Soldiers.Any(reg => reg.Type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to)));
+			var types = p_p.Province(from).Soldiers.Select(reg => reg.Type.Description).ToArray();
 			return new Client.Server.MoveInfo(possible, !p_p.Province(from).IsAllyOf(p_p.Province(to)), p_p.Province(to).Occupied, p_p.Province(from).Name, p_p.Province(to).Name, p_p.Province(from).Soldiers.ToString(), p_p.Province(to).Soldiers.ToString(), types);
 		}
 		[HttpPost("Move")]
@@ -55,7 +56,7 @@ namespace ImperitWASM.Server.Controllers
 			}
 			var p_p = pap[m.Game];
 			var (from, to) = (p_p.Province(m.From), p_p.Province(m.To));
-			var move = new Move(p_p.Player(m.LoggedIn), from, to, new Soldiers(m.Counts.Select((count, i) => (from.Soldiers[i].Type, count))));
+			var move = new Move(p_p.Player(m.LoggedIn), from, to, new Soldiers(m.Counts.Select((count, i) => new Regiment(from.Soldiers[i].Type, count)).ToImmutableArray()));
 			return pap.Do(m.Game, move) switch
 			{
 				true => Client.Pages.Move.Errors.Ok,
@@ -69,7 +70,7 @@ namespace ImperitWASM.Server.Controllers
 		{
 			var (player, land, gameId) = purchase;
 			var p_p = pap[gameId];
-			return new Client.Server.PurchaseInfo(new Buy(p_p.Player(player), p_p.Province(land), 0).Allowed(p_p), p_p.Province(land).Name, (p_p.Province(land) as Land)?.Price ?? int.MaxValue, p_p.Player(player).Money);
+			return new Client.Server.PurchaseInfo(new Buy(p_p.Player(player), p_p.Province(land), 0).Allowed(cfg.Settings, p_p), p_p.Province(land).Name, (p_p.Province(land) as Land)?.Price ?? int.MaxValue, p_p.Player(player).Money);
 		}
 		[HttpPost("Purchase")]
 		public void Purchase([FromBody] Client.Server.PurchaseCmd purchase)
@@ -79,7 +80,7 @@ namespace ImperitWASM.Server.Controllers
 			{
 				if (Land.Price > p_p.Player(purchase.LoggedIn).Money)
 				{
-					(p_p, _) = p_p.Do(new Borrow(p_p.Player(purchase.LoggedIn), Land.Price - p_p.Player(purchase.LoggedIn).Money, cfg.Settings));
+					(p_p, _) = p_p.Do(new Borrow(p_p.Player(purchase.LoggedIn), Land.Price - p_p.Player(purchase.LoggedIn).Money));
 				}
 				(pap[purchase.Game], _) = p_p.Do(new Buy(p_p.Player(purchase.LoggedIn), p_p.Province(purchase.Land), Land.Price));
 			}
@@ -95,11 +96,11 @@ namespace ImperitWASM.Server.Controllers
 		{
 			if (Validate(r.LoggedIn, r.Game, r.LoginId))
 			{
-				var soldiers = new Soldiers(r.Counts.Select((count, i) => (cfg.Settings.SoldierTypes[i], count)));
+				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(cfg.Settings.SoldierTypes[i], count)).ToImmutableArray());
 				var p_p = pap[r.Game];
 				if (soldiers.Price > p_p.Player(r.LoggedIn).Money)
 				{
-					(p_p, _) = p_p.Do(new Borrow(p_p.Player(r.LoggedIn), soldiers.Price - p_p.Player(r.LoggedIn).Money, cfg.Settings));
+					(p_p, _) = p_p.Do(new Borrow(p_p.Player(r.LoggedIn), soldiers.Price - p_p.Player(r.LoggedIn).Money));
 				}
 				(pap[r.Game], _) = p_p.Do(new Recruit(p_p.Player(r.LoggedIn), p_p.Province(r.Province), soldiers));
 			}

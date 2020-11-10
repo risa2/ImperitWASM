@@ -1,5 +1,5 @@
 ﻿using System;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Cfg;
 
 namespace ImperitWASM.Client.Server
 {

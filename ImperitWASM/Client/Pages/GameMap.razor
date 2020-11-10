@@ -3,7 +3,7 @@
 @using Mode = Server.Switch.Mode;
 
 @code{
-	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
+	[Parameter] public Server.Session Session { get; set; } = new Server.Session();
 	[Parameter] public bool IsActive { get; set; }
 	[Parameter] public Action<Mode, int?, int?> Switch { get; set; } = ((a, x, y) => { });
 	[Parameter] public bool Preview { get; set; }
@@ -13,7 +13,7 @@
 	[Parameter] public Action<Server.ProvinceVariables[]>? UpdateProvinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
-		var r = await http.PostJsonResponseAsync<Server.Click, Server.Switch>("api/Switch/Clicked", new Server.Click(LoggedIn.U, from, clicked, LoggedIn.G));
+		var r = await http.PostJsonResponseAsync<Server.Click, Server.Switch>("api/Switch/Clicked", new Server.Click(Session.U, from, clicked, Session.G));
 		Switch(r.M, r.F, r.T);
 		return r.S;
 	}
@@ -21,7 +21,7 @@
 	public async Task Update()
 	{
 		PowersCount = await http.GetJsonAsync<int>("api/Powers/Count");
-		PlayerMoney = await http.PostJsonResponseAsync<int, int>("api/Player/Money", LoggedIn.U);
+		PlayerMoney = await http.PostJsonResponseAsync<int, int>("api/Player/Money", Session.U);
 		UpdateProvinces!(await http.GetJsonAsync<Server.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current"));
 		this.StateHasChanged();
 	}

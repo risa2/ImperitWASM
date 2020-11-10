@@ -1,7 +1,7 @@
 ﻿@inject ImperitClient http;
 
 @code{
-	[Parameter] public Func<int, string, Task<bool>>? LoginAsync { get; set; }
+	[Parameter] public Func<int, int, string, Task<bool>>? LoginAsync { get; set; }
 	bool IsRegistration = false;
 	void Set(bool mode)
 	{

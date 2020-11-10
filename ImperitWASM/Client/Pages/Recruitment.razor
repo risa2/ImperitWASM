@@ -5,12 +5,12 @@
 @code{
 	[Parameter] public Action<Mode> Switch { get; set; } = (x => { });
 	[Parameter] public int Land { get; set; }
-	[Parameter] public Server.Session LoggedIn { get; set; } = new Server.Session();
+	[Parameter] public Server.Session Session { get; set; } = new Server.Session();
 	RecruitModel model = new RecruitModel();
 	Server.RecruitInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Server.CmdData, Server.RecruitInfo> ("api/Command/RecruitInfo", new Server.CmdData(Land, LoggedIn.U, LoggedIn.G));
+		Info = await http.PostJsonResponseAsync<Server.CmdData, Server.RecruitInfo> ("api/Command/RecruitInfo", new Server.CmdData(Land, Session.U, Session.G));
 		model.Soldiers = IntModel.Array(Info.R.Length);
 	}
 	int Price => Info is null ? 0 : model.Soldiers.Zip(Info.R, (count, type) => count.Value * type.P).Sum();
@@ -19,7 +19,7 @@
 	{
 		if (Missing <= 0 || model.Borrow)
 		{
-			await http.PostJsonAsync<Server.RecruitCmd>("api/Command/Recruit", new Server.RecruitCmd(LoggedIn.U, LoggedIn.I, Land, model.Soldiers.Select(s => s.Value).ToArray(), LoggedIn.G));
+			await http.PostJsonAsync<Server.RecruitCmd>("api/Command/Recruit", new Server.RecruitCmd(Session.U, Session.I, Land, model.Soldiers.Select(s => s.Value).ToArray(), Session.G));
 			Switch(Mode.Map);
 		}
 	}

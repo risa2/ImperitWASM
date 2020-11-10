@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Entities;
 
 namespace ImperitWASM.Server.Services
 {

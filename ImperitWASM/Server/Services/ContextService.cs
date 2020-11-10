@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using ImperitWASM.Shared;
+using ImperitWASM.Shared.Func;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
-using ImperitWASM.Shared.State;
 using Microsoft.EntityFrameworkCore;
+using ImperitWASM.Shared.Entities;
 
 namespace ImperitWASM.Server.Services
 {
@@ -26,21 +26,21 @@ namespace ImperitWASM.Server.Services
 		IContextService AddPlayersPower(int gameId, PlayersPower psp);
 		int CountPlayersPowers(int gameId);
 
-		DbSet<EntityGame> Games { get; }
-		DbSet<EntityPlayer> Players { get; }
-		DbSet<EntityPlayerPower> PlayerPowers { get; }
-		DbSet<EntityProvince> Provinces { get; }
-		DbSet<EntitySession> Sessions { get; }
+		DbSet<Game> Games { get; }
+		DbSet<Player> Players { get; }
+		DbSet<PlayerPower> PlayerPowers { get; }
+		DbSet<Province> Provinces { get; }
+		DbSet<Session> Sessions { get; }
 	}
 	public class ContextService : IContextService
 	{
 		readonly IConfig cfg;
 		readonly Context ctx;
-		public DbSet<EntityGame> Games => ctx.EntityGames ?? throw new NullReferenceException();
-		public DbSet<EntityPlayer> Players => ctx.EntityPlayers ?? throw new NullReferenceException();
-		public DbSet<EntityPlayerPower> PlayerPowers => ctx.EntityPlayerPowers ?? throw new NullReferenceException();
-		public DbSet<EntityProvince> Provinces => ctx.EntityProvinces ?? throw new NullReferenceException();
-		public DbSet<EntitySession> Sessions => ctx.EntitySessions ?? throw new NullReferenceException();
+		public DbSet<Game> Games => ctx.Games ?? throw new NullReferenceException();
+		public DbSet<Player> Players => ctx.Players ?? throw new NullReferenceException();
+		public DbSet<PlayerPower> PlayerPowers => ctx.PlayerPowers ?? throw new NullReferenceException();
+		public DbSet<Province> Provinces => ctx.Provinces ?? throw new NullReferenceException();
+		public DbSet<Session> Sessions => ctx.Sessions ?? throw new NullReferenceException();
 
 		public ContextService(Context ctx, IConfig cfg)
 		{

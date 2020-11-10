@@ -176,4 +176,8 @@ input::-ms-clear, input::-ms-reveal {
 	text-align-last: center;
 	text-align: center;
 	vertical-align: middle;
+	-webkit-justify-content: center;
+	justify-content: center;
+	justify-items: center;
+	justify-self: center;
 }

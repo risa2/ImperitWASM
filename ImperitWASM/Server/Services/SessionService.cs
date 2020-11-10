@@ -22,7 +22,7 @@ namespace ImperitWASM.Server.Services
 			var buf = new byte[64];
 			rng.NextBytes(buf);
 			var key = Convert.ToBase64String(buf).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-			var s = ctx.Sessions.Add(new EntitySession { GameId = gameId, PlayerIndex = player, SessionKey = key });
+			var s = ctx.Sessions.Add(new Session { GameId = gameId, PlayerIndex = player, SessionKey = key });
 			await ctx.SaveAsync();
 			return s.Entity.SessionKey;
 		}

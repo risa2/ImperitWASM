@@ -1,13 +1,14 @@
 @inject ImperitClient http;
 
 @code{
-	[Parameter] public Action Return { get; set; } = (() => { });
+	[Parameter] public Action Return { get; set; } = () => { };
+	[Parameter] public Server.Session Session { get; set; } = new Server.Session();
 	Server.DisplayablePlayer[]? Players = null;
 	PlayersPower[]? PowersArray = null;
 	protected override async Task OnInitializedAsync()
 	{
 		Players = await http.GetJsonAsync<Server.DisplayablePlayer[]>("api/Player/Display");
-		PowersArray = (await http.GetJsonAsync<PlayersPower[]>("api/Powers/List"));
+		PowersArray = await http.PostJsonResponseAsync<int, PlayersPower[]>("api/Powers/List", Session.G);
 	}
 }
 <nav>

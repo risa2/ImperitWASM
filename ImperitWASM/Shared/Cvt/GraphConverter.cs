@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImperitWASM.Shared.State;
 
-namespace ImperitWASM.Shared.Conversion
+namespace ImperitWASM.Shared.Cvt
 {
 	public class GraphConverter : JsonConverter<Graph>
 	{

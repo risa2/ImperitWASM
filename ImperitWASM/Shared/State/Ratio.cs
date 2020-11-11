@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Conversion.RatioConverter))]
+	[JsonConverter(typeof(Cvt.RatioConverter))]
 	public readonly struct Ratio : IEquatable<Ratio>, IComparable<Ratio>
 	{
 		static readonly Random rng = new Random();

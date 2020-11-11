@@ -16,11 +16,11 @@
 		await LogoutAsync!();
 	}
 
-	Data.PlayerFullInfo[]? PlayerInfos = null;
+	Data.PlayerInfo[]? PlayerInfos = null;
 	Data.ProvinceInstability[]? Instabilities = null;
 	protected override async Task OnInitializedAsync()
 	{
-		PlayerInfos = await http.GetJsonAsync<Data.PlayerFullInfo[]>("api/Player/Infos");
+		PlayerInfos = await http.GetJsonAsync<Data.PlayerInfo[]>("api/Player/Infos");
 		Instabilities = await http.GetJsonAsync<Data.ProvinceInstability[]>("api/Provinces/Instabilities");
 	}
 }

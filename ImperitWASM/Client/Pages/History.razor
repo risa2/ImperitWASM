@@ -3,16 +3,16 @@
 @code {
 	[Parameter] public Func<Task>? ReturnAsync { get; set; }
 	ImmutableArray<int> Finished;
-	protected override async Task OnInitializedAsync() 
+	protected override async Task OnInitializedAsync()
 	{
 		Finished = await http.GetJsonAsync<ImmutableArray<int>>("api/Game/Finished");
 	}
 	Data.Int model = new Data.Int();
-	ImmutableArray<Data.DisplayablePlayer> Former;
+	ImmutableArray<Data.ColoredHuman> Former;
 	ImmutableArray<PlayersPower> Powers;
 	async Task UpdateHistoryGraphs()
 	{
-		Former = await http.PostJsonResponseAsync<int, ImmutableArray<Data.DisplayablePlayer>>("api/Player/Display", model.Value);
+		Former = await http.PostJsonResponseAsync<int, ImmutableArray<Data.ColoredHuman>>("api/Player/Colored", model.Value);
 		Powers = await http.PostJsonResponseAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", model.Value);
 	}
 }
@@ -23,7 +23,7 @@
 <main>
 	@if (Finished.IsDefaultOrEmpty)
 	{
-		<p>V historii momentálně nejsou uložené žádné odehrané hry.</p>
+		<p>V historii nejsou uložené žádné odehrané hry</p>
 	}
 	else
 	{

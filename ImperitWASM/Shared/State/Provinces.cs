@@ -11,11 +11,11 @@ namespace ImperitWASM.Shared.State
 		readonly ImmutableArray<Province> provinces;
 		readonly Graph graph;
 		readonly ImmutableDictionary<Province, int> lookup;
-		public Provinces(ImmutableArray<Province> provinces, Graph graph, ImmutableDictionary<Province, int> lookup)
+		public Provinces(ImmutableArray<Province> provinces, Graph graph, ImmutableDictionary<Province, int>? lookup = null)
 		{
 			this.provinces = provinces;
 			this.graph = graph;
-			this.lookup = lookup;
+			this.lookup = lookup ?? provinces.Lookup();
 		}
 		public Provinces With(ImmutableArray<Province> new_provinces) => new Provinces(new_provinces, graph, lookup);
 		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty)

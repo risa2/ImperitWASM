@@ -12,7 +12,8 @@ namespace ImperitWASM.Server.Services
 	public interface INewGame
 	{
 		Color NextColor(int gameId);
-		Task StartAsync(int gameId);
+		Task<int> CreateAsync();
+		Task StartAllAsync();
 		Task FinishAsync(int gameId);
 		Task RegisterAsync(int gameId, string name, Password password, int land);
 	}
@@ -42,21 +43,29 @@ namespace ImperitWASM.Server.Services
 		{
 			RemainingStarts(gameId, players).Each((start, i) => pap.Add(gameId, GetRobot(players.Length, i, start.l.Earnings), start.l.Soldiers, start.i));
 		}
-		public Color NextColor(int gameId) => ColorAt(pap.PlayersCount(gameId) - 1);
-		public Task StartAsync(int gameId)
+		public async Task<int> CreateAsync()
 		{
-			AddRobots(gameId, pap.Players(gameId));
-			pap.ResetActive(gameId);
-			game.Start(gameId);
-			powers.Add(gameId);
-			game.RemoveOld(TimeSpan.FromHours(6));
+			int gameId = game.Create();
+			pap.AddPaP(gameId, new PlayersAndProvinces(ImmutableArray.Create(new Savage() as Player), cfg.Settings.Provinces));
+			game.RemoveOld(TimeSpan.FromDays(1));
+			await ctx.SaveAsync();
+			return gameId;
+		}
+		public Color NextColor(int gameId) => ColorAt(pap.PlayersCount(gameId) - 1);
+		public Task StartAllAsync()
+		{
+			foreach (int gameId in game.ShouldStart)
+			{
+				AddRobots(gameId, pap.Players(gameId));
+				pap.ResetActive(gameId);
+				game.Start(gameId);
+				powers.Add(gameId);
+			}
 			return ctx.SaveAsync();
 		}
 		public Task FinishAsync(int gameId)
 		{
 			game.Finish(gameId);
-			game.RemoveOld(TimeSpan.FromHours(6));
-			pap.AddPaP(game.Create(), pap[gameId].RemovePlayers(new Savage()));
 			return ctx.SaveAsync();
 		}
 		public Task RegisterAsync(int gameId, string name, Password password, int land)

@@ -1,25 +1,26 @@
-﻿using ImperitWASM.Shared.State;
-
-namespace ImperitWASM.Client.Data
+﻿namespace ImperitWASM.Client.Data
 {
-	public class BasicInfo
+	public class PlayerInfo
 	{
-		public BasicInfo(int player, Color color, bool isGameActive, int activePlayer)
+		public PlayerInfo() { }
+		public PlayerInfo(int id, bool real, string name, string color, bool alive, int money, int income, int debt)
 		{
-			A = player == activePlayer;
-			B = color;
-			C = isGameActive;
-			D = activePlayer;
+			Id = id;
+			Display = real;
+			Name = name;
+			Color = color;
+			Alive = alive;
+			Money = money;
+			Income = income;
+			Debt = debt;
 		}
-		public BasicInfo() { }
-		public bool A { get; set; }
-		public Color B { get; set; }
-		public bool C { get; set; }
-		public int D { get; set; }
-		public bool IsActive => A;
-		public Color Color => B;
-		public bool IsGameActive => C;
-		public int ActivePlayer => D;
-
+		public int Id { get; set; }
+		public bool Display { get; set; }
+		public string Name { get; set; } = "";
+		public string Color { get; set; } = "";
+		public bool Alive { get; set; }
+		public int Money { get; set; }
+		public int Income { get; set; }
+		public int Debt { get; set; }
 	}
 }

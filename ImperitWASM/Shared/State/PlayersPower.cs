@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Conversion.PlayersPowerConverter))]
+	[JsonConverter(typeof(Cvt.PlayersPowerConverter))]
 	public class PlayersPower : IReadOnlyList<PlayerPower>
 	{
 		readonly ImmutableArray<PlayerPower> arr;

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Conversion.ColorConverter))]
+	[JsonConverter(typeof(Cvt.ColorConverter))]
 	public readonly struct Color : IEquatable<Color>
 	{
 		static string ToHex(byte num) => num.ToString("x2", CultureInfo.InvariantCulture);

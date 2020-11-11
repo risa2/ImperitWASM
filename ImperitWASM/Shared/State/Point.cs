@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Conversion.PointConverter))]
+	[JsonConverter(typeof(Cvt.PointConverter))]
 	public readonly struct Point : System.IEquatable<Point>, System.IComparable<Point>
 	{
 		public readonly double x, y;

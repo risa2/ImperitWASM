@@ -18,7 +18,7 @@
 	ImmutableArray<Data.PlayerId> Players;
 	protected override async Task OnInitializedAsync()
 	{
-		Players = await http.GetJsonAsync<ImmutableArray<Data.PlayerId>>("api/Player/Players");
+		Players = await http.GetJsonAsync<ImmutableArray<Data.PlayerId>>("api/Player/Login");
 	}
 }
 <NavMenu Options="Přihlášení;Registrace;Historie" OnClick="i => Set((Mode)i)"/>
@@ -26,6 +26,10 @@
 	@if (Wrong)
 	{
 		<p>Buď to nejsi ty (máš hlad?), nebo to není tvoje heslo</p>
+	}
+	else if (!Players.IsDefault && Players.IsEmpty)
+	{
+		<p>Neprobíhá žádná hra, do níž by ses mohl přihlásit</p>
 	}
 	else
 	{

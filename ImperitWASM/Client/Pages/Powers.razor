@@ -3,11 +3,11 @@
 @code{
 	[Parameter] public Action Return { get; set; } = (() => { });
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	Data.DisplayablePlayer[]? Players = null;
+	Data.ColoredHuman[]? Players = null;
 	PlayersPower[]? PowersArray = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Players = await http.PostJsonResponseAsync<int, Data.DisplayablePlayer[]>("api/Player/Display", Session.G);
+		Players = await http.PostJsonResponseAsync<int, Data.ColoredHuman[]>("api/Player/Colored", Session.G);
 		PowersArray = (await http.PostJsonResponseAsync<int, PlayersPower[]>("api/Powers/List", Session.G));
 	}
 }

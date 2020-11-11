@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Conversion.SoldierTypeConverter))]
+	[JsonConverter(typeof(Cvt.SoldierTypeConverter))]
 	public abstract class SoldierType : IEquatable<SoldierType>, IComparable<SoldierType>
 	{
 		public abstract Description Description { get; }

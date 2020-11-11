@@ -16,6 +16,6 @@
 			return from is Land && to is Land && pap.Passable(from, to, Speed, (_, dest) => Difficulty(dest)) ? Weight + Capacity : 0;
 		}
 		public override int CanSustain(Province province) => province is Land ? Capacity + Weight : 0;
-		public override bool IsRecruitable(Province province) => province is Outland o && o.CanRecruit(this);
+		public override bool IsRecruitable(Province province) => province is Land o && o.CanRecruit(this);
 	}
 }

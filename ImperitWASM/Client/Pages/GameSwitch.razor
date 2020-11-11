@@ -25,13 +25,13 @@
 		}
 		else
 		{
-			Info = await http.PostJsonResponseAsync<int, Data.BasicInfo>("api/Game/Info", Session.U);
+			Info = await http.PostJsonResponseAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
 			Map?.Update();
 		}
 	}
 	async Task CheckSession()
 	{
-		Info = await http.PostJsonResponseAsync<int, Data.BasicInfo>("api/Game/Info", Session.U);
+		Info = await http.PostJsonResponseAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
 		if (!Info.IsGameActive)
 		{
 			await LogoutAsync!();

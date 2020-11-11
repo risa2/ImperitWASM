@@ -21,7 +21,7 @@
 	public async Task Update()
 	{
 		PowersCount = await http.PostJsonResponseAsync<int, int>("api/Powers/Count", Session.G);
-		PlayerMoney = await http.PostJsonResponseAsync<Data.PlayerKey, int>("api/Player/Money", new Data.PlayerKey(Session.U, Session.G));
+		PlayerMoney = await http.PostJsonResponseAsync<Data.Session, int>("api/Player/Money", Session);
 		UpdateProvinces!(await http.PostJsonResponseAsync<int, Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
 		this.StateHasChanged();
 	}

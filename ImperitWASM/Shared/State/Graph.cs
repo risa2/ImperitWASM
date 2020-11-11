@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Conversion.GraphConverter))]
+	[JsonConverter(typeof(Cvt.GraphConverter))]
 	public class Graph : IReadOnlyList<IEnumerable<int>>
 	{
 		readonly int[] edges, starts;

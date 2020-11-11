@@ -26,6 +26,6 @@ namespace ImperitWASM.Server.Services
 		public List<PlayersPower> Get(int gameId) => ctx.GetPlayersPowers(gameId);
 		public void Add(int gameId) => ctx.AddPlayersPower(gameId, PlayersPower.Compute(pap[gameId]));
 		public int Count(int gameId) => ctx.CountPlayersPowers(gameId);
-		public ImmutableDictionary<int, ImmutableArray<PlayersPower>> All => ctx.PlayerPowers.GroupBy(p => p.EntityGameId).ToImmutableDictionary(pps => pps.Key, pps => EntityPlayerPower.ConvertMore(pps));
+		public ImmutableDictionary<int, ImmutableArray<PlayersPower>> All => ctx.PlayerPowers.GroupBy(p => p.GameId).ToImmutableDictionary(pps => pps.Key, pps => EntityPlayerPower.ConvertMore(pps));
 	}
 }

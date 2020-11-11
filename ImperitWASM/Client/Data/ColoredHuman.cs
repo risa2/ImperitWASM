@@ -2,12 +2,12 @@
 
 namespace ImperitWASM.Client.Data
 {
-	public class DisplayablePlayer
+	public class ColoredHuman
 	{
 		public string Name { get; set; } = "";
 		public Color Color { get; set; }
-		public DisplayablePlayer() { }
-		public DisplayablePlayer(string name, Color color)
+		public ColoredHuman() { }
+		public ColoredHuman(string name, Color color)
 		{
 			Name = name;
 			Color = color;

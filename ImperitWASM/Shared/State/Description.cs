@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Conversion.DescriptionConverter))]
+	[JsonConverter(typeof(Cvt.DescriptionConverter))]
 	public class Description : IEquatable<Description>
 	{
 		public readonly string Name, Text, Symbol;

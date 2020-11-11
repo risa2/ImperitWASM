@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Conversion.ShapeConverter))]
+	[JsonConverter(typeof(Cvt.ShapeConverter))]
 	public class Shape : IEnumerable<Point>
 	{
 		readonly ImmutableArray<Point> border;

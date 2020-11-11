@@ -21,14 +21,14 @@ namespace ImperitWASM.Server.Services
 			var buf = new byte[64];
 			rng.NextBytes(buf);
 			var key = Convert.ToBase64String(buf).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-			var s = ctx.Sessions.Add(new EntitySession { EntityGameId = gameId, PlayerIndex = player, SessionKey = key });
+			var s = ctx.Sessions.Add(new EntitySession { GameId = gameId, PlayerIndex = player, SessionKey = key });
 			await ctx.SaveAsync();
 			return s.Entity.SessionKey;
 		}
-		public bool IsValid(int player, int gameId, string key) => ctx.Sessions.Any(s => s.EntityGameId == gameId && s.PlayerIndex == player && s.SessionKey == key);
+		public bool IsValid(int player, int gameId, string key) => ctx.Sessions.Any(s => s.GameId == gameId && s.PlayerIndex == player && s.SessionKey == key);
 		public Task Remove(int player, int gameId, string key)
 		{
-			return ctx.Sessions.Remove(ctx.Sessions.FirstOrDefault(s => s.EntityGameId == gameId && s.PlayerIndex == player && s.SessionKey == key)).Context.SaveChangesAsync();
+			return ctx.Sessions.Remove(ctx.Sessions.FirstOrDefault(s => s.GameId == gameId && s.PlayerIndex == player && s.SessionKey == key)).Context.SaveChangesAsync();
 		}
 	}
 }

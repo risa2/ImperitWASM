@@ -15,13 +15,13 @@ namespace ImperitWASM.Server
 		public IConfiguration Configuration { get; }
 		public void ConfigureServices(IServiceCollection services)
 		{
-			string p = System.AppDomain.CurrentDomain.BaseDirectory ?? ".";
 			_ = services.AddControllersWithViews();
 			_ = services.AddRazorPages();
-			_ = services.AddSingleton<IConfig, Config>(s => new Config(new File(p, "Files/Settings.json")))
-					.AddSingleton<ISessionService, SessionService>().AddSingleton<IContextService, ContextService>()
-					.AddSingleton<IPlayersProvinces, PlayersProvinces>().AddSingleton<IPowers, Powers>()
-					.AddSingleton<IGameService, GameService>().AddSingleton<IActive, Active>()
+			_ = services.AddDbContext<Context>()
+					.AddSingleton<IConfig, Config>(s => new Config(new File(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Settings.json")))
+					.AddTransient<IContextService, ContextService>().AddTransient<ISessionService, SessionService>()
+					.AddTransient<IPlayersProvinces, PlayersProvinces>().AddTransient<IPowers, Powers>()
+					.AddTransient<IGameService, GameService>().AddTransient<IActive, Active>()
 					.AddTransient<INewGame, GameCreator>().AddTransient<IEndOfTurn, EndOfTurn>();
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

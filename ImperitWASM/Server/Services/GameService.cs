@@ -16,7 +16,7 @@ namespace ImperitWASM.Server.Services
 		int[] StartedGames { get; }
 		int[] ShouldStart { get; }
 		int[] FinishedGames { get; }
-		int RegistrableGame { get; }
+		int? RegistrableGame { get; }
 	}
 	public class GameService : IGameService
 	{
@@ -27,7 +27,7 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 			this.cfg = cfg;
 		}
-		public int Create() => ctx.Games.Add(EntityGame.Create).Entity.Id;
+		public int Create() => ctx.Games.Add(Game.Create).Entity.Id;
 		public void RemoveOld(TimeSpan period) => ctx.Games.RemoveAt(g => g.Finished && DateTime.UtcNow - g.LastChange >= period);
 		public void Start(int gameId) => ctx.Games.UpdateAt(gameId, g => g.Start());
 		public void Finish(int gameId) => ctx.Games.UpdateAt(gameId, g => g.Finish());
@@ -37,6 +37,6 @@ namespace ImperitWASM.Server.Services
 		public int[] ShouldStart => ctx.Games.Where(g => g.Countdown && cfg.Settings.CountdownElapsed(g.LastChange)).Select(g => g.Id).ToArray();
 		public int[] StartedGames => ctx.Games.Where(g => g.Started).Select(g => g.Id).ToArray();
 		public int[] FinishedGames => ctx.Games.Where(g => g.Finished).Select(g => g.Id).ToArray();
-		public int RegistrableGame => ctx.Games.First(g => g.Countdown || g.Created).Id;
+		public int? RegistrableGame => ctx.Games.FirstOrDefault(g => g.Countdown || g.Created)?.Id;
 	}
 }

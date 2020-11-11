@@ -37,7 +37,7 @@ namespace ImperitWASM.Server.Services
 		public void Add(int gameId, Player player, Soldiers soldiers, int start)
 		{
 			Add(gameId, player);
-			var province = ctx.Provinces.Single(p => p.EntityGameId == gameId && p.Index == start);
+			var province = ctx.Provinces.Single(p => p.GameId == gameId && p.Index == start);
 			province.EntitySoldier = EntitySoldier.From(soldiers, cfg.Settings.SoldierTypeIndices);
 		}
 		public void Add(int gameId, Player player) => ctx.Players.Add(EntityPlayer.From(player, PlayersCount(gameId), gameId));
@@ -55,11 +55,11 @@ namespace ImperitWASM.Server.Services
 			return pap;
 		}
 		public void ResetActive(int gameId) => active[gameId] = GetNextActive(gameId, 0);
-		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).Single(p => p.Index == i && p.EntityGameId == gameId).Convert(cfg.Settings);
+		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).Single(p => p.Index == i && p.GameId == gameId).Convert(cfg.Settings);
 		public Player Active(int gameId) => Player(gameId, ctx.Games.Find(gameId).Active);
 		int GetNextActive(int gameId, int active)
 		{
-			return ctx.Players.Where(p => p.EntityGameId == gameId && p.Alive && p.Type == "H").Select(p => p.Index).OrderBy(i => i).ToArray().FirstIfOrFirst(i => i > active);
+			return ctx.Players.Where(p => p.GameId == gameId && p.Alive && p.Type == EntityPlayer.Kind.Human).Select(p => p.Index).OrderBy(i => i).ToArray().FirstIfOrFirst(i => i > active);
 		}
 		public PlayersAndProvinces this[int gameId]
 		{
@@ -72,7 +72,7 @@ namespace ImperitWASM.Server.Services
 			set => ctx.SetPlayers(gameId, value.Players).SetProvinces(gameId, value.Provinces);
 		}
 		public void AddPaP(int gameId, PlayersAndProvinces pap) => ctx.AddPlayers(gameId, pap.Players).AddProvinces(gameId, pap.Provinces);
-		public int PlayersCount(int gameId) => ctx.Players.Count(p => p.EntityGameId == gameId);
+		public int PlayersCount(int gameId) => ctx.Players.Count(p => p.GameId == gameId);
 		public ImmutableArray<Player> Players(int gameId) => ctx.GetPlayers(gameId);
 	}
 }

@@ -2,7 +2,17 @@
 	[Parameter] public string Options { get; set; } = "";
 	[Parameter] public int Selected { get; set; } = 0;
 	[Parameter] public Action<int> OnClick { get; set; } = x => { };
+	[Parameter] public Color SelBg { get; set; } = new Color(85, 238, 255);
 }
+<style>
+	nav > a:hover {
+		background-color: @SelBg.WithAlpha(100);
+	}
+	nav > a.this {
+		background-color: @SelBg;
+		color: #000;
+	}
+</style>
 <nav>
 	@foreach (var (option, i) in Options.Split(';').Select((v, i) => (v, i)))
 	{

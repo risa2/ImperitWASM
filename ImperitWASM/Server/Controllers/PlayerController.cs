@@ -35,7 +35,7 @@ namespace ImperitWASM.Server.Controllers
 		public async Task<IEnumerable<Client.Data.PlayerId>> Login()
 		{
 			await newGame.StartAllAsync();
-			return ctx.Players.Include(p => p.Game).Where(p => p.Type == EntityPlayer.Kind.Human && p.Game.Started).Select(p => new Client.Data.PlayerId(p.Index, p.GameId, p.Name));
+			return ctx.Players.Include(p => p.Game).Where(p => p.Type == EntityPlayer.Kind.Human && p.Game.Current == Game.State.Started).Select(p => new Client.Data.PlayerId(p.Index, p.GameId, p.Name));
 		}
 		[HttpPost("Money")]
 		public int Money([FromBody] Client.Data.Session ses)

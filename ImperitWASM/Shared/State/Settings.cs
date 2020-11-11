@@ -39,7 +39,6 @@ namespace ImperitWASM.Shared.State
 		}
 		public Ratio Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
-		public bool CountdownElapsed(DateTime start) => DateTime.UtcNow - start >= CountdownTime;
 		public Provinces Provinces => new Provinces(ProvinceData.Select(p => p.Build(this, new Savage())).ToImmutableArray(), Graph);
 	}
 }

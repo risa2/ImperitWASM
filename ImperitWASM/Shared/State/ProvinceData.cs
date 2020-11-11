@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Serialization;
 using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
+	[JsonConverter(typeof(Cvt.ProvinceDataConverter))]
 	public class ProvinceData
 	{
 		public enum Kind { Land, Sea, Mountains }

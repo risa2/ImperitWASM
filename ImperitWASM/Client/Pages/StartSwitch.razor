@@ -1,0 +1,29 @@
+﻿@inject ImperitClient http;
+
+@code{
+	[Parameter] public Func<int, int, string, Task<bool>>? LoginAsync { get; set; }
+	public enum Mode { Login, Registration, History }
+	Mode mode = Mode.Login;
+	void Set(Mode new_mode)
+	{
+		mode = new_mode;
+		this.StateHasChanged();
+	}
+	async Task ReturnAsync()
+	{
+		await this.OnInitializedAsync();
+		Set(Mode.Login);
+	}
+}
+@if (mode == Mode.Login)
+{
+	<Login Set="Set" LoginAsync="LoginAsync!"/>
+}
+else if (mode == Mode.Registration)
+{
+	<Registration ReturnAsync="ReturnAsync"/>
+}
+else
+{
+	<History ReturnAsync="ReturnAsync"/>
+}

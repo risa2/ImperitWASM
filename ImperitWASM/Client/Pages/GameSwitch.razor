@@ -1,0 +1,100 @@
+@inject ImperitClient http;
+
+@using Mode = Data.Switch.Mode;
+
+@code{
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
+	[Parameter] public Func<Task>? LogoutAsync { get; set; }
+	Mode Current;
+	int? From = null, To = null;
+	(int, int, string)? Player = null;
+	void Switch(Mode mode = Mode.Map, int? from = null, int? to = null, (int, int, string)? player = null)
+	{
+		Current = mode;
+		From = from;
+		To = to;
+		Player = player;
+		this.StateHasChanged();
+	}
+	GameMap? Map { get; set; }
+	async Task NextTurnAsync()
+	{
+		if (await http.PostJsonResponseAsync<Data.Session, bool>("api/Game/NextTurn", Session))
+		{
+			await LogoutAsync!();
+		}
+		else
+		{
+			Info = await http.PostJsonResponseAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
+			Map?.Update();
+		}
+	}
+	async Task CheckSession()
+	{
+		Info = await http.PostJsonResponseAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
+		if (!Info.IsGameActive)
+		{
+			await LogoutAsync!();
+		}
+	}
+	Data.BasicInfo Info = new Data.BasicInfo(0, new Color(), true, 1);
+	Data.DisplayableShape[]? Provinces = null;
+	System.Timers.Timer? timer = null;
+	protected override async Task OnInitializedAsync()
+	{
+		await CheckSession();
+		Provinces = await http.PostJsonResponseAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", Session.G);
+		timer = new System.Timers.Timer(400);
+		timer.Elapsed += async (sender, e) => await CheckSession();
+		timer.Start();
+	}
+	public void UpdateProvinces(Data.ProvinceVariables[] variables)
+	{
+		if (Provinces != null && variables.Length <= Provinces.Length)
+		{
+			variables.Each((variable, i) => (Provinces[i].F, Provinces[i].T) = (variable.F, variable.T));
+		}
+	}
+}
+
+<style>
+	nav > a:hover {
+		background-color: @Info.Color.WithAlpha(96);
+	}
+	nav > a.this {
+		background-color: @Info.Color;
+	}
+</style>
+
+@if (Current == Mode.Map)
+{
+	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+}
+else if (Current == Mode.Preview)
+{
+	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+}
+else if (Current == Mode.Donation && Player is (int Money, int Recipient, string Name))
+{
+	<Donation Session="Session" Recipient="Recipient" RecipientName="@Name" Return="() => Switch()" PlayerMoney="Money"/>
+}
+else if (Current == Mode.Move && From is int from && To is int to)
+{
+	<Move Session="Session" From="from" To="to" Return="() => Switch()"/>
+}
+else if (Current == Mode.Players)
+{
+	<Players Session="Session" Switch="Switch" LogoutAsync="LogoutAsync!"/>
+}
+else if (Current == Mode.Powers)
+{
+	<Powers Return="() => Switch()" Session="Session"/>
+}
+else if (Current == Mode.Purchase && From is int from2)
+{
+	<Purchase Session="Session" Land="from2" Return="() => Switch()"/>
+}
+else if (Current == Mode.Recruit && From is int from3)
+{
+	<Recruitment Session="Session" Land="from3" Switch="x => Switch(x, null, null, null)"/>
+}

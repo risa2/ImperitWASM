@@ -1,0 +1,39 @@
+@inject ImperitClient http;
+
+@code{
+	[Parameter] public Action Return { get; set; } = (() => { });
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
+	[Parameter] public int Land { get; set; }
+	async Task DoPurchase()
+	{
+		await http.PostJsonAsync<Data.PurchaseCmd>("api/Command/Purchase", new Data.PurchaseCmd(Session.U, Session.I, Land, Session.G));
+		Return();
+	}
+	Data.PurchaseInfo? Info = null;
+	protected override async Task OnInitializedAsync()
+	{
+		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.CmdData(Session.U, Land, Session.G));
+		if (!Info.Possible)
+		{
+			Return();
+		}
+	}
+}
+<nav>
+	<a @onclick="Return">Zrušit</a>
+	<a class="this">Koupě</a>
+</nav>
+<main>
+	@if (Info is Data.PurchaseInfo)
+	{
+		@if (Info.Price > Info.Money)
+		{
+			<p>@Info.Name stojí @Info.Price@Sym.Money, chceš si půjčit @(Info.Price - Info.Money)@Sym.Money a koupit?</p>
+		}
+		else
+		{
+			<p>@Info.Name stojí @Info.Price@Sym.Money</p>
+		}
+		<button @onclick="DoPurchase">Koupit</button>
+	}
+</main>

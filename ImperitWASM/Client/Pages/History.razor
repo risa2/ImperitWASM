@@ -1,0 +1,38 @@
+﻿@inject ImperitClient http;
+
+@code {
+	[Parameter] public Func<Task>? ReturnAsync { get; set; }
+	ImmutableArray<int> Finished;
+	protected override async Task OnInitializedAsync()
+	{
+		Finished = await http.GetJsonAsync<ImmutableArray<int>>("api/Game/Finished");
+	}
+	Data.Int model = new Data.Int();
+	ImmutableArray<Data.ColoredHuman> Former;
+	ImmutableArray<PlayersPower> Powers;
+	async Task UpdateHistoryGraphs()
+	{
+		Former = await http.PostJsonResponseAsync<int, ImmutableArray<Data.ColoredHuman>>("api/Player/Colored", model.Value);
+		Powers = await http.PostJsonResponseAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", model.Value);
+	}
+}
+<nav>
+	<a @onclick="ReturnAsync">Zpět</a>
+	<a class="this">Historie</a>
+</nav>
+<main>
+	@if (Finished.IsDefaultOrEmpty)
+	{
+		<p>V historii nejsou uložené žádné odehrané hry</p>
+	}
+	else
+	{
+		<EditForm Model="model" OnSubmit="UpdateHistoryGraphs">
+			<DataAnnotationsValidator/><ValidationSummary/>
+			<p>Hra:</p>
+			<IntSelect @bind-Value="model.Value" Options="Finished" Id="g => g" Name="g => g.ToString()"/><br/>
+			<button type="submit">Zobrazit</button>
+		</EditForm>
+		<PowerGraphs Players="Former" Powers="Powers"/>
+	}
+</main>

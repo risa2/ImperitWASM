@@ -1,0 +1,48 @@
+@inject ImperitClient http;
+
+@using Mode = StartSwitch.Mode; 
+
+@code{
+	[Parameter] public Func<int, int, string, Task<bool>>? LoginAsync { get; set; }
+	[Parameter] public Action<Mode> Set { get; set; } = x => { };
+	Data.Login model = new Data.Login();
+	bool Wrong = false;
+	async Task LoginAction()
+	{
+		if(!await LoginAsync!(model.I, model.G, model.P))
+		{
+			Wrong = true;
+			model.P = "";
+		}
+	}
+	ImmutableArray<Data.PlayerId> Players;
+	protected override async Task OnInitializedAsync()
+	{
+		Players = await http.GetJsonAsync<ImmutableArray<Data.PlayerId>>("api/Player/Login");
+	}
+}
+<NavMenu Options="Přihlášení;Registrace;Historie" OnClick="i => Set((Mode)i)"/>
+<main>
+	@if (Wrong)
+	{
+		<p>Buď to nejsi ty (máš hlad?), nebo to není tvoje heslo</p>
+	}
+	else if (!Players.IsDefault && Players.IsEmpty)
+	{
+		<p>Neprobíhá žádná hra, do níž by ses mohl přihlásit</p>
+	}
+	else
+	{
+		<EditForm Model="model" OnSubmit="LoginAction">
+			<DataAnnotationsValidator/><ValidationSummary/>
+			<p>Hráč:</p>
+			@if (!Players.IsDefaultOrEmpty)
+			{
+				<IntSelect @bind-Value="model.I" Options="Players" Id="p => p.I" Name="@(p => p.N + "(hra " + p.G + ")" )"/><br/>
+			}
+			<p>Heslo:</p><InputText type="password" @bind-Value="model.P"/><br/>
+			<button type="submit">Přihlásit se</button>
+		</EditForm>
+	}
+	
+</main>

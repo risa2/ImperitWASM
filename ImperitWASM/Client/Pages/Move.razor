@@ -1,0 +1,67 @@
+@inject ImperitClient http;
+
+@code{
+	public enum Errors { Ok, FewSoldiers, LittleCapacity, NotPlaying, Else }
+	Errors error = Errors.Ok;
+	[Parameter] public Action Return { get; set; } = (() => { });
+	[Parameter] public int From { get; set; }
+	[Parameter] public int To { get; set; }
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
+	Data.Move model = new Data.Move();
+	Data.MoveInfo? Info = null;
+	protected override async Task OnInitializedAsync()
+	{
+		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.MoveInfo>("api/Command/MoveInfo", new Data.CmdData(From, To, Session.G));
+		model.Soldiers = Data.Int.Array(Info.Soldiers.Length);
+		if (!Info.Possible)
+		{
+			Return();
+		}
+	}
+	async Task DoMove()
+	{
+		error = await http.PostJsonResponseAsync<Data.MoveCmd, Errors>("api/Command/Move", new Data.MoveCmd(Session.U, Session.I, From, To, model.Soldiers.Select(s => s.Value).ToArray(), Session.G));
+		if (error == Errors.Ok || error == Errors.NotPlaying)
+		{
+			Return();
+		}
+	}
+	SoldierTypeInfobox? infobox;
+}
+<nav>
+	<a @onclick="Return">Zrušit</a>
+	<a class="this">Manévry</a>
+</nav>
+<main>
+	<SoldierTypeInfobox @ref="infobox" />
+	@if (error == Errors.FewSoldiers)
+	{
+		<p>V počáteční provincii není dostatek vojáků</p>
+	}
+	else if (error == Errors.LittleCapacity)
+	{
+		<p>Vojsko není přesunu schopné</p>
+	}
+	else if (error == Errors.Else)
+	{
+		<p>Přesun není možný</p>
+	}
+	@if (Info is Data.MoveInfo)
+	{
+		<EditForm Model="@model" OnValidSubmit="DoMove">
+			<DataAnnotationsValidator /><ValidationSummary />
+			<p>Začátek: @(Info.FromName) @Info.FromSoldiers</p>
+			<p>Cíl: @(Info.ToName) @Info.ToSoldiers</p>
+			<table>
+				@foreach (var (i, type) in Info.Soldiers.Try().Index())
+				{
+					<tr>
+						<td>@type.Name<sup @onclick="() => infobox?.Open(type)">?</sup></td>
+						<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>
+					</tr>
+				}
+				<tr><td></td><td><button type="submit">Přesunout</button></td></tr>
+			</table>
+		</EditForm>
+	}
+</main>

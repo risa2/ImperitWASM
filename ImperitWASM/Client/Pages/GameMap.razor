@@ -1,0 +1,57 @@
+@inject ImperitClient http;
+
+@using Mode = Data.Switch.Mode;
+
+@code{
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
+	[Parameter] public bool IsActive { get; set; }
+	[Parameter] public Action<Mode, int?, int?> Switch { get; set; } = ((a, x, y) => { });
+	[Parameter] public bool Preview { get; set; }
+	[Parameter] public Func<Task>? LogoutAsync { get; set; }
+	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
+	[Parameter] public Data.DisplayableShape[]? Provinces { get; set; }
+	[Parameter] public Action<Data.ProvinceVariables[]>? UpdateProvinces { get; set; }
+	async Task<int?> OnClick(int clicked, int? from)
+	{
+		var r = await http.PostJsonResponseAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.U, from, clicked, Session.G));
+		Switch(r.M, r.F, r.T);
+		return r.S;
+	}
+	int PowersCount = 0, PlayerMoney = 0;
+	public async Task Update()
+	{
+		PowersCount = await http.PostJsonResponseAsync<int, int>("api/Powers/Count", Session.G);
+		PlayerMoney = await http.PostJsonResponseAsync<Data.Session, int>("api/Player/Money", Session);
+		UpdateProvinces!(await http.PostJsonResponseAsync<int, Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
+		this.StateHasChanged();
+	}
+	protected override Task OnInitializedAsync() => Update();
+}
+<nav>
+	@if (Preview)
+	{
+		<a @onclick="() => Switch(Mode.Map, null, null)">Zpět</a>
+		<a class="this">Náhled</a>
+	}
+	else
+	{
+		@if (IsActive)
+		{
+			<a @onclick="NextTurnAsync">Konec</a>
+		}
+		else
+		{
+			<a @onclick="LogoutAsync">Odhlášení</a>
+		}
+		<a class="this">Imperit</a>
+		<a @onclick="() => Switch(Mode.Players, null, null)">@(PlayerMoney)@Sym.Money</a>
+		<a @onclick="() => Switch(Mode.Preview, null, null)">Náhled</a>
+		@if (PowersCount > 2)
+		{
+			<a @onclick="() => Switch(Mode.Powers, null, null)">Výsledky</a>
+		}
+	}
+</nav>
+<main>
+	<Map Width="1000" Height="1000" Provinces="Provinces" Select="OnClick" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" />
+</main>

@@ -1,0 +1,46 @@
+@inject ImperitClient http;
+
+@code{
+	[Parameter] public Func<Task>? ReturnAsync { get; set; }
+	string Username { get; set; } = "";
+	string Password { get; set; } = "";
+	int? Selected = null, GameId = null;
+	ImmutableArray<Data.DisplayableShape> Provinces;
+	Color NextColor;
+	async Task OnSubmit()
+	{
+		if (Selected is int selected && GameId is int gameId && await http.PostJsonResponseAsync<Data.RegisteredPlayer, bool>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, selected, gameId)))
+		{
+			await ReturnAsync!();
+		}
+	}
+	protected override async Task OnInitializedAsync()
+	{
+		GameId = await http.GetJsonAsync<int>("api/Game/RegistrableGame");
+		NextColor = await http.PostJsonResponseAsync<int, Color>("api/Game/NextColor", GameId.Value);
+		Provinces = (await http.PostJsonResponseAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", GameId.Value)).Select(s => s.UpdateText()).ToImmutableArray();
+	}
+	#pragma warning disable 1998
+	async Task<int?> Select(int i, int? from)
+	{
+		if (Provinces![i].R)
+		{
+			Selected = i;
+		}
+		return Selected;
+	}
+}
+<nav>
+	<a @onclick="ReturnAsync">Zpět</a>
+	<a class="this">Registrace</a>
+	<a @onclick="OnSubmit">Potvrdit</a>
+</nav>
+<main>
+	<p>Jméno:</p><p><input type="text" @bind-value="Username"/></p>
+	<p>Heslo:</p><p><input type="password" @bind-value="Password"/></p>
+	<p>Vyber si zemi, kde budeš začínat:</p>
+	@if (!Provinces.IsDefaultOrEmpty)
+	{
+		<Map Width="1000" Height="1000" Provinces="Provinces" SelectedColor="NextColor" Select="Select" FontSize="9" />
+	}
+</main>

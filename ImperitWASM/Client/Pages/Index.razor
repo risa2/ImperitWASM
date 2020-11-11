@@ -1,0 +1,39 @@
+﻿@page "/"
+
+@inject ImperitClient http;
+@inject SessionService cookies;
+
+@code{
+	Data.Session? LoggedIn = null;
+	async Task<bool> LoginAsync(int player, int gameId, string password)
+	{
+		string? login = (await http.PostJsonResponseAsync<Data.Login, Data.StringValue>("api/Player/Login", new Data.Login(player, gameId, password))).Value;
+		LoggedIn = login is string ? new Data.Session(player, gameId, login) : null;
+		await cookies.SetAsync(LoggedIn);
+		this.StateHasChanged();
+		return LoggedIn != null;
+	}
+	async Task LogoutAsync()
+	{
+		if (LoggedIn != null)
+		{
+			await http.PostJsonAsync<Data.Session>("api/Player/Logout", LoggedIn);
+			await cookies.RemoveAsync();
+			LoggedIn = null;
+			this.StateHasChanged();
+		}
+	}
+	protected override async Task OnInitializedAsync()
+	{
+		LoggedIn = await cookies.GetAsync();
+		LoggedIn = LoggedIn != null && await http.PostJsonResponseAsync<Data.Session, bool>("api/Player/Correct", LoggedIn!) ? LoggedIn : null;
+	}
+}
+@if (LoggedIn != null)
+{
+	<GameSwitch LogoutAsync="LogoutAsync" LoggedIn="LoggedIn"/>
+}
+else
+{
+	<StartSwitch LoginAsync="LoginAsync"/>
+}

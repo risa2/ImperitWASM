@@ -5,7 +5,7 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load
 {
-	public class EntitySoldiers : IEntity<Soldiers, IReadOnlyList<SoldierType>>
+	public class EntitySoldier : IEntity
 	{
 		[Key] public int Id { get; set; }
 		public IEnumerable<EntitySoldierPair>? EntitySoldierPairs { get; set; }
@@ -13,9 +13,9 @@ namespace ImperitWASM.Server.Load
 		{
 			return new Soldiers(EntitySoldierPairs.Select(item => item.Convert(types)));
 		}
-		public static EntitySoldiers From(Soldiers soldiers, IReadOnlyDictionary<SoldierType, int> map)
+		public static EntitySoldier From(Soldiers soldiers, IReadOnlyDictionary<SoldierType, int> map)
 		{
-			return new EntitySoldiers { EntitySoldierPairs = soldiers.Select(s => EntitySoldierPair.From(s, map)) };
+			return new EntitySoldier { EntitySoldierPairs = soldiers.Select(s => EntitySoldierPair.From(s, map)) };
 		}
 	}
 }

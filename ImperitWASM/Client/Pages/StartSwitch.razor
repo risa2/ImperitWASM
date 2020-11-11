@@ -2,41 +2,28 @@
 
 @code{
 	[Parameter] public Func<int, int, string, Task<bool>>? LoginAsync { get; set; }
-	bool IsRegistration = false;
-	void Set(bool mode)
+	public enum Mode { Login, Registration, History }
+	Mode mode = Mode.Login;
+	void Set(Mode new_mode)
 	{
-		IsRegistration = mode;
+		mode = new_mode;
 		this.StateHasChanged();
 	}
 	async Task ReturnAsync()
 	{
 		await this.OnInitializedAsync();
-		Set(false);
+		Set(Mode.Login);
 	}
-	bool? IsActive = null;
-	protected override async Task OnInitializedAsync() => IsActive = await http.GetJsonAsync<bool>("api/Game/IsActive");
 }
-<style>
-	nav > a:hover {
-		background-color: #28a;
-	}
-	nav > a.this {
-		background-color: #5ef;
-		color: #000;
-	}
-</style>
-@if (IsActive is bool isActive)
+@if (mode == Mode.Login)
 {
-	if (isActive)
-	{
-		<Login LoginAsync="LoginAsync!"/>
-	}
-	else if (IsRegistration)
-	{
-		<Registration Return="() => Set(false)"/>
-	}
-	else
-	{
-		<BetweenGames ReturnAsync="ReturnAsync" ToRegistration="() => Set(true)"/>
-	}
+	<Login Set="Set" LoginAsync="LoginAsync!"/>
+}
+else if (mode == Mode.Registration)
+{
+	<Registration ReturnAsync="ReturnAsync"/>
+}
+else
+{
+	<History ReturnAsync="ReturnAsync"/>
 }

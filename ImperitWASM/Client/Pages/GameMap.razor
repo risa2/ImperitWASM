@@ -3,7 +3,7 @@
 @using Mode = Data.Switch.Mode;
 
 @code{
-	[Parameter] public Data.Session LoggedIn { get; set; } = new Data.Session();
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	[Parameter] public bool IsActive { get; set; }
 	[Parameter] public Action<Mode, int?, int?> Switch { get; set; } = ((a, x, y) => { });
 	[Parameter] public bool Preview { get; set; }
@@ -13,16 +13,16 @@
 	[Parameter] public Action<Data.ProvinceVariables[]>? UpdateProvinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
-		var r = await http.PostJsonResponseAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(LoggedIn.U, from, clicked, LoggedIn.G));
+		var r = await http.PostJsonResponseAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.U, from, clicked, Session.G));
 		Switch(r.M, r.F, r.T);
 		return r.S;
 	}
-	int? PowersCount = null, PlayerMoney = 0;
+	int PowersCount = 0, PlayerMoney = 0;
 	public async Task Update()
 	{
-		PowersCount = await http.GetJsonAsync<int>("api/Powers/Count");
-		PlayerMoney = await http.PostJsonResponseAsync<int, int>("api/Player/Money", LoggedIn.U);
-		UpdateProvinces!(await http.GetJsonAsync<Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current"));
+		PowersCount = await http.PostJsonResponseAsync<int, int>("api/Powers/Count", Session.G);
+		PlayerMoney = await http.PostJsonResponseAsync<Data.PlayerKey, int>("api/Player/Money", new Data.PlayerKey(Session.U, Session.G));
+		UpdateProvinces!(await http.PostJsonResponseAsync<int, Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
 		this.StateHasChanged();
 	}
 	protected override Task OnInitializedAsync() => Update();
@@ -46,7 +46,7 @@
 		<a class="this">Imperit</a>
 		<a @onclick="() => Switch(Mode.Players, null, null)">@(PlayerMoney)@Sym.Money</a>
 		<a @onclick="() => Switch(Mode.Preview, null, null)">Náhled</a>
-		@if (PowersCount is int count && count > 2)
+		@if (PowersCount > 2)
 		{
 			<a @onclick="() => Switch(Mode.Powers, null, null)">Výsledky</a>
 		}

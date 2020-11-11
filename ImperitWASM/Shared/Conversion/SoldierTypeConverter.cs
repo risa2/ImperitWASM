@@ -2,7 +2,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImperitWASM.Shared.State;
-using ImperitWASM.Shared.State.Army;
 
 namespace ImperitWASM.Shared.Conversion
 {
@@ -13,10 +12,10 @@ namespace ImperitWASM.Shared.Conversion
 			var e = JsonDocument.ParseValue(ref reader).RootElement;
 			return e.GetProperty("Type").GetString() switch
 			{
-				"E" => new Elephant(JsonSerializer.Deserialize<Description>(e.GetProperty("Description").GetRawText()), e.GetProperty("AttackPower").GetInt32(), e.GetProperty("DefensePower").GetInt32(), e.GetProperty("Weight").GetInt32(), e.GetProperty("Price").GetInt32(), e.GetProperty("Capacity").GetInt32(), e.GetProperty("Speed").GetInt32()),
-				"P" => new Pedestrian(JsonSerializer.Deserialize<Description>(e.GetProperty("Description").GetRawText()), e.GetProperty("AttackPower").GetInt32(), e.GetProperty("DefensePower").GetInt32(), e.GetProperty("Weight").GetInt32(), e.GetProperty("Price").GetInt32()),
-				"O" => new OutlandishShip(JsonSerializer.Deserialize<Description>(e.GetProperty("Description").GetRawText()), e.GetProperty("AttackPower").GetInt32(), e.GetProperty("DefensePower").GetInt32(), e.GetProperty("Weight").GetInt32(), e.GetProperty("Price").GetInt32(), e.GetProperty("Capacity").GetInt32(), e.GetProperty("Speed").GetInt32()),
-				"S" => new Ship(JsonSerializer.Deserialize<Description>(e.GetProperty("Description").GetRawText()), e.GetProperty("AttackPower").GetInt32(), e.GetProperty("DefensePower").GetInt32(), e.GetProperty("Weight").GetInt32(), e.GetProperty("Price").GetInt32(), e.GetProperty("Capacity").GetInt32()),
+				"E" => new Elephant(JsonSerializer.Deserialize<Description>(e.GetProperty("Description").GetRawText()).Must(), e.GetProperty("AttackPower").GetInt32(), e.GetProperty("DefensePower").GetInt32(), e.GetProperty("Weight").GetInt32(), e.GetProperty("Price").GetInt32(), e.GetProperty("Capacity").GetInt32(), e.GetProperty("Speed").GetInt32()),
+				"P" => new Pedestrian(JsonSerializer.Deserialize<Description>(e.GetProperty("Description").GetRawText()).Must(), e.GetProperty("AttackPower").GetInt32(), e.GetProperty("DefensePower").GetInt32(), e.GetProperty("Weight").GetInt32(), e.GetProperty("Price").GetInt32()),
+				"O" => new OutlandishShip(JsonSerializer.Deserialize<Description>(e.GetProperty("Description").GetRawText()).Must(), e.GetProperty("AttackPower").GetInt32(), e.GetProperty("DefensePower").GetInt32(), e.GetProperty("Weight").GetInt32(), e.GetProperty("Price").GetInt32(), e.GetProperty("Capacity").GetInt32(), e.GetProperty("Speed").GetInt32()),
+				"S" => new Ship(JsonSerializer.Deserialize<Description>(e.GetProperty("Description").GetRawText()).Must(), e.GetProperty("AttackPower").GetInt32(), e.GetProperty("DefensePower").GetInt32(), e.GetProperty("Weight").GetInt32(), e.GetProperty("Price").GetInt32(), e.GetProperty("Capacity").GetInt32()),
 				_ => throw new JsonException("Unknown type of SoldierType")
 			};
 		}

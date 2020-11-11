@@ -18,7 +18,10 @@ namespace ImperitWASM.Shared.State
 		public readonly ImmutableDictionary<SoldierType, int> SoldierTypeIndices;
 		public readonly int FinalLandsCount;
 		public readonly TimeSpan CountdownTime;
-		public Settings(int debtLimit, Ratio defaultInstability, int defaultMoney, double interest, Color landColor, Color mountainsColor, int mountainsWidth, Color seaColor, ImmutableArray<SoldierType> soldierTypes, int finalLandsCount, TimeSpan countdownTime)
+		public readonly Graph Graph;
+		public readonly ImmutableArray<Shape> Shapes;
+		public readonly ImmutableArray<ImmutableArray<Tuple<int, int>>> DefaultSoldiers;
+		public Settings(int debtLimit, Ratio defaultInstability, int defaultMoney, double interest, Color landColor, Color mountainsColor, int mountainsWidth, Color seaColor, ImmutableArray<SoldierType> soldierTypes, int finalLandsCount, TimeSpan countdownTime, Graph graph, ImmutableArray<Shape> shapes, ImmutableArray<ImmutableArray<Tuple<int, int>>> defaultSoldiers)
 		{
 			DebtLimit = debtLimit;
 			DefaultInstability = defaultInstability;
@@ -32,6 +35,9 @@ namespace ImperitWASM.Shared.State
 			SoldierTypeIndices = SoldierTypes.Lookup();
 			FinalLandsCount = finalLandsCount;
 			CountdownTime = countdownTime;
+			Graph = graph;
+			Shapes = shapes;
+			DefaultSoldiers = defaultSoldiers;
 		}
 		public Ratio Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));

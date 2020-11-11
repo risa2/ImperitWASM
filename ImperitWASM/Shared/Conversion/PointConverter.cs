@@ -9,7 +9,7 @@ namespace ImperitWASM.Shared.Conversion
 	{
 		public override Point Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
-			return Point.Parse(reader.GetString());
+			return Point.Parse(reader.GetString().Must().ToString());
 		}
 		public override void Write(Utf8JsonWriter writer, Point point, JsonSerializerOptions options)
 		{

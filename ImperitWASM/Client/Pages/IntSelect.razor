@@ -1,29 +1,32 @@
 ﻿@inherits InputBase<int>
+@typeparam T
 
 @code {
-    [Parameter] public IEnumerable<Data.PlayerId>? Options { get; set; }
-    protected override bool TryParseValueFromString(string value, out int result, out string? errorMsg)
-    {
-        if (int.TryParse(value, out result))
-        {
-            errorMsg = null;
-            return true;
-        }
-        else
-        {
-            errorMsg = "'" + value + "' is not a number";
-            return false;
-        }
-    }
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        CurrentValue = Options.First().I;
-    }
+	[Parameter] public IEnumerable<T>? Options { get; set; }
+	[Parameter] public Func<T, int> Id { get; set; } = t => 0;
+	[Parameter] public Func<T, string> Name { get; set; } = t => "";
+	protected override bool TryParseValueFromString(string value, out int result, out string? errorMsg)
+	{
+		if (int.TryParse(value, out result))
+		{
+			errorMsg = null;
+			return true;
+		}
+		else
+		{
+			errorMsg = "'" + value + "' is not a number";
+			return false;
+		}
+	}
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		CurrentValue = Id(Options.First());
+	}
 }
 <select @attributes="@AdditionalAttributes" class="@CssClass" @bind="@CurrentValue">
     @foreach (var opt in Options!)
     {
-        <option class="@CssClass" value="@opt.I">@opt.N</option>
+        <option class="@CssClass" value="@Id(opt)">@Name(opt)</option>
     }
 </select>

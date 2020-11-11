@@ -17,7 +17,7 @@ namespace ImperitWASM.Shared.Conversion
 		public override PlayersPower Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var array = JsonDocument.ParseValue(ref reader).RootElement.EnumerateArray();
-			return new PlayersPower(array.Select(p => Parse(p.GetString().Split("/"))).ToImmutableArray());
+			return new PlayersPower(array.Select(p => Parse(p.GetString().Must().Split("/"))).ToImmutableArray());
 		}
 		public override void Write(Utf8JsonWriter writer, PlayersPower pps, JsonSerializerOptions options)
 		{

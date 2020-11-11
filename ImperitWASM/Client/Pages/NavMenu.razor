@@ -1,0 +1,11 @@
+﻿@code {
+	[Parameter] public string Options { get; set; } = "";
+	[Parameter] public int Selected { get; set; } = 0;
+	[Parameter] public Action<int> OnClick { get; set; } = x => { };
+}
+<nav>
+	@foreach (var (option, i) in Options.Split(';').Select((v, i) => (v, i)))
+	{
+		<a class="@(i == Selected ? "this" : "")" @onclick="() => OnClick(i)">@option</a>
+	}
+</nav>

@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ImperitWASM.Server.Controllers;
 
 namespace ImperitWASM.Server.Load
 {
-	public class EntitySession : IEntity<Session, bool>
+	public class EntitySession : IEntity
 	{
 		[Key] public int Id { get; set; }
-		[Required] public int GameId { get; set; }
-		[Required] public int PlayerIndex { get; set; }
-		[Required] public string SessionKey { get; set; } = "";
-		public Session Convert(bool _) => new Session(PlayerIndex, GameId);
+		public EntityGame EntityGame { get; set; } = new EntityGame();
+		public int EntityGameId { get; set; }
+		public int PlayerIndex { get; set; }
+		public string SessionKey { get; set; } = "";
 	}
 }

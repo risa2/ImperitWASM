@@ -12,7 +12,7 @@ namespace ImperitWASM.Shared.Conversion
 		public override Shape Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var points = JsonDocument.ParseValue(ref reader).RootElement;
-			return new Shape(points.GetProperty("Border").EnumerateArray().Select(p => Point.Parse(p.GetString())).ToImmutableArray(), Point.Parse(points.GetProperty("Center").GetString()));
+			return new Shape(points.GetProperty("Border").EnumerateArray().Select(p => Point.Parse(p.GetString().Must())).ToImmutableArray(), Point.Parse(points.GetProperty("Center").GetString().Must()));
 		}
 		public override void Write(Utf8JsonWriter writer, Shape shape, JsonSerializerOptions options)
 		{

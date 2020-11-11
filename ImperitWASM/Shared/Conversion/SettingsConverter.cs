@@ -11,7 +11,7 @@ namespace ImperitWASM.Shared.Conversion
 		public override Settings Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var root = JsonDocument.ParseValue(ref reader).RootElement;
-			return new Settings(root.GetProperty("DebtLimit").GetInt32(), new Ratio(root.GetProperty("DefaultInstability").GetInt32()), root.GetProperty("DefaultMoney").GetInt32(), root.GetProperty("Interest").GetDouble(), Color.Parse(root.GetProperty("LandColor").GetString()), Color.Parse(root.GetProperty("MountainsColor").GetString()), root.GetProperty("MountainsWidth").GetInt32(), Color.Parse(root.GetProperty("SeaColor").GetString()), JsonSerializer.Deserialize<ImmutableArray<SoldierType>>(root.GetProperty("SoldierTypes").GetRawText()), root.GetProperty("FinalLandsCount").GetInt32(), TimeSpan.FromSeconds(root.GetProperty("CountdownTime").GetInt32()));
+			return new Settings(root.GetProperty("DebtLimit").GetInt32(), new Ratio(root.GetProperty("DefaultInstability").GetInt32()), root.GetProperty("DefaultMoney").GetInt32(), root.GetProperty("Interest").GetDouble(), Color.Parse(root.GetProperty("LandColor").GetString().Must()), Color.Parse(root.GetProperty("MountainsColor").GetString().Must()), root.GetProperty("MountainsWidth").GetInt32(), Color.Parse(root.GetProperty("SeaColor").GetString().Must()), JsonSerializer.Deserialize<ImmutableArray<SoldierType>>(root.GetProperty("SoldierTypes").GetRawText()), root.GetProperty("FinalLandsCount").GetInt32(), TimeSpan.FromSeconds(root.GetProperty("CountdownTime").GetInt32()), JsonSerializer.Deserialize<Graph>(root.GetProperty("Graph").GetRawText()).Must(), JsonSerializer.Deserialize<ImmutableArray<Shape>>(root.GetProperty("Shapes").GetRawText()), JsonSerializer.Deserialize<ImmutableArray<ImmutableArray<Tuple<int, int>>>>(root.GetProperty("DefaultSoldiers").GetRawText()));
 		}
 		public override void Write(Utf8JsonWriter writer, Settings s, JsonSerializerOptions options)
 		{
@@ -30,6 +30,29 @@ namespace ImperitWASM.Shared.Conversion
 			foreach (var type in s.SoldierTypes)
 			{
 				stc.Write(writer, type, options);
+			}
+			writer.WriteEndArray();
+			var gc = new GraphConverter();
+			gc.Write(writer, s.Graph, options);
+			writer.WritePropertyName("Shapes");
+			writer.WriteStartArray();
+			var sc = new ShapeConverter();
+			foreach (var shape in s.Shapes)
+			{
+				sc.Write(writer, shape, options);
+			}
+			writer.WriteEndArray();
+			writer.WritePropertyName("DefaultSoldiers");
+			writer.WriteStartArray();
+			foreach (var list in s.DefaultSoldiers)
+			{
+				writer.WriteStartArray();
+				foreach (var pair in list)
+				{
+					writer.WriteNumber("Item1", pair.Item1);
+					writer.WriteNumber("Item2", pair.Item2);
+				}
+				writer.WriteEndArray();
 			}
 			writer.WriteEndArray();
 			writer.WriteEndObject();

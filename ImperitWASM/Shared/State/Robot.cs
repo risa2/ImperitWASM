@@ -75,8 +75,7 @@ namespace ImperitWASM.Shared.State
 		{
 			(pap, _) = pap.Do(new Move(this, from, to, soldiers));
 		}
-		static readonly Soldiers Unit = new Soldiers(new Army.Pedestrian(new Description("", "", ""), 1, 1, 1, 1), 1);
-		static Soldiers Units(int num) => Unit.Multiply(num);
+		static Soldiers Units(int num) => new Soldiers(new Pedestrian(new Description("", "", ""), 1, 1, 1, 1), num);
 		IEnumerable<(Province, Soldiers)> GetAttacks(PlayersAndProvinces pap, Province from)
 		{
 			int enemies = EnemiesPower(pap, from);

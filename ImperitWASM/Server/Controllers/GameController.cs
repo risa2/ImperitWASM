@@ -30,31 +30,27 @@ namespace ImperitWASM.Server.Controllers
 		{
 			return new Client.Data.BasicInfo(p.I, pap.Player(p.G, p.I).Color, game.Started(p.G), active[p.G]);
 		}
-
-		[HttpGet("ActiveGame")]
-		public async Task<int[]> IsActive()
-		{
-			await game.ShouldStart.EachAsync(g => newGame.StartAsync(g));
-			return game.StartedGames;
-		}
 		[HttpPost("Register")]
 		public async Task<bool> Register([FromBody] Client.Data.RegisteredPlayer player)
 		{
-			var gameId = game.RegistrableGame;
-			var p_p = pap[gameId];
-			if (!string.IsNullOrWhiteSpace(player.Name) && !string.IsNullOrWhiteSpace(player.Name) && p_p.Province(player.Start) is Land land && land.IsStart && !land.Occupied)
+			var p_p = pap[player.G];
+			if (!string.IsNullOrWhiteSpace(player.N) && !string.IsNullOrWhiteSpace(player.N) && p_p.Province(player.S) is Land land && land.IsStart && !land.Occupied)
 			{
-				await newGame.RegisterAsync(gameId, player.Name, new Password(player.Password), player.Start);
+				await newGame.RegisterAsync(player.G, player.N, new Password(player.P), player.S);
 				return true;
 			}
 			return false;
 		}
-		[HttpGet("NextColor")]
-		public Color NextColor() => newGame.NextColor(game.RegistrableGame);
+		[HttpGet("RegistrableGame")]
+		public int RegistrableGame() => game.RegistrableGame;
+		[HttpPost("NextColor")]
+		public Color NextColor([FromBody] int gameId) => newGame.NextColor(gameId);
 		[HttpPost("NextTurn")]
 		public async Task<bool> NextTurn([FromBody] Client.Data.Session loggedIn)
 		{
 			return active[loggedIn.G] == loggedIn.U && login.IsValid(loggedIn.U, loggedIn.G, loggedIn.I) && await end.NextTurnAsync(loggedIn.G);
 		}
+		[HttpGet("Finished")]
+		public int[] Finished() => game.FinishedGames;
 	}
 }

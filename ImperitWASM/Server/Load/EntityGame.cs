@@ -7,9 +7,9 @@ namespace ImperitWASM.Server.Load
 	{
 		public enum State { Created, Countdown, Started, Finished }
 		[Key] public int Id { get; set; }
-		[Required] public int Active { get; set; }
-		[Required] public State Current { get; set; }
-		[Required] public DateTime LastChange { get; set; }
+		public int Active { get; set; }
+		public State Current { get; set; }
+		public DateTime LastChange { get; set; }
 		public bool Created => Current == State.Created;
 		public bool Countdown => Current == State.Countdown;
 		public bool Started => Current == State.Started;

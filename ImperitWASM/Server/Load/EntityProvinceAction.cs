@@ -5,20 +5,23 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load
 {
-	public class EntityProvinceAction : IEntity<IProvinceAction, (Settings settings, IReadOnlyList<Player> players)>
+	public class EntityProvinceAction : IEntity
 	{
 		[Key] public int Id { get; set; }
-		[Required] public string Type { get; set; } = "";
-		[Required] public int Player { get; set; }
-		[Required] public EntitySoldiers Soldiers { get; set; } = new EntitySoldiers();
-		public IProvinceAction Convert((Settings settings, IReadOnlyList<Player> players) x) => Type switch
+		public EntityProvince EntityProvince { get; set; } = new EntityProvince();
+		public int EntityProvinceId { get; set; }
+		public string Type { get; set; } = "";
+		public int Player { get; set; }
+		public EntitySoldier EntitySoldier { get; set; } = new EntitySoldier();
+		public int EntitySoldierId { get; set; }
+		public IProvinceAction Convert(Settings settings, IReadOnlyList<Player> players) => Type switch
 		{
-			"Manoeuvre" => new Manoeuvre(x.players[Player], Soldiers.Convert(x.settings.SoldierTypes)),
+			"Manoeuvre" => new Manoeuvre(players[Player], EntitySoldier.Convert(settings.SoldierTypes)),
 			_ => throw new System.Exception("Unknown type of Action: " + Type)
 		};
 		public static EntityProvinceAction From(IProvinceAction action, IReadOnlyDictionary<Player, int> map, IReadOnlyDictionary<SoldierType, int> smap) => action switch
 		{
-			Manoeuvre M => new EntityProvinceAction { Type = "Manoeuvre", Player = map[M.Player], Soldiers = EntitySoldiers.From(M.Soldiers, smap) },
+			Manoeuvre M => new EntityProvinceAction { Type = "Manoeuvre", Player = map[M.Player], EntitySoldier = EntitySoldier.From(M.Soldiers, smap) },
 			_ => throw new System.Exception("Unknown type of Action: " + action.GetType())
 		};
 	}

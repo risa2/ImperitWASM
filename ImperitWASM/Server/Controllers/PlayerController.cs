@@ -14,25 +14,27 @@ namespace ImperitWASM.Server.Controllers
 	{
 		readonly ISessionService login;
 		readonly IPlayersProvinces pap;
-		public PlayerController(IPlayersProvinces pap, ISessionService login)
+		readonly IContextService ctx;
+		public PlayerController(IPlayersProvinces pap, ISessionService login, IContextService ctx)
 		{
 			this.pap = pap;
 			this.login = login;
+			this.ctx = ctx;
 		}
 		[HttpPost("Display")]
 		public IEnumerable<Client.Data.DisplayablePlayer> Display([FromBody] int gameId)
 		{
 			return pap.Players(gameId).OfType<Human>().Select(p => new Client.Data.DisplayablePlayer(p.Name, p.Color));
 		}
-		[HttpPost("Players")]
-		public IEnumerable<Client.Data.PlayerId> Players([FromBody] int gameId)
+		[HttpGet("Players")]
+		public IEnumerable<Client.Data.PlayerId> Players()
 		{
-			return pap.Players(gameId).Select((p, i) => (p is Human, new Client.Data.PlayerId(i, p.Name))).Where(p => p.Item1).Select(p => p.Item2);
+			return ctx.Players.Where(p => p.Type == "H").Select(p => new Client.Data.PlayerId(p.Index, p.EntityGameId, p.Name));
 		}
 		[HttpPost("Money")]
-		public int Money([FromBody] Client.Data.PlayerKey p)
+		public int Money([FromBody] Client.Data.PlayerKey k)
 		{
-			return pap.Player(p.G, p.I).Money;
+			return ctx.Players.Single(p => p.EntityGameId == k.G && p.Index == k.I).Money;
 		}
 		[HttpPost("Infos")]
 		public IEnumerable<Client.Data.PlayerFullInfo> Infos([FromBody] int gameId)

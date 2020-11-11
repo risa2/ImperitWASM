@@ -4,8 +4,4 @@
 	{
 		int Id { get; set; }
 	}
-	public interface IEntity<TResult, TArg> : IEntity
-	{
-		TResult Convert(TArg arg);
-	}
 }

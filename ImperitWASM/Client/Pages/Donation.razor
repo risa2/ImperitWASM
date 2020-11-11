@@ -1,7 +1,7 @@
 @inject ImperitClient http;
 
 @code{
-	[Parameter] public Data.Session LoggedIn { get; set; } = new Data.Session();
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	[Parameter] public int Recipient { get; set; }
 	[Parameter] public int PlayerMoney { get; set; }
 	[Parameter] public string RecipientName { get; set; } = "";
@@ -9,7 +9,7 @@
 	Data.Int model = new Data.Int();
 	async Task DoDonate()
 	{
-		if (await http.PostJsonResponseAsync<Data.DonationCmd, bool>("api/Command/Donate", new Data.DonationCmd(LoggedIn.U, LoggedIn.I, Recipient, model.Value, LoggedIn.G)))
+		if (await http.PostJsonResponseAsync<Data.DonationCmd, bool>("api/Command/Donate", new Data.DonationCmd(Session.U, Session.I, Recipient, model.Value, Session.G)))
 		{
 			Return();
 		}

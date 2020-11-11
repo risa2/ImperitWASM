@@ -4,10 +4,12 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load
 {
-	public class EntityPlayerAction : IEntity<IPlayerAction, Settings>
+	public class EntityPlayerAction : IEntity
 	{
 		[Key] public int Id { get; set; }
-		[Required] public string Type { get; set; } = "";
+		public EntityPlayer EntityPlayer { get; set; } = new EntityPlayer();
+		public int EntityPlayerId { get; set; }
+		public string Type { get; set; } = "";
 		public int? Debt { get; set; }
 		public IPlayerAction Convert(Settings settings) => Type switch
 		{

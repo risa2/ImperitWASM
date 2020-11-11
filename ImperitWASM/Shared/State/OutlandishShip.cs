@@ -1,4 +1,4 @@
-﻿namespace ImperitWASM.Shared.State.Army
+﻿namespace ImperitWASM.Shared.State
 {
 	public class OutlandishShip : Ship
 	{

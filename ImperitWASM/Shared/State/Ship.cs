@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ImperitWASM.Shared.State.Army
+﻿namespace ImperitWASM.Shared.State
 {
 	public class Ship : SoldierType
 	{

@@ -6,8 +6,8 @@ namespace ImperitWASM.Shared.State
 	public class Mountains : Province
 	{
 		readonly Settings settings;
-		public Mountains(Shape shape, Settings set)
-			: base(new Description(), shape, new Savage(), new Soldiers(), new Soldiers(), ImmutableList<IProvinceAction>.Empty) => settings = set;
+		public Mountains(string name, Shape shape, Settings set)
+			: base(new Description(name), shape, new Savage(), new Soldiers(), new Soldiers(), ImmutableList<IProvinceAction>.Empty) => settings = set;
 		public override Color Stroke => settings.MountainsColor;
 		public override int StrokeWidth => settings.MountainsWidth;
 		public override Province GiveUpTo(Player p, Soldiers s) => this;

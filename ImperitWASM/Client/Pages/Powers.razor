@@ -2,12 +2,13 @@
 
 @code{
 	[Parameter] public Action Return { get; set; } = (() => { });
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	Data.DisplayablePlayer[]? Players = null;
 	PlayersPower[]? PowersArray = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Players = await http.GetJsonAsync<Data.DisplayablePlayer[]>("api/Player/Display");
-		PowersArray = (await http.GetJsonAsync<PlayersPower[]>("api/Powers/List"));
+		Players = await http.PostJsonResponseAsync<int, Data.DisplayablePlayer[]>("api/Player/Display", Session.G);
+		PowersArray = (await http.PostJsonResponseAsync<int, PlayersPower[]>("api/Powers/List", Session.G));
 	}
 }
 <nav>

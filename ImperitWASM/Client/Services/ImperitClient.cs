@@ -7,7 +7,7 @@ namespace ImperitWASM.Client.Services
 {
 	public class ImperitClient
 	{
-		internal class Policy : JsonNamingPolicy
+		class Policy : JsonNamingPolicy
 		{
 			public override string ConvertName(string name) => new string(name[0], 1).ToLower() + name[1..];
 		}

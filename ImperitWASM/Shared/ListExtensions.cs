@@ -8,6 +8,7 @@ namespace ImperitWASM.Shared
 {
 	public static class ListExtensions
 	{
+		public static T Must<T>(this T? value) where T : class => value ?? throw new ArgumentNullException();
 		public static T FirstOr<T>(this IEnumerable<T> e, T x) => e.DefaultIfEmpty(x).First();
 		public static T? MinBy<T, TC>(this IEnumerable<T> e, Func<T, TC> selector, T? v = default) where T : class => e.OrderBy(selector).FirstOr(v);
 		public static (ImmutableList<A>, P) Fold<A, P>(this IEnumerable<A> e, P init, Func<P, A, (P, A?)> fn) where A : class
@@ -24,7 +25,7 @@ namespace ImperitWASM.Shared
 			}
 			return (result.ToImmutable(), init);
 		}
-		public static ImmutableDictionary<T, int> Lookup<T>(this IEnumerable<T> e) => e.Select((a, i) => (a, i)).ToImmutableDictionary(it => it.a, it => it.i);
+		public static ImmutableDictionary<T, int> Lookup<T>(this IEnumerable<T> e) where T : notnull => e.Select((a, i) => (a, i)).ToImmutableDictionary(it => it.a, it => it.i);
 		public static int FirstRotated<T>(this IReadOnlyList<T> arr, int shift, Func<T, bool> cond, int otherwise)
 		{
 			return Enumerable.Range(shift, arr.Count).Where(i => cond(arr[i % arr.Count])).FirstOr(otherwise) % arr.Count;

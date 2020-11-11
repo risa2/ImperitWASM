@@ -6,12 +6,12 @@
 	[Parameter] public Action Return { get; set; } = (() => { });
 	[Parameter] public int From { get; set; }
 	[Parameter] public int To { get; set; }
-	[Parameter] public Data.Session LoggedIn { get; set; } = new Data.Session();
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	Data.Move model = new Data.Move();
 	Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.MoveInfo>("api/Command/MoveInfo", new Data.CmdData(From, To, LoggedIn.G));
+		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.MoveInfo>("api/Command/MoveInfo", new Data.CmdData(From, To, Session.G));
 		model.Soldiers = Data.Int.Array(Info.Soldiers.Length);
 		if (!Info.Possible)
 		{
@@ -20,7 +20,7 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostJsonResponseAsync<Data.MoveCmd, Errors>("api/Command/Move", new Data.MoveCmd(LoggedIn.U, LoggedIn.I, From, To, model.Soldiers.Select(s => s.Value).ToArray(), LoggedIn.G));
+		error = await http.PostJsonResponseAsync<Data.MoveCmd, Errors>("api/Command/Move", new Data.MoveCmd(Session.U, Session.I, From, To, model.Soldiers.Select(s => s.Value).ToArray(), Session.G));
 		if (error == Errors.Ok || error == Errors.NotPlaying)
 		{
 			Return();

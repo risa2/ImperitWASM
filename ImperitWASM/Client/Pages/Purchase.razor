@@ -2,17 +2,17 @@
 
 @code{
 	[Parameter] public Action Return { get; set; } = (() => { });
-	[Parameter] public Data.Session LoggedIn { get; set; } = new Data.Session();
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	[Parameter] public int Land { get; set; }
 	async Task DoPurchase()
 	{
-		await http.PostJsonAsync<Data.PurchaseCmd>("api/Command/Purchase", new Data.PurchaseCmd(LoggedIn.U, LoggedIn.I, Land, LoggedIn.G));
+		await http.PostJsonAsync<Data.PurchaseCmd>("api/Command/Purchase", new Data.PurchaseCmd(Session.U, Session.I, Land, Session.G));
 		Return();
 	}
 	Data.PurchaseInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.CmdData(LoggedIn.U, Land, LoggedIn.G));
+		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.CmdData(Session.U, Land, Session.G));
 		if (!Info.Possible)
 		{
 			Return();

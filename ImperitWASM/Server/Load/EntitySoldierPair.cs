@@ -7,7 +7,7 @@ namespace ImperitWASM.Server.Load
 	public class EntitySoldierPair : IEntity
 	{
 		[Key] public int Id { get; set; }
-		public EntitySoldier EntitySoldier { get; set; } = new EntitySoldier();
+		public EntitySoldier? EntitySoldier { get; set; }
 		public int EntitySoldierId { get; set; }
 		public int Type { get; set; }
 		public int Count { get; set; }

@@ -7,8 +7,8 @@ namespace ImperitWASM.Shared.State
 {
 	public readonly struct Password : IEquatable<Password>
 	{
-		static readonly SHA256 sha = SHA256.Create();
-		readonly byte[] Hash;
+		private static readonly SHA256 sha = SHA256.Create();
+		private readonly byte[] Hash;
 		public Password(byte[] hash) => Hash = hash;
 		public Password(string str) => Hash = sha.ComputeHash(Encoding.UTF8.GetBytes(str));
 		public static Password Parse(string b64) => new Password(Convert.FromBase64String(b64));

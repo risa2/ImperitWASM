@@ -8,15 +8,15 @@ namespace ImperitWASM.Server.Load
 	public class EntityProvinceAction : IEntity
 	{
 		[Key] public int Id { get; set; }
-		public EntityProvince EntityProvince { get; set; } = new EntityProvince();
+		public EntityProvince? EntityProvince { get; set; }
 		public int EntityProvinceId { get; set; }
 		public string Type { get; set; } = "";
 		public int Player { get; set; }
-		public EntitySoldier EntitySoldier { get; set; } = new EntitySoldier();
+		public EntitySoldier? EntitySoldier { get; set; }
 		public int EntitySoldierId { get; set; }
 		public IProvinceAction Convert(Settings settings, IReadOnlyList<Player> players) => Type switch
 		{
-			"Manoeuvre" => new Manoeuvre(players[Player], EntitySoldier.Convert(settings.SoldierTypes)),
+			"Manoeuvre" => new Manoeuvre(players[Player], EntitySoldier!.Convert(settings.SoldierTypes)),
 			_ => throw new System.Exception("Unknown type of Action: " + Type)
 		};
 		public static EntityProvinceAction From(IProvinceAction action, IReadOnlyDictionary<Player, int> map, IReadOnlyDictionary<SoldierType, int> smap) => action switch

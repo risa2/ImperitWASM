@@ -81,7 +81,7 @@ namespace ImperitWASM.Shared
 		{
 			foreach (var t2 in s2)
 			{
-				var index = s1.Find(t1 => eq(t1, t2));
+				int? index = s1.Find(t1 => eq(t1, t2));
 				if (index is int i)
 				{
 					s1[i] = match(s1[i], t2);

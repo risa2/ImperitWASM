@@ -11,8 +11,8 @@ namespace ImperitWASM.Shared.Cvt
 		public override Graph Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var array = JsonDocument.ParseValue(ref reader).RootElement.EnumerateArray();
-			var table = array.Select(line => line.EnumerateArray().Select(item => item.GetInt32()).ToArray()).ToArray();
-			var starts = new int[table.Length + 1];
+			int[][]? table = array.Select(line => line.EnumerateArray().Select(item => item.GetInt32()).ToArray()).ToArray();
+			int[]? starts = new int[table.Length + 1];
 			starts[0] = 0;
 			for (int i = 1; i < starts.Length; ++i)
 			{
@@ -26,7 +26,7 @@ namespace ImperitWASM.Shared.Cvt
 			foreach (var line in value)
 			{
 				writer.WriteStartArray();
-				foreach (var item in line)
+				foreach (int item in line)
 				{
 					writer.WriteNumberValue(item);
 				}

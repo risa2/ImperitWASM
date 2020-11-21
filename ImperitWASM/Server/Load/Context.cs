@@ -15,7 +15,14 @@ namespace ImperitWASM.Server.Load
 		}
 		protected override void OnModelCreating(ModelBuilder mod)
 		{
-			
+			_ = mod.OneToMany<Game, EntitySession>(x => x.GameId).IsRequired();
+			_ = mod.OneToMany<Game, EntityPlayer>(x => x.GameId).IsRequired();
+			_ = mod.OneToMany<Game, EntityProvince>(x => x.GameId).IsRequired();
+			_ = mod.OneToMany<Game, EntityPlayerPower>(x => x.GameId).IsRequired();
+			_ = mod.OneToMany<EntityPlayer, EntityPlayerAction>(x => x.EntityPlayerId).IsRequired();
+			_ = mod.OneToMany<EntityProvince, EntityProvinceAction>(x => x.EntityProvinceId).IsRequired();
+			_ = mod.OneToOne<EntitySoldier, EntityProvince>(x => x.EntitySoldierId).IsRequired();
+			_ = mod.OneToOne<EntitySoldier, EntityProvinceAction>(x => x.EntitySoldierId);
 		}
 	}
 }

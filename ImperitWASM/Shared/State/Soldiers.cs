@@ -8,7 +8,7 @@ namespace ImperitWASM.Shared.State
 {
 	public class Soldiers : IEnumerable<(SoldierType Type, int Count)>
 	{
-		readonly ImmutableArray<(SoldierType Type, int Count)> soldiers;
+		private readonly ImmutableArray<(SoldierType Type, int Count)> soldiers;
 		public Soldiers() => soldiers = ImmutableArray<(SoldierType Type, int Count)>.Empty;
 		public Soldiers(ImmutableArray<(SoldierType, int)> list) => soldiers = list;
 		public Soldiers(IEnumerable<(SoldierType, int)> list) => soldiers = list.ToImmutableArray();
@@ -54,7 +54,8 @@ namespace ImperitWASM.Shared.State
 			return Any && from.Soldiers.Contains(this) && Capacity(pap, from, to) >= 0;
 		}
 		public bool CanSurviveIn(Province province) => soldiers.Sum(p => (p.Type.CanSustain(province) - p.Type.Weight) * p.Count) >= 0;
-		static int[] Fight(ImmutableArray<(SoldierType Type, int Count)> soldiers, int me, int enemy, Func<SoldierType, int> powerof)
+
+		private static int[] Fight(ImmutableArray<(SoldierType Type, int Count)> soldiers, int me, int enemy, Func<SoldierType, int> powerof)
 		{
 			int died = 0;
 			int[] remaining = new int[soldiers.Length];
@@ -74,7 +75,7 @@ namespace ImperitWASM.Shared.State
 			{
 				if (powerof(soldiers[i].Type) > 0)
 				{
-					var d = Math.Min(remaining[i], ((enemy - died) / powerof(soldiers[i].Type)) + 1);
+					int d = Math.Min(remaining[i], ((enemy - died) / powerof(soldiers[i].Type)) + 1);
 					remaining[i] -= d;
 					died += d * powerof(soldiers[i].Type);
 				}

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Motion;
-using ImperitWASM.Shared;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,10 +14,10 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class PlayerController : ControllerBase
 	{
-		readonly ISessionService login;
-		readonly IPlayersProvinces pap;
-		readonly IContextService ctx;
-		readonly INewGame newGame;
+		private readonly ISessionService login;
+		private readonly IPlayersProvinces pap;
+		private readonly IContextService ctx;
+		private readonly INewGame newGame;
 		public PlayerController(IPlayersProvinces pap, ISessionService login, IContextService ctx, INewGame newGame)
 		{
 			this.pap = pap;
@@ -35,7 +34,7 @@ namespace ImperitWASM.Server.Controllers
 		public async Task<IEnumerable<Client.Data.PlayerId>> Login()
 		{
 			await newGame.StartAllAsync();
-			return ctx.Players.Include(p => p.Game).Where(p => p.Type == EntityPlayer.Kind.Human && p.Game.Current == Game.State.Started).Select(p => new Client.Data.PlayerId(p.Index, p.GameId, p.Name));
+			return ctx.Players.Include(p => p.Game).Where(p => p.Type == EntityPlayer.Kind.Human && p.Game!.Current == Game.State.Started).Select(p => new Client.Data.PlayerId(p.Index, p.GameId, p.Name));
 		}
 		[HttpPost("Money")]
 		public int Money([FromBody] Client.Data.Session ses)

@@ -7,7 +7,7 @@ namespace ImperitWASM.Server.Load
 	public class EntityPlayerAction : IEntity
 	{
 		[Key] public int Id { get; set; }
-		public EntityPlayer EntityPlayer { get; set; } = new EntityPlayer();
+		public EntityPlayer? EntityPlayer { get; set; }
 		public int EntityPlayerId { get; set; }
 		public string Type { get; set; } = "";
 		public int? Debt { get; set; }

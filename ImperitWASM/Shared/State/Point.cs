@@ -14,10 +14,10 @@ namespace ImperitWASM.Shared.State
 		public override int GetHashCode() => System.HashCode.Combine(x, y);
 		public static Point Parse(string s)
 		{
-			var split = s.IndexOf('/');
-			return new Point(double.Parse(s.Substring(0, s.IndexOf('/')), CultureInfo.InvariantCulture), double.Parse(s.Substring(split + 1), CultureInfo.InvariantCulture));
+			int split = s.IndexOf('/');
+			return new Point(double.Parse(s[..split], CultureInfo.InvariantCulture), double.Parse(s[(split + 1)..], CultureInfo.InvariantCulture));
 		}
-		public override string ToString() => x.ToString(CultureInfo.InvariantCulture) + "/" + y.ToString(CultureInfo.InvariantCulture);
+		public override string ToString() => string.Format(CultureInfo.InvariantCulture, "{0}/{1}", x, y);
 		public static bool operator ==(Point left, Point right) => left.Equals(right);
 		public static bool operator !=(Point left, Point right) => !left.Equals(right);
 	}

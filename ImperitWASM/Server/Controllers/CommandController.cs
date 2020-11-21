@@ -11,11 +11,11 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class CommandController : ControllerBase
 	{
-		readonly IPlayersProvinces pap;
-		readonly ISessionService login;
-		readonly IConfig cfg;
-		readonly IEndOfTurn end;
-		readonly IActive active;
+		private readonly IPlayersProvinces pap;
+		private readonly ISessionService login;
+		private readonly IConfig cfg;
+		private readonly IEndOfTurn end;
+		private readonly IActive active;
 		public CommandController(IPlayersProvinces pap, ISessionService login, IConfig cfg, IEndOfTurn end, IActive active)
 		{
 			this.pap = pap;
@@ -24,7 +24,8 @@ namespace ImperitWASM.Server.Controllers
 			this.end = end;
 			this.active = active;
 		}
-		bool Validate(int playerId, int gameId, string loginId) => login.IsValid(playerId, gameId, loginId) && playerId == active[gameId];
+
+		private bool Validate(int playerId, int gameId, string loginId) => login.IsValid(playerId, gameId, loginId) && playerId == active[gameId];
 		[HttpPost("GiveUp")]
 		public async Task GiveUp([FromBody] Client.Data.Session player)
 		{
@@ -42,7 +43,7 @@ namespace ImperitWASM.Server.Controllers
 		{
 			var (from, to, game) = move;
 			var p_p = pap[game];
-			var possible = p_p.Province(from).SoldierTypes.Any(type => type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to)));
+			bool possible = p_p.Province(from).SoldierTypes.Any(type => type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to)));
 			var types = p_p.Province(from).SoldierTypes.Select(type => type.Description).ToArray();
 			return new Client.Data.MoveInfo(possible, !p_p.Province(from).IsAllyOf(p_p.Province(to)), p_p.Province(to).Occupied, p_p.Province(from).Name, p_p.Province(to).Name, p_p.Province(from).Soldiers.ToString(), p_p.Province(to).Soldiers.ToString(), types);
 		}

@@ -9,7 +9,7 @@ namespace ImperitWASM.Shared.State
 	[JsonConverter(typeof(Cvt.GraphConverter))]
 	public class Graph : IReadOnlyList<IEnumerable<int>>
 	{
-		readonly int[] edges, starts;
+		private readonly int[] edges, starts;
 		public Graph(int[] edges, int[] starts)
 		{
 			this.edges = edges;
@@ -18,7 +18,7 @@ namespace ImperitWASM.Shared.State
 		public bool Passable(int from, int to, int limit, Func<int, int, int> difficulty)
 		{
 			var stack = new List<(int Pos, int Distance)>() { (from, 0) };
-			var visited = new bool[Count];
+			bool[]? visited = new bool[Count];
 			visited[from] = true;
 			for (int i = 0; i < stack.Count; ++i)
 			{

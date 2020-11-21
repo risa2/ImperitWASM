@@ -8,9 +8,9 @@ namespace ImperitWASM.Shared.State
 {
 	public class Provinces : IReadOnlyList<Province>
 	{
-		readonly ImmutableArray<Province> provinces;
-		readonly Graph graph;
-		readonly ImmutableDictionary<Province, int> lookup;
+		private readonly ImmutableArray<Province> provinces;
+		private readonly Graph graph;
+		private readonly ImmutableDictionary<Province, int> lookup;
 		public Provinces(ImmutableArray<Province> provinces, Graph graph, ImmutableDictionary<Province, int>? lookup = null)
 		{
 			this.provinces = provinces;

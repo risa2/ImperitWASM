@@ -19,12 +19,12 @@ namespace ImperitWASM.Server.Services
 	}
 	public class GameCreator : INewGame
 	{
-		readonly IPlayersProvinces pap;
-		readonly IPowers powers;
-		readonly IGameService game;
-		readonly IConfig cfg;
-		readonly IContextService ctx;
-		readonly static ImmutableList<IPlayerAction> Actions = ImmutableList.Create<IPlayerAction>(new Default(), new Instability());
+		private readonly IPlayersProvinces pap;
+		private readonly IPowers powers;
+		private readonly IGameService game;
+		private readonly IConfig cfg;
+		private readonly IContextService ctx;
+		private static readonly ImmutableList<IPlayerAction> Actions = ImmutableList.Create<IPlayerAction>(new Default(), new Instability());
 		public GameCreator(IPlayersProvinces pap, IPowers powers, IGameService game, IConfig cfg, IContextService ctx)
 		{
 			this.pap = pap;
@@ -33,20 +33,23 @@ namespace ImperitWASM.Server.Services
 			this.cfg = cfg;
 			this.ctx = ctx;
 		}
-		static Color ColorAt(int i) => new Color(120.0 + (137.507764050037854 * i), 1.0, 1.0);
-		IEnumerable<(Land l, int i)> RemainingStarts(int gameId, ImmutableArray<Player> players) => ctx.GetProvinces(gameId, players).Select((p, i) => (p as Land, i)).Where(it => it.Item1 is Land && it.Item1.IsStart && !it.Item1.Occupied)!;
-		Player GetRobot(int count, int i, int earnings)
+
+		private static Color ColorAt(int i) => new Color(120.0 + (137.507764050037854 * i), 1.0, 1.0);
+		private IEnumerable<(Land l, int i)> RemainingStarts(int gameId, ImmutableArray<Player> players) => ctx.GetProvinces(gameId, players).Select((p, i) => (p as Land, i)).Where(it => it.Item1 is Land && it.Item1.IsStart && !it.Item1.Occupied)!;
+
+		private Player GetRobot(int count, int i, int earnings)
 		{
 			return new Robot(ColorAt(count + i - 1), cfg.Settings.DefaultMoney - (earnings * 2), true, Actions, cfg.Settings);
 		}
-		void AddRobots(int gameId, ImmutableArray<Player> players)
+
+		private void AddRobots(int gameId, ImmutableArray<Player> players)
 		{
 			RemainingStarts(gameId, players).Each((start, i) => pap.Add(gameId, GetRobot(players.Length, i, start.l.Earnings), start.l.Soldiers, start.i));
 		}
 		public async Task<int> CreateAsync()
 		{
 			int gameId = game.Create();
-			pap.AddPaP(gameId, new PlayersAndProvinces(ImmutableArray.Create(new Savage() as Player), cfg.Settings.Provinces));
+			pap.AddPaP(gameId, new PlayersAndProvinces(ImmutableArray.Create<Player>(new Savage()), cfg.Settings.Provinces));
 			game.RemoveOld(TimeSpan.FromDays(1));
 			await ctx.SaveAsync();
 			return gameId;

@@ -10,7 +10,8 @@
 			Capacity = capacity;
 			Speed = speed;
 		}
-		int Difficulty(Province to) => to is Land || to is Mountains ? 1 : Speed + 1;
+
+		private int Difficulty(Province to) => to is Land || to is Mountains ? 1 : Speed + 1;
 		public override int CanMove(PlayersAndProvinces pap, Province from, Province to)
 		{
 			return from is Land && to is Land && pap.Passable(from, to, Speed, (_, dest) => Difficulty(dest)) ? Weight + Capacity : 0;

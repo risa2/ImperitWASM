@@ -30,11 +30,10 @@
 		return Selected;
 	}
 }
-<nav>
-	<a @onclick="ReturnAsync">Zpět</a>
-	<a class="this">Registrace</a>
-	<a @onclick="OnSubmit">Potvrdit</a>
-</nav>
+<NavMenu Options="Zpět;Registrace;Potvrdit" Selected="1" OnClick="@(async i =>
+{
+	await (i == 0 ? ReturnAsync!() : i == 1 ? OnSubmit() : Task.Run(() => { }));
+})"/>
 <main>
 	<p>Jméno:</p><p><input type="text" @bind-value="Username"/></p>
 	<p>Heslo:</p><p><input type="password" @bind-value="Password"/></p>

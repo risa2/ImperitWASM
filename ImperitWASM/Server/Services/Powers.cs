@@ -15,8 +15,8 @@ namespace ImperitWASM.Server.Services
 	}
 	public class Powers : IPowers
 	{
-		readonly IPlayersProvinces pap;
-		readonly IContextService ctx;
+		private readonly IPlayersProvinces pap;
+		private readonly IContextService ctx;
 
 		public Powers(IPlayersProvinces pap, IContextService ctx)
 		{

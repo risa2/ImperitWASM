@@ -9,7 +9,7 @@ namespace ImperitWASM.Shared.State
 	[JsonConverter(typeof(Cvt.PlayersPowerConverter))]
 	public class PlayersPower : IReadOnlyList<PlayerPower>
 	{
-		readonly ImmutableArray<PlayerPower> arr;
+		private readonly ImmutableArray<PlayerPower> arr;
 		public PlayersPower(ImmutableArray<PlayerPower> pp) => arr = pp;
 		public PlayerPower this[int i] => arr[i];
 		public int Count => arr.Length;
@@ -17,13 +17,14 @@ namespace ImperitWASM.Shared.State
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 		public ImmutableArray<double> GetRatios()
 		{
-			var sum = arr.Sum(p => p.Soldiers + p.Money);
+			int sum = arr.Sum(p => p.Soldiers + p.Money);
 			return arr.Select(p => (double)(p.Soldiers + p.Money) / sum).ToImmutableArray();
 		}
 		public int TotalSum => arr.Sum(p => p.Total);
 		public int TotalAvg => TotalSum / Count;
 		public int TotalMax => arr.Max(pp => pp.Total);
-		static PlayerPower ComputeOne(Player p, IEnumerable<Province> provinces)
+
+		private static PlayerPower ComputeOne(Player p, IEnumerable<Province> provinces)
 		{
 			return new PlayerPower(p.Alive, provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(), p.Money, provinces.Sum(p => p.Soldiers.Power), provinces.Count(p => p is Land));
 		}

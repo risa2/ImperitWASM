@@ -16,11 +16,10 @@ namespace ImperitWASM.Server.Services
 
 		ImmutableArray<Player> GetPlayers(int gameId);
 		IContextService SetPlayers(int gameId, IEnumerable<Player> players);
-		IContextService AddPlayers(int gameId, IEnumerable<Player> players);
 
 		ImmutableArray<Province> GetProvinces(int gameId, IReadOnlyList<Player> players);
 		IContextService SetProvinces(int gameId, IEnumerable<Province> provinces);
-		IContextService AddProvinces(int gameId, IEnumerable<Province> provinces);
+		IContextService AddPlayersAndProvinces(int gameId, IEnumerable<Player> players, IEnumerable<Province> provinces);
 
 		List<PlayersPower> GetPlayersPowers(int gameId);
 		IContextService AddPlayersPower(int gameId, PlayersPower psp);
@@ -34,8 +33,8 @@ namespace ImperitWASM.Server.Services
 	}
 	public class ContextService : IContextService
 	{
-		readonly Context ctx;
-		readonly IConfig cfg;
+		private readonly Context ctx;
+		private readonly IConfig cfg;
 		public DbSet<Game> Games => ctx.EntityGames ?? throw new NullReferenceException();
 		public DbSet<EntityPlayer> Players => ctx.EntityPlayers ?? throw new NullReferenceException();
 		public DbSet<EntityPlayerPower> PlayerPowers => ctx.EntityPlayerPowers ?? throw new NullReferenceException();
@@ -48,27 +47,23 @@ namespace ImperitWASM.Server.Services
 			this.cfg = cfg;
 		}
 		public Task SaveAsync() => ctx.SaveChangesAsync();
+
 		//Players--------------------------------------------------------------
-		IQueryable<EntityPlayer> GetEPlayers(int gameId) => Players.Where(p => p.GameId == gameId).OrderBy(p => p.Index).Include(p => p.EntityPlayerActions);
+		private IQueryable<EntityPlayer> GetEPlayers(int gameId) => Players.Where(p => p.GameId == gameId).OrderBy(p => p.Index).Include(p => p.EntityPlayerActions);
 		public ImmutableArray<Player> GetPlayers(int gameId) => GetEPlayers(gameId).Select(p => p.Convert(cfg.Settings)).ToImmutableArray();
 		public IContextService SetPlayers(int gameId, IEnumerable<Player> players)
 		{
 			GetEPlayers(gameId).ToArray().Zip(players).Each(it => it.First.Assign(it.Second));
 			return this;
 		}
-		public IContextService AddPlayers(int gameId, IEnumerable<Player> players)
-		{
-			players.Each((player, i) => Players.Add(EntityPlayer.From(player, i, gameId)));
-			return this;
-		}
+
 		//Provinces------------------------------------------------------------
-		IQueryable<EntityProvince> GetEProvinces(int gameId) => Provinces.Where(p => p.GameId == gameId).OrderBy(p => p.Index)
-						.Include(p => p.EntitySoldier).ThenInclude(s => s.EntitySoldierPairs)
-						.Include(p => p.EntityProvinceActions).ThenInclude(a => a.EntitySoldier).ThenInclude(s => s.EntitySoldierPairs);
+		private IQueryable<EntityProvince> GetEProvinces(int gameId) => Provinces.Where(p => p.GameId == gameId).OrderBy(p => p.Index)
+						.Include(p => p.EntitySoldier).ThenInclude(s => s!.EntitySoldierPairs)
+						.Include(p => p.EntityProvinceActions).ThenInclude(a => a.EntitySoldier).ThenInclude(s => s!.EntitySoldierPairs);
 		public ImmutableArray<Province> GetProvinces(int gameId, IReadOnlyList<Player> players)
 		{
-			Province Convert(EntityProvince p) => p.Convert(cfg.Settings, players);
-			return GetEProvinces(gameId).Select(Convert).ToImmutableArray();
+			return GetEProvinces(gameId).Select(p => p.Convert(cfg.Settings, players)).ToImmutableArray();
 		}
 		public IContextService SetProvinces(int gameId, IEnumerable<Province> provinces)
 		{
@@ -76,10 +71,16 @@ namespace ImperitWASM.Server.Services
 			GetEProvinces(gameId).ToArray().Zip(provinces).Each(it => it.First.Assign(it.Second, map, cfg.Settings.SoldierTypeIndices));
 			return this;
 		}
-		public IContextService AddProvinces(int gameId, IEnumerable<Province> provinces)
+		public IContextService AddPlayersAndProvinces(int gameId, IEnumerable<Player> players, IEnumerable<Province> provinces)
 		{
-			var map = GetEPlayers(gameId).ToImmutableDictionary(p => p.Convert(cfg.Settings), p => p.Index);
-			provinces.Each((province, i) => Provinces.Add(EntityProvince.From(province, map, cfg.Settings.SoldierTypeIndices, gameId, i)));
+			var map = players.Select((p, i) => (p, i)).ToImmutableDictionary(x => x.p, x => x.i);
+			players.Each((player, i) => Players.Add(EntityPlayer.From(player, i, gameId)));
+			provinces.Each((province, i) => Provinces.Add(EntityProvince.From(province, map, cfg.Settings.SoldierTypeIndices, i, gameId)));
+			//Console.WriteLine("GameId: " + gameId);
+			//Console.WriteLine("PL: " + Players.Count());
+			//Console.WriteLine("List: " + string.Join(", ", Players.Select(p => p.GameId + ":" + p.Index)));
+			//Console.WriteLine("PR: " + Provinces.Count());
+			//Console.WriteLine("List: " + string.Join(", ", Provinces.Select(p => p.GameId + ":" + p.Index)));
 			return this;
 		}
 		//PlayerPower----------------------------------------------------------

@@ -9,7 +9,7 @@ namespace ImperitWASM.Server.Load
 	public class EntityPlayerPower : IEntity
 	{
 		[Key] public int Id { get; set; }
-		public Game Game { get; set; } = new Game();
+		public Game? Game { get; set; }
 		public int GameId { get; set; }
 		public int TurnIndex { get; set; }
 		public int PlayerIndex { get; set; }

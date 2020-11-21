@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Server.Load;
-using ImperitWASM.Shared;
 using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
@@ -25,9 +24,9 @@ namespace ImperitWASM.Server.Services
 	}
 	public class PlayersProvinces : IPlayersProvinces
 	{
-		readonly IContextService ctx;
-		readonly IConfig cfg;
-		readonly IActive active;
+		private readonly IContextService ctx;
+		private readonly IConfig cfg;
+		private readonly IActive active;
 		public PlayersProvinces(IContextService ctx, IConfig cfg, IActive active)
 		{
 			this.ctx = ctx;
@@ -49,7 +48,7 @@ namespace ImperitWASM.Server.Services
 		}
 		public PlayersAndProvinces Next(int gameId)
 		{
-			var i = active[gameId];
+			int i = active[gameId];
 			var pap = this[gameId] = this[gameId].Do(new NextTurn()).Item1.Act(i);
 			active[gameId] = GetNextActive(gameId, i);
 			return pap;
@@ -57,7 +56,8 @@ namespace ImperitWASM.Server.Services
 		public void ResetActive(int gameId) => active[gameId] = GetNextActive(gameId, 0);
 		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).Single(p => p.Index == i && p.GameId == gameId).Convert(cfg.Settings);
 		public Player Active(int gameId) => Player(gameId, ctx.Games.Find(gameId).Active);
-		int GetNextActive(int gameId, int active)
+
+		private int GetNextActive(int gameId, int active)
 		{
 			return ctx.Players.Where(p => p.GameId == gameId && p.Alive && p.Type == EntityPlayer.Kind.Human).Select(p => p.Index).OrderBy(i => i).ToArray().FirstIfOrFirst(i => i > active);
 		}
@@ -67,11 +67,11 @@ namespace ImperitWASM.Server.Services
 			{
 				var players = ctx.GetPlayers(gameId);
 				var provinces = ctx.GetProvinces(gameId, players);
-				return new PlayersAndProvinces(players, new Provinces(provinces, cfg.Settings.Graph, provinces.Lookup()));
+				return new PlayersAndProvinces(players, new Provinces(provinces, cfg.Settings.Graph));
 			}
 			set => ctx.SetPlayers(gameId, value.Players).SetProvinces(gameId, value.Provinces);
 		}
-		public void AddPaP(int gameId, PlayersAndProvinces pap) => ctx.AddPlayers(gameId, pap.Players).AddProvinces(gameId, pap.Provinces);
+		public void AddPaP(int gameId, PlayersAndProvinces pap) => ctx.AddPlayersAndProvinces(gameId, pap.Players, pap.Provinces);
 		public int PlayersCount(int gameId) => ctx.Players.Count(p => p.GameId == gameId);
 		public ImmutableArray<Player> Players(int gameId) => ctx.GetPlayers(gameId);
 	}

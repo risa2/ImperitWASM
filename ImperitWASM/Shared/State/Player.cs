@@ -28,12 +28,14 @@ namespace ImperitWASM.Shared.State
 		{
 			return WithActions(Actions.Replace(cond, interact, value));
 		}
-		Player Action(PlayersAndProvinces pap)
+
+		private Player Action(PlayersAndProvinces pap)
 		{
 			var (a, p) = Actions.Fold(this, (player, action) => action.Perform(player, pap));
 			return p.WithActions(a);
 		}
-		(Province, Player) Action(Province province, PlayersAndProvinces pap)
+
+		private (Province, Player) Action(Province province, PlayersAndProvinces pap)
 		{
 			var (a, p) = Actions.Fold(province, (province, action) => action.Perform(province, this, pap));
 			return (p, WithActions(a));

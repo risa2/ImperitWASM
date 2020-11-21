@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.Cvt
 {
 	public class PlayersPowerConverter : JsonConverter<PlayersPower>
 	{
-		static PlayerPower Parse(string[] s)
+		private static PlayerPower Parse(string[] s)
 		{
 			return new PlayerPower(int.Parse(s[0]) != 0, int.Parse(s[1]), int.Parse(s[2]), int.Parse(s[3]), int.Parse(s[4]), int.Parse(s[5]));
 		}

@@ -21,17 +21,17 @@ namespace ImperitWASM.Server.Services
 	}
 	public class GameService : IGameService
 	{
-		readonly IContextService ctx;
-		readonly IConfig cfg;
+		private readonly IContextService ctx;
+		private readonly IConfig cfg;
 		public GameService(IContextService ctx, IConfig cfg)
 		{
 			this.ctx = ctx;
 			this.cfg = cfg;
 		}
 		public int Create() => ctx.Games.Add(Game.Create).Entity.Id;
-		static Expression<Func<Game, bool>> TimeElapsed(Game.State state, DateTime deadline) => g => g.Current == state && g.LastChange >= deadline;
-		static Expression<Func<Game, bool>> InState(Game.State state) => g => g.Current == state;
-		static Expression<Func<Game, bool>> InState(Game.State a, Game.State b) => g => g.Current == a || g.Current == b;
+		private static Expression<Func<Game, bool>> TimeElapsed(Game.State state, DateTime deadline) => g => g.Current == state && g.LastChange >= deadline;
+		private static Expression<Func<Game, bool>> InState(Game.State state) => g => g.Current == state;
+		private static Expression<Func<Game, bool>> InState(Game.State a, Game.State b) => g => g.Current == a || g.Current == b;
 		public void RemoveOld(TimeSpan period) => ctx.Games.RemoveAt(TimeElapsed(Game.State.Finished, DateTime.UtcNow - period));
 		public void Start(int gameId) => ctx.Games.UpdateAt(gameId, g => g.Start());
 		public void Finish(int gameId) => ctx.Games.UpdateAt(gameId, g => g.Finish());

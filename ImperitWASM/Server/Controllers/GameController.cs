@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,13 +9,13 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class GameController : ControllerBase
 	{
-		readonly IGameService game;
-		readonly INewGame newGame;
-		readonly IPlayersProvinces pap;
-		readonly ISessionService login;
-		readonly IEndOfTurn end;
-		readonly IActive active;
-		readonly IContextService ctx;
+		private readonly IGameService game;
+		private readonly INewGame newGame;
+		private readonly IPlayersProvinces pap;
+		private readonly ISessionService login;
+		private readonly IEndOfTurn end;
+		private readonly IActive active;
+		private readonly IContextService ctx;
 		public GameController(IGameService game, INewGame newGame, IPlayersProvinces pap, ISessionService login, IEndOfTurn end, IActive active, IContextService ctx)
 		{
 			this.game = game;

@@ -4,7 +4,7 @@ namespace ImperitWASM.Shared.Motion.Commands
 {
 	public class Borrow : ICommand
 	{
-		private readonly Settings settings;
+		readonly Settings settings;
 		public readonly Player Player;
 		public readonly int Amount;
 		public Borrow(Player player, int amount, Settings set)

@@ -5,7 +5,7 @@ namespace ImperitWASM.Shared.Motion
 {
 	public class Loan : IPlayerAction
 	{
-		private readonly Settings settings;
+		readonly Settings settings;
 		public readonly int Debt;
 		public Loan(int debt, Settings set)
 		{

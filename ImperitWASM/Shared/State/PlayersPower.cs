@@ -9,7 +9,7 @@ namespace ImperitWASM.Shared.State
 	[JsonConverter(typeof(Cvt.PlayersPowerConverter))]
 	public class PlayersPower : IReadOnlyList<PlayerPower>
 	{
-		private readonly ImmutableArray<PlayerPower> arr;
+		readonly ImmutableArray<PlayerPower> arr;
 		public PlayersPower(ImmutableArray<PlayerPower> pp) => arr = pp;
 		public PlayerPower this[int i] => arr[i];
 		public int Count => arr.Length;
@@ -24,7 +24,7 @@ namespace ImperitWASM.Shared.State
 		public int TotalAvg => TotalSum / Count;
 		public int TotalMax => arr.Max(pp => pp.Total);
 
-		private static PlayerPower ComputeOne(Player p, IEnumerable<Province> provinces)
+		static PlayerPower ComputeOne(Player p, IEnumerable<Province> provinces)
 		{
 			return new PlayerPower(p.Alive, provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(), p.Money, provinces.Sum(p => p.Soldiers.Power), provinces.Count(p => p is Land));
 		}

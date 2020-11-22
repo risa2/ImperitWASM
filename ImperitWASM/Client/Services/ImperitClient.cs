@@ -7,26 +7,26 @@ namespace ImperitWASM.Client.Services
 {
 	public class ImperitClient
 	{
-		private class Policy : JsonNamingPolicy
+		class Policy : JsonNamingPolicy
 		{
 			public override string ConvertName(string name) => new string(name[0], 1).ToLower() + name[1..];
 		}
 
-		private readonly HttpClient http;
+		readonly HttpClient http;
 		public ImperitClient(HttpClient http) => this.http = http;
 
-		private static readonly JsonSerializerOptions opt = new JsonSerializerOptions
+		static readonly JsonSerializerOptions opt = new JsonSerializerOptions
 		{
 			PropertyNameCaseInsensitive = true,
 			PropertyNamingPolicy = new Policy()
 		};
 
-		private static async Task<T> Parse<T>(HttpResponseMessage msg)
+		static async Task<T> Parse<T>(HttpResponseMessage msg)
 		{
 			return (await JsonSerializer.DeserializeAsync<T>(await msg.Content.ReadAsStreamAsync(), opt))!;
 		}
 
-		private static StringContent MakeContent<T>(T data)
+		static StringContent MakeContent<T>(T data)
 		{
 			return new StringContent(JsonSerializer.Serialize(data, opt), Encoding.UTF8, "application/json");
 		}

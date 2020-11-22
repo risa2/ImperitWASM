@@ -7,11 +7,11 @@ namespace ImperitWASM.Shared.State
 	[JsonConverter(typeof(Cvt.RatioConverter))]
 	public readonly struct Ratio : IEquatable<Ratio>, IComparable<Ratio>
 	{
-		private static readonly Random rng = new Random();
+		static readonly Random rng = new Random();
 		public static Ratio Zero { get; } = new Ratio(0);
 		public static Ratio One { get; } = new Ratio(int.MaxValue);
 
-		private readonly int value;
+		readonly int value;
 		public Ratio(long p) => value = p < 0 ? 0 : p > int.MaxValue ? int.MaxValue : (int)p;
 		public static Ratio operator +(Ratio x, Ratio y) => new Ratio((long)x.value + y.value);
 		public static Ratio operator -(Ratio x, Ratio y) => new Ratio((long)x.value - y.value);

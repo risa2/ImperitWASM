@@ -14,10 +14,10 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class PlayerController : ControllerBase
 	{
-		private readonly ISessionService login;
-		private readonly IPlayersProvinces pap;
-		private readonly IContextService ctx;
-		private readonly INewGame newGame;
+		readonly ISessionService login;
+		readonly IPlayersProvinces pap;
+		readonly IContextService ctx;
+		readonly INewGame newGame;
 		public PlayerController(IPlayersProvinces pap, ISessionService login, IContextService ctx, INewGame newGame)
 		{
 			this.pap = pap;

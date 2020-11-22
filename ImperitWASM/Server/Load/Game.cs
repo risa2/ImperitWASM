@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ImperitWASM.Server.Load
 {
@@ -10,6 +12,10 @@ namespace ImperitWASM.Server.Load
 		public int Active { get; set; }
 		public State Current { get; set; }
 		public DateTime LastChange { get; set; }
+		[ForeignKey("GameId")] public ICollection<EntityPlayer>? EntityPlayers { get; set; }
+		[ForeignKey("GameId")] public ICollection<EntityProvince>? EntityProvinces { get; set; }
+		[ForeignKey("GameId")] public ICollection<EntitySession>? EntitySessions { get; set; }
+		[ForeignKey("GameId")] public ICollection<EntityPlayerPower>? EntityPlayerPowers { get; set; }
 		public bool Created => Current == State.Created;
 		public bool Countdown => Current == State.Countdown;
 		public bool Started => Current == State.Started;

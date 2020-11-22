@@ -13,8 +13,8 @@ namespace ImperitWASM.Server.Services
 	}
 	public class SessionService : ISessionService
 	{
-		private static readonly Random rng = new Random();
-		private readonly IContextService ctx;
+		static readonly Random rng = new Random();
+		readonly IContextService ctx;
 		public SessionService(IContextService ctx) => this.ctx = ctx;
 		public async Task<string> Add(int player, int gameId)
 		{

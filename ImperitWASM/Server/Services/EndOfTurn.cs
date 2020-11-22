@@ -9,11 +9,11 @@ namespace ImperitWASM.Server.Services
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
-		private readonly IContextService ctx;
-		private readonly IPlayersProvinces pap;
-		private readonly IPowers powers;
-		private readonly INewGame newGame;
-		private readonly IConfig cfg;
+		readonly IContextService ctx;
+		readonly IPlayersProvinces pap;
+		readonly IPowers powers;
+		readonly INewGame newGame;
+		readonly IConfig cfg;
 		public EndOfTurn(IPlayersProvinces pap, IPowers powers, INewGame newGame, IConfig cfg, IContextService ctx)
 		{
 			this.pap = pap;

@@ -9,13 +9,13 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class GameController : ControllerBase
 	{
-		private readonly IGameService game;
-		private readonly INewGame newGame;
-		private readonly IPlayersProvinces pap;
-		private readonly ISessionService login;
-		private readonly IEndOfTurn end;
-		private readonly IActive active;
-		private readonly IContextService ctx;
+		readonly IGameService game;
+		readonly INewGame newGame;
+		readonly IPlayersProvinces pap;
+		readonly ISessionService login;
+		readonly IEndOfTurn end;
+		readonly IActive active;
+		readonly IContextService ctx;
 		public GameController(IGameService game, INewGame newGame, IPlayersProvinces pap, ISessionService login, IEndOfTurn end, IActive active, IContextService ctx)
 		{
 			this.game = game;
@@ -37,13 +37,13 @@ namespace ImperitWASM.Server.Controllers
 			var p_p = pap[player.G];
 			if (!string.IsNullOrWhiteSpace(player.N) && !string.IsNullOrWhiteSpace(player.N) && p_p.Province(player.S) is Land land && land.IsStart && !land.Occupied)
 			{
-				await newGame.RegisterAsync(player.G, player.N, new Password(player.P), player.S);
+				await newGame.RegisterAsync(game.Find(player.G), player.N, new Password(player.P), player.S);
 				return true;
 			}
 			return false;
 		}
 		[HttpGet("RegistrableGame")]
-		public async Task<int> RegistrableGame()
+		public async Task<int> RegistrableGameAsync()
 		{
 			await newGame.StartAllAsync();
 			if (game.RegistrableGame is int registrable)

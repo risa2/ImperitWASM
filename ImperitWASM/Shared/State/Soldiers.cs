@@ -8,7 +8,7 @@ namespace ImperitWASM.Shared.State
 {
 	public class Soldiers : IEnumerable<(SoldierType Type, int Count)>
 	{
-		private readonly ImmutableArray<(SoldierType Type, int Count)> soldiers;
+		readonly ImmutableArray<(SoldierType Type, int Count)> soldiers;
 		public Soldiers() => soldiers = ImmutableArray<(SoldierType Type, int Count)>.Empty;
 		public Soldiers(ImmutableArray<(SoldierType, int)> list) => soldiers = list;
 		public Soldiers(IEnumerable<(SoldierType, int)> list) => soldiers = list.ToImmutableArray();
@@ -55,7 +55,7 @@ namespace ImperitWASM.Shared.State
 		}
 		public bool CanSurviveIn(Province province) => soldiers.Sum(p => (p.Type.CanSustain(province) - p.Type.Weight) * p.Count) >= 0;
 
-		private static int[] Fight(ImmutableArray<(SoldierType Type, int Count)> soldiers, int me, int enemy, Func<SoldierType, int> powerof)
+		static int[] Fight(ImmutableArray<(SoldierType Type, int Count)> soldiers, int me, int enemy, Func<SoldierType, int> powerof)
 		{
 			int died = 0;
 			int[] remaining = new int[soldiers.Length];

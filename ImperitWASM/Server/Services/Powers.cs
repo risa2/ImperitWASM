@@ -15,8 +15,8 @@ namespace ImperitWASM.Server.Services
 	}
 	public class Powers : IPowers
 	{
-		private readonly IPlayersProvinces pap;
-		private readonly IContextService ctx;
+		readonly IPlayersProvinces pap;
+		readonly IContextService ctx;
 
 		public Powers(IPlayersProvinces pap, IContextService ctx)
 		{
@@ -24,7 +24,7 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 		}
 		public List<PlayersPower> Get(int gameId) => ctx.GetPlayersPowers(gameId);
-		public void Add(int gameId) => ctx.AddPlayersPower(gameId, PlayersPower.Compute(pap[gameId]));
+		public void Add(int gameId) => ctx.Add(gameId, PlayersPower.Compute(pap[gameId]));
 		public int Count(int gameId) => ctx.CountPlayersPowers(gameId);
 		public ImmutableDictionary<int, ImmutableArray<PlayersPower>> All => ctx.PlayerPowers.GroupBy(p => p.GameId).ToImmutableDictionary(pps => pps.Key, pps => EntityPlayerPower.ConvertMore(pps));
 	}

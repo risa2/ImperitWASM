@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using ImperitWASM.Server.Load;
 using ImperitWASM.Shared;
 using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.State;
@@ -15,16 +16,16 @@ namespace ImperitWASM.Server.Services
 		Task<int> CreateAsync();
 		Task StartAllAsync();
 		Task FinishAsync(int gameId);
-		Task RegisterAsync(int gameId, string name, Password password, int land);
+		Task RegisterAsync(Game game, string name, Password password, int land);
 	}
 	public class GameCreator : INewGame
 	{
-		private readonly IPlayersProvinces pap;
-		private readonly IPowers powers;
-		private readonly IGameService game;
-		private readonly IConfig cfg;
-		private readonly IContextService ctx;
-		private static readonly ImmutableList<IPlayerAction> Actions = ImmutableList.Create<IPlayerAction>(new Default(), new Instability());
+		readonly IPlayersProvinces pap;
+		readonly IPowers powers;
+		readonly IGameService game;
+		readonly IConfig cfg;
+		readonly IContextService ctx;
+		static readonly ImmutableList<IPlayerAction> Actions = ImmutableList.Create<IPlayerAction>(new Default(), new Instability());
 		public GameCreator(IPlayersProvinces pap, IPowers powers, IGameService game, IConfig cfg, IContextService ctx)
 		{
 			this.pap = pap;
@@ -34,22 +35,21 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 		}
 
-		private static Color ColorAt(int i) => new Color(120.0 + (137.507764050037854 * i), 1.0, 1.0);
-		private IEnumerable<(Land l, int i)> RemainingStarts(int gameId, ImmutableArray<Player> players) => ctx.GetProvinces(gameId, players).Select((p, i) => (p as Land, i)).Where(it => it.Item1 is Land && it.Item1.IsStart && !it.Item1.Occupied)!;
+		static Color ColorAt(int i) => new Color(120.0 + (137.507764050037854 * i), 1.0, 1.0);
+		IEnumerable<(Land l, int i)> RemainingStarts(PlayersAndProvinces p_p) => p_p.Provinces.Select((p, i) => (p as Land, i)).Where(it => it.Item1 is Land && it.Item1.IsStart && !it.Item1.Occupied)!;
 
-		private Player GetRobot(int count, int i, int earnings)
+		Player GetRobot(int count, int i, int earnings)
 		{
 			return new Robot(ColorAt(count + i - 1), cfg.Settings.DefaultMoney - (earnings * 2), true, Actions, cfg.Settings);
 		}
 
-		private void AddRobots(int gameId, ImmutableArray<Player> players)
+		void AddRobots(Game game, PlayersAndProvinces p_p)
 		{
-			RemainingStarts(gameId, players).Each((start, i) => pap.Add(gameId, GetRobot(players.Length, i, start.l.Earnings), start.l.Soldiers, start.i));
+			RemainingStarts(p_p).Each((start, i) => pap.Add(game, GetRobot(p_p.PlayersCount, i, start.l.Earnings), start.i));
 		}
 		public async Task<int> CreateAsync()
 		{
-			int gameId = game.Create();
-			pap.AddPaP(gameId, new PlayersAndProvinces(ImmutableArray.Create<Player>(new Savage()), cfg.Settings.Provinces));
+			int gameId = pap.Add(new PlayersAndProvinces(ImmutableArray.Create<Player>(new Savage()), cfg.Settings.Provinces)).Id;
 			game.RemoveOld(TimeSpan.FromDays(1));
 			await ctx.SaveAsync();
 			return gameId;
@@ -57,12 +57,11 @@ namespace ImperitWASM.Server.Services
 		public Color NextColor(int gameId) => ColorAt(pap.PlayersCount(gameId) - 1);
 		public Task StartAllAsync()
 		{
-			foreach (int gameId in game.ShouldStart)
+			foreach (var g in game.ShouldStart)
 			{
-				AddRobots(gameId, pap.Players(gameId));
-				pap.ResetActive(gameId);
-				game.Start(gameId);
-				powers.Add(gameId);
+				AddRobots(g, pap[g.Id]);
+				_ = g.Start().SetActive(pap.FirstActive(g.Id));
+				powers.Add(g.Id);
 			}
 			return ctx.SaveAsync();
 		}
@@ -71,14 +70,14 @@ namespace ImperitWASM.Server.Services
 			game.Finish(gameId);
 			return ctx.SaveAsync();
 		}
-		public Task RegisterAsync(int gameId, string name, Password password, int land)
+		public Task RegisterAsync(Game game, string name, Password password, int land)
 		{
-			var p_p = pap[gameId];
-			var player = new Human(ColorAt(p_p.PlayersCount), name, cfg.Settings.DefaultMoney - ((p_p.Province(land) as Land)?.Earnings * 2 ?? 0), true, Actions, password);
-			pap.Add(gameId, player, p_p.Province(land).DefaultSoldiers, land);
-			if (p_p.PlayersCount == 2)
+			int count = pap.PlayersCount(game.Id);
+			var player = new Human(ColorAt(count), name, cfg.Settings.DefaultMoney - (cfg.Settings.ProvinceData[land]?.Earnings * 2).GetValueOrDefault(), true, Actions, password);
+			pap.Add(game, player, land);
+			if (count == 2)
 			{
-				game.StartCountdown(gameId);
+				_ = game.StartCountdown();
 			}
 			return ctx.SaveAsync();
 		}

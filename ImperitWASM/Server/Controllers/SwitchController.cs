@@ -12,9 +12,9 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class SwitchController : ControllerBase
 	{
-		private readonly IPlayersProvinces pap;
-		private readonly IConfig cfg;
-		private readonly IActive active;
+		readonly IPlayersProvinces pap;
+		readonly IConfig cfg;
+		readonly IActive active;
 		public SwitchController(IPlayersProvinces pap, IConfig cfg, IActive active)
 		{
 			this.pap = pap;
@@ -22,15 +22,15 @@ namespace ImperitWASM.Server.Controllers
 			this.active = active;
 		}
 
-		private bool IsPossible(PlayersAndProvinces p_p, int player, Switch s) => s.F is int from && s.T is int to && s.M switch
+		bool IsPossible(PlayersAndProvinces p_p, int player, Switch s) => s.F is int from && s.T is int to && s.M switch
 		{
 			Mode.Recruit => cfg.Settings.RecruitableTypes(p_p.Province(to)).Any(),
 			Mode.Move => p_p.Province(from).SoldierTypes.Any(t => t.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to))),
 			Mode.Purchase => new Buy(p_p.Player(player), p_p.Province(to), 0).Allowed(p_p),
 			_ => false
 		};
-		private Switch IfPossible(PlayersAndProvinces p_p, int player, Switch s) => IsPossible(p_p, player, s) ? s : new Switch(s.S, Mode.Map, null, null);
-		private Switch ClickedResult(PlayersAndProvinces p_p, int user, int? from, int clicked) => from switch
+		Switch IfPossible(PlayersAndProvinces p_p, int player, Switch s) => IsPossible(p_p, player, s) ? s : new Switch(s.S, Mode.Map, null, null);
+		Switch ClickedResult(PlayersAndProvinces p_p, int user, int? from, int clicked) => from switch
 		{
 			int start => new Switch(null, start == clicked ? Mode.Recruit : Mode.Move, start, clicked),
 			null when p_p.Province(clicked).IsAllyOf(p_p.Player(user)) => new Switch(clicked, Mode.Map, null, null),

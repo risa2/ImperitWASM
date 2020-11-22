@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.Motion.Commands;
@@ -11,35 +12,37 @@ namespace ImperitWASM.Server.Services
 	public interface IPlayersProvinces
 	{
 		int PlayersCount(int gameId);
-		void Add(int gameId, Player player);
-		void Add(int gameId, Player player, Soldiers soldiers, int start);
+		EntityPlayer Add(Game game, Player player);
+		void Add(Game game, Player player, int start);
 		bool Do(int gameId, ICommand cmd);
-		void ResetActive(int gameId);
-		ImmutableArray<Player> Players(int gameId);
+		int FirstActive(int gameId);
 		PlayersAndProvinces Next(int gameId);
 		PlayersAndProvinces this[int gameId] { get; set; }
-		void AddPaP(int gameId, PlayersAndProvinces pap);
+		Game Add(PlayersAndProvinces pap);
 		Player Player(int gameId, int i);
 		Player Active(int gameId);
 	}
 	public class PlayersProvinces : IPlayersProvinces
 	{
-		private readonly IContextService ctx;
-		private readonly IConfig cfg;
-		private readonly IActive active;
+		readonly IContextService ctx;
+		readonly IConfig cfg;
+		readonly IActive active;
 		public PlayersProvinces(IContextService ctx, IConfig cfg, IActive active)
 		{
 			this.ctx = ctx;
 			this.cfg = cfg;
 			this.active = active;
 		}
-		public void Add(int gameId, Player player, Soldiers soldiers, int start)
+		public void Add(Game game, Player player, int start)
 		{
-			Add(gameId, player);
-			var province = ctx.Provinces.Single(p => p.GameId == gameId && p.Index == start);
-			province.EntitySoldier = EntitySoldier.From(soldiers, cfg.Settings.SoldierTypeIndices);
+			ctx.Provinces.Single(p => p.GameId == game.Id && p.Index == start).EntityPlayer = Add(game, player);
 		}
-		public void Add(int gameId, Player player) => ctx.Players.Add(EntityPlayer.From(player, PlayersCount(gameId), gameId));
+		public EntityPlayer Add(Game game, Player player)
+		{
+			var ePlayer = EntityPlayer.From(player, PlayersCount(game.Id));
+			game.EntityPlayers!.Add(ePlayer);
+			return ePlayer;
+		}
 		public bool Do(int gameId, ICommand cmd)
 		{
 			var (new_pap, success) = this[gameId].Do(cmd);
@@ -50,29 +53,19 @@ namespace ImperitWASM.Server.Services
 		{
 			int i = active[gameId];
 			var pap = this[gameId] = this[gameId].Do(new NextTurn()).Item1.Act(i);
-			active[gameId] = GetNextActive(gameId, i);
+			active[gameId] = pap.Players.Select((p, i) => (p, i)).First(p => p.p.Alive && !(p.p is Savage)).i;
 			return pap;
 		}
-		public void ResetActive(int gameId) => active[gameId] = GetNextActive(gameId, 0);
+		public int FirstActive(int gameId) => ctx.Players.Where(p => p.GameId == gameId && p.Alive && p.Type != EntityPlayer.Kind.Savage).Select(p => p.Index).Min(i => i);
 		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).Single(p => p.Index == i && p.GameId == gameId).Convert(cfg.Settings);
 		public Player Active(int gameId) => Player(gameId, ctx.Games.Find(gameId).Active);
 
-		private int GetNextActive(int gameId, int active)
-		{
-			return ctx.Players.Where(p => p.GameId == gameId && p.Alive && p.Type == EntityPlayer.Kind.Human).Select(p => p.Index).OrderBy(i => i).ToArray().FirstIfOrFirst(i => i > active);
-		}
 		public PlayersAndProvinces this[int gameId]
 		{
-			get
-			{
-				var players = ctx.GetPlayers(gameId);
-				var provinces = ctx.GetProvinces(gameId, players);
-				return new PlayersAndProvinces(players, new Provinces(provinces, cfg.Settings.Graph));
-			}
-			set => ctx.SetPlayers(gameId, value.Players).SetProvinces(gameId, value.Provinces);
+			get => ctx.GetPlayersAndProvinces(gameId);
+			set => ctx.Set(gameId, value.Players, value.Provinces);
 		}
-		public void AddPaP(int gameId, PlayersAndProvinces pap) => ctx.AddPlayersAndProvinces(gameId, pap.Players, pap.Provinces);
+		public Game Add(PlayersAndProvinces pap) => ctx.Add(pap.Players, pap.Provinces);
 		public int PlayersCount(int gameId) => ctx.Players.Count(p => p.GameId == gameId);
-		public ImmutableArray<Player> Players(int gameId) => ctx.GetPlayers(gameId);
 	}
 }

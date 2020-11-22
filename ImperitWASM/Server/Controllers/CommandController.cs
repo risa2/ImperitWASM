@@ -11,11 +11,11 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class CommandController : ControllerBase
 	{
-		private readonly IPlayersProvinces pap;
-		private readonly ISessionService login;
-		private readonly IConfig cfg;
-		private readonly IEndOfTurn end;
-		private readonly IActive active;
+		readonly IPlayersProvinces pap;
+		readonly ISessionService login;
+		readonly IConfig cfg;
+		readonly IEndOfTurn end;
+		readonly IActive active;
 		public CommandController(IPlayersProvinces pap, ISessionService login, IConfig cfg, IEndOfTurn end, IActive active)
 		{
 			this.pap = pap;
@@ -25,7 +25,7 @@ namespace ImperitWASM.Server.Controllers
 			this.active = active;
 		}
 
-		private bool Validate(int playerId, int gameId, string loginId) => login.IsValid(playerId, gameId, loginId) && playerId == active[gameId];
+		bool Validate(int playerId, int gameId, string loginId) => login.IsValid(playerId, gameId, loginId) && playerId == active[gameId];
 		[HttpPost("GiveUp")]
 		public async Task GiveUp([FromBody] Client.Data.Session player)
 		{

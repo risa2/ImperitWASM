@@ -37,7 +37,7 @@ namespace ImperitWASM.Shared.State
 			return p.WithActions(a);
 		}
 
-		private (Province, Player) Act(Player player, PlayersAndProvinces pap)
+		(Province, Player) Act(Player player, PlayersAndProvinces pap)
 		{
 			var (a, p) = Actions.Fold(player, (player, action) => action.Perform(player, pap));
 			return (WithActions(a), p);

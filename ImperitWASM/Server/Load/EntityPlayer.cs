@@ -26,16 +26,11 @@ namespace ImperitWASM.Server.Load
 			Kind.Robot => new Robot(Shared.State.Color.Parse(Color), Money, Alive, EntityPlayerActions!.Select(a => a.Convert(settings)).ToImmutableList(), settings),
 			_ => new Savage(),
 		};
-		public EntityPlayer Assign(Player p)
+		public static EntityPlayer From(Player p, int index) => p switch
 		{
-			_ = p switch
-			{
-				Human H => (Type = Kind.Human, Color = H.Color.ToString(), Name = H.Name, Money = H.Money, Alive = H.Alive, EntityPlayerActions = H.Actions.Select(EntityPlayerAction.From).ToArray(), Password = H.Password.ToString()),
-				Robot R => (Type = Kind.Robot, Color = R.Color.ToString(), Name = R.Name, Money = R.Money, Alive = R.Alive, EntityPlayerActions = R.Actions.Select(EntityPlayerAction.From).ToArray()),
-				_ => (object)(Type = Kind.Savage),
-			};
-			return this;
-		}
-		public static EntityPlayer From(Player p, int index, int gameId) => new EntityPlayer { Index = index, GameId = gameId }.Assign(p);
+			Human H => new EntityPlayer { Index = index, Type = Kind.Human, Color = H.Color.ToString(), Name = H.Name, Money = H.Money, Alive = H.Alive, EntityPlayerActions = H.Actions.Select(EntityPlayerAction.From).ToArray(), Password = H.Password.ToString() },
+			Robot R => new EntityPlayer { Index = index, Type = Kind.Robot, Color = R.Color.ToString(), Name = R.Name, Money = R.Money, Alive = R.Alive, EntityPlayerActions = R.Actions.Select(EntityPlayerAction.From).ToArray() },
+			_ => new EntityPlayer { Index = index, Type = Kind.Savage },
+		};
 	}
 }

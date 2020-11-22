@@ -9,7 +9,7 @@ namespace ImperitWASM.Shared.State
 	[JsonConverter(typeof(Cvt.GraphConverter))]
 	public class Graph : IReadOnlyList<IEnumerable<int>>
 	{
-		private readonly int[] edges, starts;
+		readonly int[] edges, starts;
 		public Graph(int[] edges, int[] starts)
 		{
 			this.edges = edges;

@@ -9,7 +9,7 @@ namespace ImperitWASM.Server.Load
 	}
 	public class File : IFile
 	{
-		private readonly string path;
+		readonly string path;
 		public File(params string[] parts) => path = System.IO.Path.Combine(parts);
 		public T Read<T>() where T : class => JsonSerializer.Deserialize<T>(System.IO.File.ReadAllText(path)).Must();
 	}

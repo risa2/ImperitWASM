@@ -13,16 +13,16 @@
 	[Parameter] public Action<Data.ProvinceVariables[]>? UpdateProvinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
-		var r = await http.PostJsonResponseAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.U, from, clicked, Session.G));
+		var r = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.U, from, clicked, Session.G));
 		Switch(r.M, r.F, r.T);
 		return r.S;
 	}
 	int PowersCount = 0, PlayerMoney = 0;
 	public async Task Update()
 	{
-		PowersCount = await http.PostJsonResponseAsync<int, int>("api/Powers/Count", Session.G);
-		PlayerMoney = await http.PostJsonResponseAsync<Data.Session, int>("api/Player/Money", Session);
-		UpdateProvinces!(await http.PostJsonResponseAsync<int, Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
+		PowersCount = await http.PostAsync<int, int>("api/Powers/Count", Session.G);
+		PlayerMoney = await http.PostAsync<Data.Session, int>("api/Player/Money", Session);
+		UpdateProvinces!(await http.PostAsync<int, Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
 		this.StateHasChanged();
 	}
 	protected override Task OnInitializedAsync() => Update();

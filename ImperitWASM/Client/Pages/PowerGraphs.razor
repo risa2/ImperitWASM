@@ -7,16 +7,16 @@
 	}
 	static string Polyline(IEnumerable<int> y_values, int count, int max_y, int x_offset, int y_offset, int width, int height, bool reverse = false)
 	{
-		return max_y == 0 || count < 2 ? "" : string.Join(' ', Parts(y_values, count, max_y, x_offset, y_offset, width, height).Reverse(reverse));
+		return max_y == 0 || count < 2 ? "" : string.Join(' ', Parts(y_values, count, max_y, x_offset, y_offset, width, height).ReverseIf(reverse));
 	}
 	static string ToString(double num) => num.ToString(CultureInfo.InvariantCulture);
 }
 @{
 	var total_avg = Powers.Select(p => p.TotalAvg);
 	var total_max = Powers.Max(p => p.TotalMax);
-	var ratios = Powers.Select(p => p.GetRatios()).ToArray();
+	var ratios = Powers.Select(p => p.GetRatios()).ToImmutableArray();
 	var ratio_sums = new double[ratios.Length];
-	var life = Players.Select((_, i) => Math.Min(Powers.Count, Powers.Count(p => p[i].Alive) + 1)).ToArray();
+	var life = Players.Select((_, i) => Math.Min(Powers.Count, Powers.Count(p => p[i].Alive) + 1)).ToImmutableArray();
 }
 @foreach (var (finals, player) in Powers[^1].Zip(Players, (a, b) => (a.Final, b)).Where(it => it.Final > 0))
 {
@@ -32,7 +32,7 @@
 </svg>
 @if (Powers.Count > 6)
 {
-	var changes = Powers.Zip(Powers.Skip(1), (prev, next) => prev.Zip(next, (p1, p2) => (double)p2.Total / p1.Total - 1.0).ToArray()).ToArray();
+	var changes = Powers.Zip(Powers.Skip(1), (prev, next) => prev.Zip(next, (p1, p2) => (double)p2.Total / p1.Total - 1.0).ToImmutableArray()).ToImmutableArray();
 	<p>Poměrná změna síly:</p>
 	<svg viewBox="-10 -10 1220 620" class="diagram">
 		@for (int p = 0; p < Players.Count; ++p)
@@ -51,6 +51,6 @@
 	{
 		<polyline points="@(Polyline(ratio_sums.Select(r => (int)(r * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600) + " " +
 							Polyline(ratio_sums.Select((r,j) => (int)((r + ratios[j][i]) * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i].Color"></polyline>
-		ratio_sums = ratio_sums.Select((r, j) => r + ratios[j][i]).ToArray();
+		ratio_sums.Each((sum, j) => sum += ratios[j][i]);
 	}
 </svg>

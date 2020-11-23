@@ -28,8 +28,8 @@ namespace ImperitWASM.Server.Load
 		};
 		public static EntityPlayer From(Player p, int index) => p switch
 		{
-			Human H => new EntityPlayer { Index = index, Type = Kind.Human, Color = H.Color.ToString(), Name = H.Name, Money = H.Money, Alive = H.Alive, EntityPlayerActions = H.Actions.Select(EntityPlayerAction.From).ToArray(), Password = H.Password.ToString() },
-			Robot R => new EntityPlayer { Index = index, Type = Kind.Robot, Color = R.Color.ToString(), Name = R.Name, Money = R.Money, Alive = R.Alive, EntityPlayerActions = R.Actions.Select(EntityPlayerAction.From).ToArray() },
+			Human H => new EntityPlayer { Index = index, Type = Kind.Human, Color = H.Color.ToString(), Name = H.Name, Money = H.Money, Alive = H.Alive, EntityPlayerActions = H.Actions.Select(EntityPlayerAction.From).ToList(), Password = H.Password.ToString() },
+			Robot R => new EntityPlayer { Index = index, Type = Kind.Robot, Color = R.Color.ToString(), Name = R.Name, Money = R.Money, Alive = R.Alive, EntityPlayerActions = R.Actions.Select(EntityPlayerAction.From).ToList() },
 			_ => new EntityPlayer { Index = index, Type = Kind.Savage },
 		};
 	}

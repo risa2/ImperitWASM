@@ -25,6 +25,7 @@ namespace ImperitWASM.Shared.State
 		public int ProvincesCount => Provinces.Count;
 		public Player Player(int i) => Players[i];
 		public Province Province(int i) => Provinces[i];
+		public int Next(int active) => (Players.Select((p, i) => (p, i)).Where(x => x.p.Alive && !(x.p is Savage)).Min(x => (x.i - active - 1 + PlayersCount) % PlayersCount) + active + 1) % PlayersCount;
 		public PlayersAndProvinces Act(int active, bool includePlayerActions = true)
 		{
 			var new_players = Players.ToBuilder();
@@ -39,7 +40,7 @@ namespace ImperitWASM.Shared.State
 			}
 			return new PlayersAndProvinces(new_players.MoveToImmutable(), Provinces.With(new_provinces.MoveToImmutable()));
 		}
-		public (PlayersAndProvinces, bool) Do(ICommand cmd)
+		public (PlayersAndProvinces, bool) Add(ICommand cmd)
 		{
 			if (cmd.Allowed(this))
 			{
@@ -49,22 +50,7 @@ namespace ImperitWASM.Shared.State
 			}
 			return (new PlayersAndProvinces(Players, Provinces), false);
 		}
-		public PlayersAndProvinces RemovePlayers(Player init)
-		{
-			var new_provinces = Provinces.With(Provinces.Select(p => p.Revolt()).ToImmutableArray());
-			return new PlayersAndProvinces(ImmutableArray.Create(init), new_provinces);
-		}
-		public PlayersAndProvinces Add(IEnumerable<(Player, Soldiers, int)> starts)
-		{
-			var new_provinces = Provinces.ToBuilder();
-			foreach (var (player, soldiers, where) in starts)
-			{
-				new_provinces[where] = new_provinces[where].GiveUpTo(player, soldiers);
-			}
-			return new PlayersAndProvinces(Players.AddRange(starts.Select(s => s.Item1)), Provinces.With(new_provinces.MoveToImmutable()));
-		}
-		public PlayersAndProvinces Add(Player p) => new PlayersAndProvinces(Players.Add(p), Provinces);
 		public int LivingHumans => Players.Count(p => p.Alive && p is Human);
-		public IEnumerable<(Player Player, IEnumerable<Province> Provinces)> PlayersProvinces => Players.Select(p => (p, Provinces.ControlledBy(p)));
+		public IEnumerable<IGrouping<Player, Province>> PlayersProvinces => Provinces.GroupBy(p => p.Player);
 	}
 }

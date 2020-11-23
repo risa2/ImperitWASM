@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Motion.Commands;
@@ -31,7 +32,7 @@ namespace ImperitWASM.Server.Controllers
 		{
 			if (login.IsValid(player.U, player.G, player.I))
 			{
-				_ = pap.Do(player.G, new GiveUp(pap.Player(player.G, player.U)));
+				_ = pap.Add(player.G, new GiveUp(pap.Player(player.G, player.U)));
 				if (active[player.G] == player.U)
 				{
 					_ = await end.NextTurnAsync(player.G);
@@ -44,7 +45,7 @@ namespace ImperitWASM.Server.Controllers
 			var (from, to, game) = move;
 			var p_p = pap[game];
 			bool possible = p_p.Province(from).SoldierTypes.Any(type => type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to)));
-			var types = p_p.Province(from).SoldierTypes.Select(type => type.Description).ToArray();
+			var types = p_p.Province(from).SoldierTypes.Select(type => type.Description).ToImmutableArray();
 			return new Client.Data.MoveInfo(possible, !p_p.Province(from).IsAllyOf(p_p.Province(to)), p_p.Province(to).Occupied, p_p.Province(from).Name, p_p.Province(to).Name, p_p.Province(from).Soldiers.ToString(), p_p.Province(to).Soldiers.ToString(), types);
 		}
 		[HttpPost("Move")]
@@ -57,7 +58,7 @@ namespace ImperitWASM.Server.Controllers
 			var p_p = pap[m.Game];
 			var (from, to) = (p_p.Province(m.From), p_p.Province(m.To));
 			var move = new Move(p_p.Player(m.LoggedIn), from, to, new Soldiers(m.Counts.Select((count, i) => (from.Soldiers[i].Type, count))));
-			return pap.Do(m.Game, move) switch
+			return pap.Add(m.Game, move) switch
 			{
 				true => Client.Pages.Move.Errors.Ok,
 				false when !from.Soldiers.Contains(move.Soldiers) => Client.Pages.Move.Errors.FewSoldiers,
@@ -80,16 +81,16 @@ namespace ImperitWASM.Server.Controllers
 			{
 				if (Land.Price > p_p.Player(purchase.LoggedIn).Money)
 				{
-					(p_p, _) = p_p.Do(new Borrow(p_p.Player(purchase.LoggedIn), Land.Price - p_p.Player(purchase.LoggedIn).Money, cfg.Settings));
+					(p_p, _) = p_p.Add(new Borrow(p_p.Player(purchase.LoggedIn), Land.Price - p_p.Player(purchase.LoggedIn).Money, cfg.Settings));
 				}
-				(pap[purchase.Game], _) = p_p.Do(new Buy(p_p.Player(purchase.LoggedIn), p_p.Province(purchase.Land), Land.Price));
+				(pap[purchase.Game], _) = p_p.Add(new Buy(p_p.Player(purchase.LoggedIn), p_p.Province(purchase.Land), Land.Price));
 			}
 		}
 		[HttpPost("RecruitInfo")]
 		public Client.Data.RecruitInfo RecruitInfo([FromBody] Client.Data.CmdData p)
 		{
 			var p_p = pap[p.G];
-			return new Client.Data.RecruitInfo(p_p.Province(p.A).Name, p_p.Province(p.A).Soldiers.ToString(), cfg.Settings.RecruitableTypes(p_p.Province(p.A)).Select(t => new Client.Data.SoldiersItem(t.Description, t.Price)).ToArray(), p_p.Player(p.B).Money);
+			return new Client.Data.RecruitInfo(p_p.Province(p.A).Name, p_p.Province(p.A).Soldiers.ToString(), cfg.Settings.RecruitableTypes(p_p.Province(p.A)).Select(t => new Client.Data.SoldiersItem(t.Description, t.Price)).ToImmutableArray(), p_p.Player(p.B).Money);
 		}
 		[HttpPost("Recruit")]
 		public void Recruit([FromBody] Client.Data.RecruitCmd r)
@@ -100,15 +101,15 @@ namespace ImperitWASM.Server.Controllers
 				var p_p = pap[r.Game];
 				if (soldiers.Price > p_p.Player(r.LoggedIn).Money)
 				{
-					(p_p, _) = p_p.Do(new Borrow(p_p.Player(r.LoggedIn), soldiers.Price - p_p.Player(r.LoggedIn).Money, cfg.Settings));
+					(p_p, _) = p_p.Add(new Borrow(p_p.Player(r.LoggedIn), soldiers.Price - p_p.Player(r.LoggedIn).Money, cfg.Settings));
 				}
-				(pap[r.Game], _) = p_p.Do(new Recruit(p_p.Player(r.LoggedIn), p_p.Province(r.Province), soldiers));
+				(pap[r.Game], _) = p_p.Add(new Recruit(p_p.Player(r.LoggedIn), p_p.Province(r.Province), soldiers));
 			}
 		}
 		[HttpPost("Donate")]
 		public bool Donate([FromBody] Client.Data.DonationCmd donation)
 		{
-			return login.IsValid(donation.LoggedIn, donation.Game, donation.LoginId) && pap.Do(donation.Game, new Donate(pap.Player(donation.Game, donation.LoggedIn), pap.Player(donation.Game, donation.Recipient), donation.Amount));
+			return login.IsValid(donation.LoggedIn, donation.Game, donation.LoginId) && pap.Add(donation.Game, new Donate(pap.Player(donation.Game, donation.LoggedIn), pap.Player(donation.Game, donation.Recipient), donation.Amount));
 		}
 	}
 }

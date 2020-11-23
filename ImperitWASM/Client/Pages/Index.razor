@@ -7,7 +7,7 @@
 	Data.Session? Session = null;
 	async Task<bool> LoginAsync(int player, int gameId, string password)
 	{
-		string? login = (await http.PostJsonResponseAsync<Data.Login, Data.StringValue>("api/Player/Login", new Data.Login(player, gameId, password))).Value;
+		string? login = (await http.PostAsync<Data.Login, Data.StringValue>("api/Player/Login", new Data.Login(player, gameId, password))).Value;
 		Session = login is string ? new Data.Session(player, gameId, login) : null;
 		await cookies.SetAsync(Session);
 		this.StateHasChanged();
@@ -17,7 +17,7 @@
 	{
 		if (Session != null)
 		{
-			await http.PostJsonAsync<Data.Session>("api/Player/Logout", Session);
+			await http.PostAsync<Data.Session>("api/Player/Logout", Session);
 			await cookies.RemoveAsync();
 			Session = null;
 			this.StateHasChanged();
@@ -26,7 +26,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		Session = await cookies.GetAsync();
-		Session = Session != null && await http.PostJsonResponseAsync<Data.Session, bool>("api/Player/Correct", Session!) ? Session : null;
+		Session = Session != null && await http.PostAsync<Data.Session, bool>("api/Player/Correct", Session!) ? Session : null;
 	}
 }
 @if (Session != null)

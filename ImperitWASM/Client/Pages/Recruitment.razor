@@ -7,19 +7,20 @@
 	[Parameter] public int Land { get; set; }
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	Data.Recruit model = new Data.Recruit();
-	Data.RecruitInfo? Info = null;
+	Data.RecruitInfo Info = new Data.RecruitInfo();
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.RecruitInfo> ("api/Command/RecruitInfo", new Data.CmdData(Land, Session.U, Session.G));
+		Info = await http.PostAsync<Data.CmdData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.CmdData(Land, Session.U, Session.G));
+		System.Console.WriteLine(Info.R.Length);
 		model.Soldiers = Data.Int.Array(Info.R.Length);
 	}
-	int Price => Info is null ? 0 : model.Soldiers.Zip(Info.R, (count, type) => count.Value * type.P).Sum();
-	int Missing => Price - Info?.M ?? 0;
+	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
+	int Missing => Price - Info.M;
 	async Task DoRecruit()
 	{
 		if (Missing <= 0 || model.Borrow)
 		{
-			await http.PostJsonAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.U, Session.I, Land, model.Soldiers.Select(s => s.Value).ToArray(), Session.G));
+			await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.U, Session.I, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
 			Switch(Mode.Map);
 		}
 	}
@@ -28,17 +29,17 @@
 <nav>
 	<a @onclick="() => Switch(Mode.Map)">Zrušit</a>
 	<a class="this">Verbování</a>
-	<a @onclick="() => Switch(Mode.Players)">@Info?.M@Sym.Money</a>
+	<a @onclick="() => Switch(Mode.Players)">@Info.M@Sym.Money</a>
 </nav>
 <main>
 	<SoldierTypeInfobox @ref="infobox" />
 	<EditForm Model="model" OnValidSubmit="DoRecruit">
 		<DataAnnotationsValidator /><ValidationSummary />
 		<p>
-			@Info?.N
-			@if (!string.IsNullOrWhiteSpace(Info?.S))
+			@Info.N
+			@if (!string.IsNullOrWhiteSpace(Info.S))
 			{
-				<text>má @Info!.S</text>
+				<text>má @Info.S</text>
 			}
 			else
 			{
@@ -46,8 +47,9 @@
 			}
 		</p>
 		<table>
-			@foreach (var (i, (type, price)) in (Info?.R?.Index()).Try())
+			@foreach (var (i, (type, price)) in Info.R.Try().Index())
 			{
+				System.Console.WriteLine(i);
 				<tr>
 					<td>@type.Name @price@Sym.Money<sup @onclick="() => infobox?.Open(type)">?</sup></td>
 					<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Shared.State;
 
@@ -7,15 +7,15 @@ namespace ImperitWASM.Client.Data
 {
 	public class DisplayableShape
 	{
-		public Point[] B { get; set; } = Array.Empty<Point>();
+		public ImmutableArray<Point> B { get; set; }
 		public Point C { get; set; }
 		public Color F { get; set; }
 		public Color S { get; set; }
 		public int W { get; set; }
 		public bool R { get; set; }
-		public IEnumerable<string> T { get; set; } = Array.Empty<string>();
+		public IEnumerable<string> T { get; set; } = ImmutableArray<string>.Empty;
 		public DisplayableShape() { }
-		public DisplayableShape(Point[] border, Point center, Color fill, Color stroke, int strokeWidth, bool isStart, IEnumerable<string> text)
+		public DisplayableShape(ImmutableArray<Point> border, Point center, Color fill, Color stroke, int strokeWidth, bool isStart, IEnumerable<string> text)
 		{
 			B = border;
 			C = center;

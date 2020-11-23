@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -9,8 +10,8 @@ namespace ImperitWASM.Shared.State
 	[JsonConverter(typeof(Cvt.GraphConverter))]
 	public class Graph : IReadOnlyList<IEnumerable<int>>
 	{
-		readonly int[] edges, starts;
-		public Graph(int[] edges, int[] starts)
+		readonly ImmutableArray<int> edges, starts;
+		public Graph(ImmutableArray<int> edges, ImmutableArray<int> starts)
 		{
 			this.edges = edges;
 			this.starts = starts;

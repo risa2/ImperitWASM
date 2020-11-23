@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Immutable;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Client.Data
@@ -12,9 +12,9 @@ namespace ImperitWASM.Client.Data
 		public string ToName { get; set; } = "";
 		public string FromSoldiers { get; set; } = "";
 		public string ToSoldiers { get; set; } = "";
-		public Description[] Soldiers { get; set; } = Array.Empty<Description>();
+		public ImmutableArray<Description> Soldiers { get; set; }
 		public MoveInfo() { }
-		public MoveInfo(bool possible, bool canAttack, bool canReinforce, string fromName, string toName, string fromSoldiers, string toSoldiers, Description[] soldiers)
+		public MoveInfo(bool possible, bool canAttack, bool canReinforce, string fromName, string toName, string fromSoldiers, string toSoldiers, ImmutableArray<Description> soldiers)
 		{
 			Possible = possible;
 			CanAttack = canAttack;

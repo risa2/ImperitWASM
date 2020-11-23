@@ -87,7 +87,7 @@ namespace ImperitWASM.Shared.State
 						break;
 				}
 			}
-			static byte clamp(int i) => i < 0 ? (byte)0 : i > 255 ? (byte)255 : (byte)i;
+			static byte clamp(int i) => (byte)Math.Clamp(i, 0, 255);
 			r = clamp((int)(R * 255.0));
 			g = clamp((int)(G * 255.0));
 			b = clamp((int)(B * 255.0));

@@ -43,7 +43,7 @@ namespace ImperitWASM.Server.Services
 			this.cfg = cfg;
 		}
 		public Task SaveAsync() => ctx.SaveChangesAsync();
-		
+
 		// Players and Provinces -------------------------------------------------------------------
 		public PlayersAndProvinces GetPlayersAndProvinces(int gameId)
 		{
@@ -51,16 +51,17 @@ namespace ImperitWASM.Server.Services
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityPlayer).ThenInclude(p => p!.EntityPlayerActions)
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntitySoldier).ThenInclude(s => s!.EntitySoldierPairs)
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntitySoldier).ThenInclude(s => s!.EntitySoldierPairs)
-							.Single(game => game.Id == gameId);
+							.AsNoTracking().Single(game => game.Id == gameId);
 			var players = game.EntityPlayers.OrderBy(p => p.Index).Select(p => p.Convert(cfg.Settings)).ToImmutableArray();
 			var provinces = game.EntityProvinces.OrderBy(p => p.Index).Select(p => p.Convert(cfg.Settings)).ToImmutableArray();
 			return new PlayersAndProvinces(players, new Provinces(provinces, cfg.Settings.Graph));
 		}
+
 		Game Insert(Game game, IEnumerable<Player> players, IEnumerable<Province> provinces)
 		{
 			var map = players.Select((p, i) => (p, i)).ToImmutableDictionary(x => x.p, x => EntityPlayer.From(x.p, x.i));
-			game.EntityPlayers = map.Values.ToArray();
-			game.EntityProvinces = provinces.Select((province, i) => EntityProvince.From(province, map, cfg.Settings.SoldierTypeIndices, i)).ToArray();
+			game.EntityPlayers = map.Values.ToList();
+			game.EntityProvinces = provinces.Select((province, i) => EntityProvince.From(province, map, cfg.Settings.SoldierTypeIndices, i)).ToList();
 			return game;
 		}
 		public Game Set(int gameId, IEnumerable<Player> players, IEnumerable<Province> provinces)

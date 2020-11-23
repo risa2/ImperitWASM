@@ -15,7 +15,7 @@ namespace ImperitWASM.Server.Load
 		}
 		public static EntitySoldier From(Soldiers soldiers, IReadOnlyDictionary<SoldierType, int> map)
 		{
-			return new EntitySoldier { EntitySoldierPairs = soldiers.Select(s => EntitySoldierPair.From(s, map)).ToArray() };
+			return new EntitySoldier { EntitySoldierPairs = soldiers.Select(s => EntitySoldierPair.From(s, map)).ToList() };
 		}
 	}
 }

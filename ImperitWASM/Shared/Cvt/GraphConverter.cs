@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,14 +12,14 @@ namespace ImperitWASM.Shared.Cvt
 		public override Graph Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var array = JsonDocument.ParseValue(ref reader).RootElement.EnumerateArray();
-			int[][]? table = array.Select(line => line.EnumerateArray().Select(item => item.GetInt32()).ToArray()).ToArray();
-			int[]? starts = new int[table.Length + 1];
+			var table = array.Select(line => line.EnumerateArray().Select(item => item.GetInt32()).ToList()).ToList();
+			var starts = ImmutableArray.CreateBuilder<int>(table.Count + 1);
 			starts[0] = 0;
-			for (int i = 1; i < starts.Length; ++i)
+			for (int i = 1; i < starts.Capacity; ++i)
 			{
-				starts[i] = starts[i - 1] + table[i - 1].Length;
+				starts[i] = starts[i - 1] + table[i - 1].Count;
 			}
-			return new Graph(table.SelectMany(n => n).ToArray(), starts);
+			return new Graph(table.SelectMany(n => n).ToImmutableArray(), starts.MoveToImmutable());
 		}
 		public override void Write(Utf8JsonWriter writer, Graph value, JsonSerializerOptions options)
 		{

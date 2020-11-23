@@ -13,25 +13,29 @@ namespace ImperitWASM.Server.Services
 		readonly IPlayersProvinces pap;
 		readonly IPowers powers;
 		readonly IGameCreator newGame;
+		readonly IGameService game;
 		readonly IConfig cfg;
-		public EndOfTurn(IPlayersProvinces pap, IPowers powers, IGameCreator newGame, IConfig cfg, IContextService ctx)
+		public EndOfTurn(IPlayersProvinces pap, IPowers powers, IGameCreator newGame, IConfig cfg, IContextService ctx, IGameService game)
 		{
 			this.pap = pap;
 			this.powers = powers;
 			this.newGame = newGame;
 			this.cfg = cfg;
 			this.ctx = ctx;
+			this.game = game;
 		}
 		public async Task<bool> NextTurnAsync(int gameId)
 		{
-			var p = pap.Next(gameId);
-			while (pap.Active(gameId) is Robot robot && p.LivingHumans > 0)
+			var p_p = pap[gameId];
+			var g = game.Find(gameId);
+			while (p_p.Player(g.Active) is Robot robot && p_p.LivingHumans > 0)
 			{
-				pap[gameId] = robot.Think(p);
-				p = pap.Next(gameId);
+				p_p = robot.Think(p_p).Act(g.Active);
+				g.Active = p_p.Next(g.Active);
 			}
+			pap[gameId] = p_p;
 			powers.Add(gameId);
-			if (p.LivingHumans <= 0 || p.Winner(cfg.Settings.FinalLandsCount) is Human)
+			if (p_p.LivingHumans <= 0 || p_p.Winner(cfg.Settings.FinalLandsCount) is Human)
 			{
 				await newGame.FinishAsync(gameId);
 				return true;

@@ -19,19 +19,19 @@
 	GameMap? Map { get; set; }
 	async Task NextTurnAsync()
 	{
-		if (await http.PostJsonResponseAsync<Data.Session, bool>("api/Game/NextTurn", Session))
+		if (await http.PostAsync<Data.Session, bool>("api/Game/NextTurn", Session))
 		{
 			await LogoutAsync!();
 		}
 		else
 		{
-			Info = await http.PostJsonResponseAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
+			Info = await http.PostAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
 			Map?.Update();
 		}
 	}
 	async Task CheckSession()
 	{
-		Info = await http.PostJsonResponseAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
+		Info = await http.PostAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
 		if (!Info.IsGameActive)
 		{
 			await LogoutAsync!();
@@ -43,7 +43,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		await CheckSession();
-		Provinces = await http.PostJsonResponseAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", Session.G);
+		Provinces = await http.PostAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", Session.G);
 		timer = new System.Timers.Timer(400);
 		timer.Elapsed += async (sender, e) => await CheckSession();
 		timer.Start();

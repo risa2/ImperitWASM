@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.State;
@@ -20,7 +21,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Shapes")]
 		public IEnumerable<Client.Data.DisplayableShape> Shapes([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new Client.Data.DisplayableShape(p.ToArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart, p.Text));
+			return pap[gameId].Provinces.Select(p => new Client.Data.DisplayableShape(p.ToImmutableArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart, p.Text));
 		}
 		[HttpPost("Current")]
 		public IEnumerable<Client.Data.ProvinceVariables> Current([FromBody] int gameId)

@@ -7,8 +7,8 @@
 	PlayersPower[]? PowersArray = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Players = await http.PostJsonResponseAsync<int, Data.ColoredHuman[]>("api/Player/Colored", Session.G);
-		PowersArray = (await http.PostJsonResponseAsync<int, PlayersPower[]>("api/Powers/List", Session.G));
+		Players = await http.PostAsync<int, Data.ColoredHuman[]>("api/Player/Colored", Session.G);
+		PowersArray = (await http.PostAsync<int, PlayersPower[]>("api/Powers/List", Session.G));
 	}
 }
 <nav>

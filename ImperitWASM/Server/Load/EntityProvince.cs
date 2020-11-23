@@ -23,7 +23,7 @@ namespace ImperitWASM.Server.Load
 		}
 		public static EntityProvince From(Province p, IReadOnlyDictionary<Player, EntityPlayer> map, IReadOnlyDictionary<SoldierType, int> smap, int index)
 		{
-			return new EntityProvince { Index = index, EntityPlayer = map[p.Player], EntitySoldier = EntitySoldier.From(p.Soldiers, smap), EntityProvinceActions = p.Actions.Select(a => EntityProvinceAction.From(a, map, smap)).ToArray() };
+			return new EntityProvince { Index = index, EntityPlayer = map[p.Player], EntitySoldier = EntitySoldier.From(p.Soldiers, smap), EntityProvinceActions = p.Actions.Select(a => EntityProvinceAction.From(a, map, smap)).ToList() };
 		}
 	}
 }

@@ -26,7 +26,7 @@ namespace ImperitWASM.Shared.State
 
 		void Recruit(ref PlayersAndProvinces pap, ref int spent, Province province, Soldiers soldiers)
 		{
-			(pap, _) = pap.Do(new Recruit(this, province, soldiers));
+			(pap, _) = pap.Add(new Recruit(this, province, soldiers));
 			spent += soldiers.Price;
 		}
 
@@ -37,7 +37,7 @@ namespace ImperitWASM.Shared.State
 
 		static int DivUp(int a, int b) => (a / b) + (a % b > 0 ? 1 : 0);
 
-		void DefensiveRecruits(ref PlayersAndProvinces pap, ref int spent, Province[] my)
+		void DefensiveRecruits(ref PlayersAndProvinces pap, ref int spent, ImmutableArray<Province> my)
 		{
 			foreach (var place in my)
 			{
@@ -48,7 +48,7 @@ namespace ImperitWASM.Shared.State
 			}
 		}
 
-		void StabilisatingRecruits(ref PlayersAndProvinces pap, ref int spent, Province[] my)
+		void StabilisatingRecruits(ref PlayersAndProvinces pap, ref int spent, ImmutableArray<Province> my)
 		{
 			foreach (var place in my)
 			{
@@ -63,7 +63,7 @@ namespace ImperitWASM.Shared.State
 			}
 		}
 
-		void Recruits(ref PlayersAndProvinces pap, Province[] my)
+		void Recruits(ref PlayersAndProvinces pap, ImmutableArray<Province> my)
 		{
 			int spent = 0;
 			DefensiveRecruits(ref pap, ref spent, my);
@@ -81,7 +81,7 @@ namespace ImperitWASM.Shared.State
 
 		void Attack(ref PlayersAndProvinces pap, Province from, Province to, Soldiers soldiers)
 		{
-			(pap, _) = pap.Do(new Move(this, from, to, soldiers));
+			(pap, _) = pap.Add(new Move(this, from, to, soldiers));
 		}
 
 		static Soldiers Units(int num) => new Soldiers(new Pedestrian(new Description("", "", ""), 1, 1, 1, 1), num);
@@ -92,7 +92,7 @@ namespace ImperitWASM.Shared.State
 			return pap.NeighborsOf(from).Select(to => (to, from.Soldiers.MaxAttackers(pap, from, to).AttackedBy(Units(enemies - (IsEnemy(to) ? to.Soldiers.AttackPower : 0))))).Where(to => ShouldAttack(to.Item2, to.to, EnemiesPower(pap, to.to)));
 		}
 
-		void Attacks(ref PlayersAndProvinces pap, Province[] my)
+		void Attacks(ref PlayersAndProvinces pap, ImmutableArray<Province> my)
 		{
 			foreach (var from in my)
 			{
@@ -104,14 +104,14 @@ namespace ImperitWASM.Shared.State
 		}
 
 		IEnumerable<Province> NeighborAllies(PlayersAndProvinces pap, Province pr) => pap.NeighborsOf(pr).Where(n => n.IsAllyOf(this));
-		IEnumerable<Province> AttackPlaces(PlayersAndProvinces pap, Province[] my) => my.SelectMany(place => pap.NeighborsOf(place).Where(p => p.Occupied && !p.IsAllyOf(this)));
+		IEnumerable<Province> AttackPlaces(PlayersAndProvinces pap, ImmutableArray<Province> my) => my.SelectMany(place => pap.NeighborsOf(place).Where(p => p.Occupied && !p.IsAllyOf(this)));
 
 		Soldiers AttackersFrom(PlayersAndProvinces pap, IEnumerable<Province> starts, Province to)
 		{
 			return starts.Aggregate(new Soldiers(), (s, from) => s.Add(from.Soldiers.MaxAttackers(pap, from, to).AttackedBy(Units(EnemiesPower(pap, from) - to.Soldiers.AttackPower))));
 		}
 
-		void MultiAttacks(ref PlayersAndProvinces pap, Province[] my)
+		void MultiAttacks(ref PlayersAndProvinces pap, ImmutableArray<Province> my)
 		{
 			foreach (var to in AttackPlaces(pap, my).Distinct())
 			{
@@ -129,10 +129,10 @@ namespace ImperitWASM.Shared.State
 
 		void Transport(ref PlayersAndProvinces pap, Province from, Province to, Soldiers soldiers)
 		{
-			(pap, _) = pap.Do(new Move(this, from, to, soldiers));
+			(pap, _) = pap.Add(new Move(this, from, to, soldiers));
 		}
 
-		void SpreadSoldiers(ref PlayersAndProvinces pap, Province[] my)
+		void SpreadSoldiers(ref PlayersAndProvinces pap, ImmutableArray<Province> my)
 		{
 			foreach (var from in my)
 			{
@@ -154,7 +154,7 @@ namespace ImperitWASM.Shared.State
 		}
 		public PlayersAndProvinces Think(PlayersAndProvinces pap)
 		{
-			var my = pap.Provinces.ControlledBy(this).ToArray();
+			var my = pap.Provinces.ControlledBy(this).ToImmutableArray();
 			Recruits(ref pap, my);
 			Attacks(ref pap, my);
 			MultiAttacks(ref pap, my);

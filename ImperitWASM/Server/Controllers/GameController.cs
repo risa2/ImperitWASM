@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
+using System.Threading.Tasks;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,6 @@ namespace ImperitWASM.Server.Controllers
 			return active[loggedIn.G] == loggedIn.U && login.IsValid(loggedIn.U, loggedIn.G, loggedIn.I) && await end.NextTurnAsync(loggedIn.G);
 		}
 		[HttpGet("Finished")]
-		public int[] Finished() => game.FinishedGames;
+		public ImmutableArray<int> Finished() => game.FinishedGames;
 	}
 }

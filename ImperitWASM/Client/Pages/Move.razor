@@ -11,7 +11,7 @@
 	Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.MoveInfo>("api/Command/MoveInfo", new Data.CmdData(From, To, Session.G));
+		Info = await http.PostAsync<Data.CmdData, Data.MoveInfo>("api/Command/MoveInfo", new Data.CmdData(From, To, Session.G));
 		model.Soldiers = Data.Int.Array(Info.Soldiers.Length);
 		if (!Info.Possible)
 		{
@@ -20,7 +20,7 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostJsonResponseAsync<Data.MoveCmd, Errors>("api/Command/Move", new Data.MoveCmd(Session.U, Session.I, From, To, model.Soldiers.Select(s => s.Value).ToArray(), Session.G));
+		error = await http.PostAsync<Data.MoveCmd, Errors>("api/Command/Move", new Data.MoveCmd(Session.U, Session.I, From, To, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
 		if (error == Errors.Ok || error == Errors.NotPlaying)
 		{
 			Return();

@@ -18,7 +18,7 @@
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		Players = await http.GetJsonAsync<ImmutableArray<Data.PlayerId>>("api/Player/Login");
+		Players = await http.GetAsync<ImmutableArray<Data.PlayerId>>("api/Player/Login");
 	}
 }
 <NavMenu Options="Přihlášení;Registrace;Historie" OnClick="i => Set((Mode)i)"/>
@@ -38,9 +38,9 @@
 			<p>Hráč:</p>
 			@if (!Players.IsDefaultOrEmpty)
 			{
-				<IntSelect @bind-Value="model.I" Options="Players" Name="@(p => p.N + "(hra " + p.G + ")" )"/><br/>
+				<IntSelect @bind-Value="model.I" Options="Players" Name="@(p => p.N + " (hra " + p.G + ")" )"/><br/>
 			}
-			<p>Heslo:</p><InputText type="password" @bind-Value="model.P"/><br/>
+			<p>Heslo:</p><InputText type="password" @bind-Value="model.P" autocomplete="current-password"/><br/>
 			<button type="submit">Přihlásit se</button>
 		</EditForm>
 	}

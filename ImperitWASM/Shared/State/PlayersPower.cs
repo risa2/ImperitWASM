@@ -30,7 +30,7 @@ namespace ImperitWASM.Shared.State
 		}
 		public static PlayersPower Compute(PlayersAndProvinces pap)
 		{
-			return new PlayersPower(pap.PlayersProvinces.Where(pp => pp.Player is Human).Select(pp => ComputeOne(pp.Player, pp.Provinces)).ToImmutableArray());
+			return new PlayersPower(pap.PlayersProvinces.Where(pp => pp.Key is Human).Select(pp => ComputeOne(pp.Key, pp)).ToImmutableArray());
 		}
 	}
 }

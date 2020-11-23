@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using ImperitWASM.Server.Load;
@@ -12,9 +14,9 @@ namespace ImperitWASM.Server.Services
 		void RemoveOld(TimeSpan period);
 		bool Started(int gameId);
 		bool Finished(int gameId);
-		int[] StartedGames { get; }
-		Game[] ShouldStart { get; }
-		int[] FinishedGames { get; }
+		List<Game> ShouldStart { get; }
+		ImmutableArray<int> StartedGames { get; }
+		ImmutableArray<int> FinishedGames { get; }
 		int? RegistrableGame { get; }
 	}
 	public class GameService : IGameService
@@ -26,6 +28,7 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 			this.cfg = cfg;
 		}
+
 		static Expression<Func<Game, bool>> TimeElapsed(Game.State state, DateTime time) => g => g.Current == state && g.LastChange <= time;
 		static Expression<Func<Game, bool>> InState(Game.State state) => g => g.Current == state;
 		static Expression<Func<Game, bool>> InState(Game.State a, Game.State b) => g => g.Current == a || g.Current == b;
@@ -34,9 +37,9 @@ namespace ImperitWASM.Server.Services
 		public void Finish(int gameId) => ctx.Games.UpdateAt(gameId, g => g.Finish());
 		public bool Started(int gameId) => ctx.Games.Find(gameId).Started;
 		public bool Finished(int gameId) => ctx.Games.Find(gameId).Finished;
-		public Game[] ShouldStart => ctx.Games.Where(TimeElapsed(Game.State.Countdown, DateTime.UtcNow - cfg.Settings.CountdownTime)).ToArray();
-		public int[] StartedGames => ctx.Games.Where(InState(Game.State.Started)).Select(g => g.Id).ToArray();
-		public int[] FinishedGames => ctx.Games.Where(InState(Game.State.Finished)).Select(g => g.Id).ToArray();
+		public List<Game> ShouldStart => ctx.Games.Where(TimeElapsed(Game.State.Countdown, DateTime.UtcNow - cfg.Settings.CountdownTime)).ToList();
+		public ImmutableArray<int> StartedGames => ctx.Games.Where(InState(Game.State.Started)).Select(g => g.Id).ToImmutableArray();
+		public ImmutableArray<int> FinishedGames => ctx.Games.Where(InState(Game.State.Finished)).Select(g => g.Id).ToImmutableArray();
 		public int? RegistrableGame => ctx.Games.FirstOrDefault(InState(Game.State.Countdown, Game.State.Created))?.Id;
 	}
 }

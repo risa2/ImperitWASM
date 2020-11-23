@@ -5,15 +5,15 @@
 	ImmutableArray<int> Finished;
 	protected override async Task OnInitializedAsync()
 	{
-		Finished = await http.GetJsonAsync<ImmutableArray<int>>("api/Game/Finished");
+		Finished = await http.GetAsync<ImmutableArray<int>>("api/Game/Finished");
 	}
 	Data.Int model = new Data.Int();
 	ImmutableArray<Data.ColoredHuman> Former;
 	ImmutableArray<PlayersPower> Powers;
 	async Task UpdateHistoryGraphs()
 	{
-		Former = await http.PostJsonResponseAsync<int, ImmutableArray<Data.ColoredHuman>>("api/Player/Colored", Finished[model.Value]);
-		Powers = await http.PostJsonResponseAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Finished[model.Value]);
+		Former = await http.PostAsync<int, ImmutableArray<Data.ColoredHuman>>("api/Player/Colored", Finished[model.Value]);
+		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Finished[model.Value]);
 	}
 }
 <nav>

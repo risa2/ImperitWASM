@@ -9,16 +9,16 @@
 	Color NextColor;
 	async Task OnSubmit()
 	{
-		if (Selected is int selected && GameId is int gameId && await http.PostJsonResponseAsync<Data.RegisteredPlayer, bool>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, selected, gameId)))
+		if (Selected is int selected && GameId is int gameId && await http.PostAsync<Data.RegisteredPlayer, bool>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, selected, gameId)))
 		{
 			await ReturnAsync!();
 		}
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		GameId = await http.GetJsonAsync<int>("api/Game/RegistrableGame");
-		NextColor = await http.PostJsonResponseAsync<int, Color>("api/Game/NextColor", GameId.Value);
-		Provinces = (await http.PostJsonResponseAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", GameId.Value)).Select(s => s.UpdateText()).ToImmutableArray();
+		GameId = await http.GetAsync<int>("api/Game/RegistrableGame");
+		NextColor = await http.PostAsync<int, Color>("api/Game/NextColor", GameId.Value);
+		Provinces = (await http.PostAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", GameId.Value)).Select(s => s.UpdateText()).ToImmutableArray();
 	}
 	#pragma warning disable 1998
 	async Task<int?> Select(int i, int? from)
@@ -42,8 +42,8 @@
 	}
 })"/>
 <main>
-	<p>Jméno:</p><p><input type="text" @bind-value="Username"/></p>
-	<p>Heslo:</p><p><input type="password" @bind-value="Password"/></p>
+	<p>Jméno:</p><p><input type="text" @bind-value="Username" autocomplete="username"/></p>
+	<p>Heslo:</p><p><input type="password" @bind-value="Password" autocomplete="current-password"/></p>
 	<p>Vyber si zemi, kde budeš začínat:</p>
 	@if (!Provinces.IsDefaultOrEmpty)
 	{

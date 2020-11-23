@@ -1,10 +1,10 @@
-﻿using System;
+﻿using System.Collections.Immutable;
 
 namespace ImperitWASM.Client.Data
 {
 	public class RecruitCmd
 	{
-		public RecruitCmd(int loggedIn, string loginId, int province, int[] counts, int game)
+		public RecruitCmd(int loggedIn, string loginId, int province, ImmutableArray<int> counts, int game)
 		{
 			LoggedIn = loggedIn;
 			LoginId = loginId;
@@ -17,6 +17,6 @@ namespace ImperitWASM.Client.Data
 		public int Game { get; set; }
 		public string LoginId { get; set; } = "";
 		public int Province { get; set; }
-		public int[] Counts { get; set; } = Array.Empty<int>();
+		public ImmutableArray<int> Counts { get; set; }
 	}
 }

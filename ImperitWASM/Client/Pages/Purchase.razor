@@ -6,13 +6,13 @@
 	[Parameter] public int Land { get; set; }
 	async Task DoPurchase()
 	{
-		await http.PostJsonAsync<Data.PurchaseCmd>("api/Command/Purchase", new Data.PurchaseCmd(Session.U, Session.I, Land, Session.G));
+		await http.PostAsync<Data.PurchaseCmd>("api/Command/Purchase", new Data.PurchaseCmd(Session.U, Session.I, Land, Session.G));
 		Return();
 	}
 	Data.PurchaseInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostJsonResponseAsync<Data.CmdData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.CmdData(Session.U, Land, Session.G));
+		Info = await http.PostAsync<Data.CmdData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.CmdData(Session.U, Land, Session.G));
 		if (!Info.Possible)
 		{
 			Return();

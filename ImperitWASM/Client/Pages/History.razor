@@ -12,8 +12,8 @@
 	ImmutableArray<PlayersPower> Powers;
 	async Task UpdateHistoryGraphs()
 	{
-		Former = await http.PostJsonResponseAsync<int, ImmutableArray<Data.ColoredHuman>>("api/Player/Colored", model.Value);
-		Powers = await http.PostJsonResponseAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", model.Value);
+		Former = await http.PostJsonResponseAsync<int, ImmutableArray<Data.ColoredHuman>>("api/Player/Colored", Finished[model.Value]);
+		Powers = await http.PostJsonResponseAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Finished[model.Value]);
 	}
 }
 <nav>
@@ -30,7 +30,7 @@
 		<EditForm Model="model" OnSubmit="UpdateHistoryGraphs">
 			<DataAnnotationsValidator/><ValidationSummary/>
 			<p>Hra:</p>
-			<IntSelect @bind-Value="model.Value" Options="Finished" Id="g => g" Name="g => g.ToString()"/><br/>
+			<IntSelect @bind-Value="model.Value" Options="Finished" Name="g => g.ToString()"/><br/>
 			<button type="submit">Zobrazit</button>
 		</EditForm>
 		<PowerGraphs Players="Former" Powers="Powers"/>

@@ -23,7 +23,7 @@ namespace ImperitWASM.Server.Load
 		public Player Convert(Settings settings) => Type switch
 		{
 			Kind.Human => new Human(Shared.State.Color.Parse(Color), Name, Money, Alive, EntityPlayerActions!.Select(a => a.Convert(settings)).ToImmutableList(), Shared.State.Password.Parse(Password)),
-			Kind.Robot => new Robot(Shared.State.Color.Parse(Color), Money, Alive, EntityPlayerActions!.Select(a => a.Convert(settings)).ToImmutableList(), settings),
+			Kind.Robot => new Robot(Shared.State.Color.Parse(Color), Name, Money, Alive, EntityPlayerActions!.Select(a => a.Convert(settings)).ToImmutableList(), settings),
 			_ => new Savage(),
 		};
 		public static EntityPlayer From(Player p, int index) => p switch

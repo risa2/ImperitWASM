@@ -22,6 +22,6 @@
 	<Country @ref="country" Points="SelectedPoints" Fill="SelectedColor" Width="Width" Height="Height" OnClick="async() => await ClickSelect(selected)" />
 	@foreach (var (i, province) in Provinces.Try().Index())
 	{
-		<Caption Text="province.T" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClick="async() => await ClickSelect(i)" />
+		<Caption Text="@province.T" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClick="async() => await ClickSelect(i)" />
 	}
 </svg>

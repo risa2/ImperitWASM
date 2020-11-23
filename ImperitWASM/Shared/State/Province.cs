@@ -24,7 +24,7 @@ namespace ImperitWASM.Shared.State
 			Actions = actions;
 		}
 		public string Name => Description.Name;
-		public string Text => Description.Text;
+		public ImmutableArray<string> Text => Description.Text;
 		public abstract Province GiveUpTo(Player player, Soldiers soldiers);
 		public Province GiveUpTo(Player p) => GiveUpTo(p, new Soldiers());
 		public Province Revolt() => GiveUpTo(new Savage(), DefaultSoldiers);

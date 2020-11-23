@@ -93,5 +93,6 @@ namespace ImperitWASM.Shared.State
 			b = clamp((int)(B * 255.0));
 			a = 255;
 		}
+		public static Color Generate(int i, double h_0, double s, double v) => new Color(h_0 + (137.507764050037854 * i), s, v);
 	}
 }

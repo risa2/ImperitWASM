@@ -61,7 +61,7 @@ namespace ImperitWASM.Server.Services
 			var map = players.Select((p, i) => (p, i)).ToImmutableDictionary(x => x.p, x => EntityPlayer.From(x.p, x.i));
 			game.EntityPlayers = map.Values.ToArray();
 			game.EntityProvinces = provinces.Select((province, i) => EntityProvince.From(province, map, cfg.Settings.SoldierTypeIndices, i)).ToArray();
-			return Games.Add(game).Entity;
+			return game;
 		}
 		public Game Set(int gameId, IEnumerable<Player> players, IEnumerable<Province> provinces)
 		{

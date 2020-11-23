@@ -22,7 +22,7 @@ namespace ImperitWASM.Server
 					.AddTransient<IContextService, ContextService>().AddTransient<ISessionService, SessionService>()
 					.AddTransient<IPlayersProvinces, PlayersProvinces>().AddTransient<IPowers, Powers>()
 					.AddTransient<IGameService, GameService>().AddTransient<IActive, Active>()
-					.AddTransient<INewGame, GameCreator>().AddTransient<IEndOfTurn, EndOfTurn>();
+					.AddTransient<IGameCreator, GameCreator>().AddTransient<IEndOfTurn, EndOfTurn>();
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{

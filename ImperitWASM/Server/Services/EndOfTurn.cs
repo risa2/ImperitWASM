@@ -12,9 +12,9 @@ namespace ImperitWASM.Server.Services
 		readonly IContextService ctx;
 		readonly IPlayersProvinces pap;
 		readonly IPowers powers;
-		readonly INewGame newGame;
+		readonly IGameCreator newGame;
 		readonly IConfig cfg;
-		public EndOfTurn(IPlayersProvinces pap, IPowers powers, INewGame newGame, IConfig cfg, IContextService ctx)
+		public EndOfTurn(IPlayersProvinces pap, IPowers powers, IGameCreator newGame, IConfig cfg, IContextService ctx)
 		{
 			this.pap = pap;
 			this.powers = powers;

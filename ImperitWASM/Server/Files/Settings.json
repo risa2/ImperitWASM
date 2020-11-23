@@ -258,10 +258,10 @@
 	],
 	"DebtLimit":400,"DefaultInstability":214750000,"DefaultMoney":150,"FinalLandsCount":4,"Interest":0.1,"LandColor":"#111111ff","MountainsColor":"#606060ff","MountainsWidth":3,"SeaColor":"#1188ffff","CountdownTime":180,
 	"SoldierTypes":[
-		{"Id":0,"Type":"P","Description":{"Name":"P\u011b\u0161\u00e1k","Symbol":"\ud83d\udc68","Text":"S\u00edla v \u00fatoku:1<br/>S\u00edla v obran\u011b:1<br/>Hmotnost:1"},"AttackPower":1,"DefensePower":1,"Weight":1,"Price":1},
-		{"Id":1,"Type":"S","Description":{"Name":"Lo\u010f","Symbol":"\u26f4","Text":"Hmotnost:200<br/>Nosnost:200"},"AttackPower":0,"DefensePower":0,"Weight":200,"Price":100,"Capacity":200},
-		{"Id":2,"Type":"E","Description":{"Name":"Slon","Symbol":"\ud83d\udc18","Text":"S\u00edla v \u00fatoku:6<br/>S\u00edla v obran\u011b:2<br/>Hmotnost:10<br/>Nosnost:3<br/>Rychlost:2 (m\u016f\u017ee j\u00edt p\u0159es hory)<br/>Lze zkrotit jen v Kar\u00e1gu"},"AttackPower":6,"DefensePower":2,"Weight":10,"Price":6,"Capacity":3,"Speed":2},
-		{"Id":3,"Type":"O","Description":{"Name":"F\u0102\u00a9nick\u0102\u02c7 lo\u00c4\u0179","Symbol":"f\u26f4","Text":"Hmotnost:50<br/>Nosnost:400<br/>Rychlost:2<br/>Lze koupit jen v Kar\u00e1gu"},"AttackPower":0,"DefensePower":0,"Weight":50,"Price":50,"Capacity":400,"Speed":2},
-		{"Id":4,"Type":"O","Description":{"Name":"Germ\u0102\u02c7nsk\u0102\u02c7 bojov\u0102\u02c7 veslice","Symbol":"\u2694\u26f4","Text":"S\u00edla v \u00fatoku:130<br/>S\u00edla v obran\u011b:150<br/>Hmotnost:150<br/>Nosnost:120<br/>Lze koupit jen u Bodensee"},"AttackPower":130,"DefensePower":150,"Weight":150,"Price":130,"Capacity":120,"Speed":1}
+		{"Id":0,"Type":"P","Description":{"Name":"P\u011b\u0161\u00e1k","Symbol":"\ud83d\udc68","Text":["S\u00edla v \u00fatoku: 1", "S\u00edla v obran\u011b: 1", "Hmotnost:1"]},"AttackPower":1,"DefensePower":1,"Weight":1,"Price":1},
+		{"Id":1,"Type":"S","Description":{"Name":"Lo\u010f","Symbol":"\u26f4","Text":["Hmotnost: 200", "Nosnost: 200"]},"AttackPower":0,"DefensePower":0,"Weight":200,"Price":100,"Capacity":200},
+		{"Id":2,"Type":"E","Description":{"Name":"Slon","Symbol":"\ud83d\udc18","Text":["S\u00edla v \u00fatoku: 6", "S\u00edla v obran\u011b: 2", "Hmotnost: 10", "Nosnost: 3", "Rychlost: 2 (m\u016f\u017ee j\u00edt p\u0159es hory)", "Lze zkrotit jen v Kar\u00e1gu"]},"AttackPower":6,"DefensePower":2,"Weight":10,"Price":6,"Capacity":3,"Speed":2},
+		{"Id":3,"Type":"O","Description":{"Name":"F\u0102\u00a9nick\u0102\u02c7 lo\u00c4\u0179","Symbol":"f\u26f4","Text":["Hmotnost: 50", "Nosnost: 400", "Rychlost: 2", "Lze koupit jen v Kar\u00e1gu"]},"AttackPower":0,"DefensePower":0,"Weight":50,"Price":50,"Capacity":400,"Speed":2},
+		{"Id":4,"Type":"O","Description":{"Name":"Germ\u0102\u02c7nsk\u0102\u02c7 bojov\u0102\u02c7 veslice","Symbol":"\u2694\u26f4","Text":["S\u00edla v \u00fatoku: 130", "S\u00edla v obran\u011b: 150", "Hmotnost: 150", "Nosnost: 120", "Lze koupit jen u Bodensee"]},"AttackPower":130,"DefensePower":150,"Weight":150,"Price":130,"Capacity":120,"Speed":1}
 	]
 }

@@ -8,5 +8,5 @@
 }
 
 <PopupBox Show="type is Description" OnClose="() => type = null">
-	@type?.Name (@type?.Symbol) &ndash; @(new MarkupString(type?.Text))
+	@type?.Name (@type?.Symbol) &ndash; @(new MarkupString(string.Join("<br/>", type?.Text)))
 </PopupBox>

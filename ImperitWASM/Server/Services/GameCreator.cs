@@ -10,7 +10,7 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Services
 {
-	public interface INewGame
+	public interface IGameCreator
 	{
 		Color NextColor(int gameId);
 		Task<int> CreateAsync();
@@ -18,7 +18,7 @@ namespace ImperitWASM.Server.Services
 		Task FinishAsync(int gameId);
 		Task RegisterAsync(Game game, string name, Password password, int land);
 	}
-	public class GameCreator : INewGame
+	public class GameCreator : IGameCreator
 	{
 		readonly IPlayersProvinces pap;
 		readonly IPowers powers;
@@ -35,12 +35,12 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 		}
 
-		static Color ColorAt(int i) => new Color(120.0 + (137.507764050037854 * i), 1.0, 1.0);
+		static Color ColorAt(int i) => Color.Generate(i, 120.0, 1.0, 1.0);
 		IEnumerable<(Land l, int i)> RemainingStarts(PlayersAndProvinces p_p) => p_p.Provinces.Select((p, i) => (p as Land, i)).Where(it => it.Item1 is Land && it.Item1.IsStart && !it.Item1.Occupied)!;
 
 		Player GetRobot(int count, int i, int earnings)
 		{
-			return new Robot(ColorAt(count + i - 1), cfg.Settings.DefaultMoney - (earnings * 2), true, Actions, cfg.Settings);
+			return new Robot(ColorAt(count + i - 1), "AI " + i, cfg.Settings.DefaultMoney - (earnings * 2), true, Actions, cfg.Settings);
 		}
 
 		void AddRobots(Game game, PlayersAndProvinces p_p)
@@ -49,10 +49,10 @@ namespace ImperitWASM.Server.Services
 		}
 		public async Task<int> CreateAsync()
 		{
-			int gameId = pap.Add(new PlayersAndProvinces(ImmutableArray.Create<Player>(new Savage()), cfg.Settings.Provinces)).Id;
+			var g = pap.Add(new PlayersAndProvinces(ImmutableArray.Create<Player>(new Savage()), cfg.Settings.Provinces));
 			game.RemoveOld(TimeSpan.FromDays(1));
 			await ctx.SaveAsync();
-			return gameId;
+			return g.Id;
 		}
 		public Color NextColor(int gameId) => ColorAt(pap.PlayersCount(gameId) - 1);
 		public Task StartAllAsync()
@@ -73,12 +73,9 @@ namespace ImperitWASM.Server.Services
 		public Task RegisterAsync(Game game, string name, Password password, int land)
 		{
 			int count = pap.PlayersCount(game.Id);
-			var player = new Human(ColorAt(count), name, cfg.Settings.DefaultMoney - (cfg.Settings.ProvinceData[land]?.Earnings * 2).GetValueOrDefault(), true, Actions, password);
+			var player = new Human(ColorAt(count - 1), name, cfg.Settings.DefaultMoney - (cfg.Settings.ProvinceData[land]?.Earnings * 2).GetValueOrDefault(), true, Actions, password);
 			pap.Add(game, player, land);
-			if (count == 2)
-			{
-				_ = game.StartCountdown();
-			}
+			_ = count == 2 ? game.StartCountdown() : game;
 			return ctx.SaveAsync();
 		}
 	}

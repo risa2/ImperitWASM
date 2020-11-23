@@ -32,7 +32,14 @@
 }
 <NavMenu Options="Zpět;Registrace;Potvrdit" Selected="1" OnClick="@(async i =>
 {
-	await (i == 0 ? ReturnAsync!() : i == 1 ? OnSubmit() : Task.Run(() => { }));
+	if (i == 0)
+	{
+		await ReturnAsync!();
+	}
+	else if (i == 2)
+	{
+		await OnSubmit();
+	}
 })"/>
 <main>
 	<p>Jméno:</p><p><input type="text" @bind-value="Username"/></p>

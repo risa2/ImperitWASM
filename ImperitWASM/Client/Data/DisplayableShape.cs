@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ImperitWASM.Shared.State;
 
@@ -12,9 +13,9 @@ namespace ImperitWASM.Client.Data
 		public Color S { get; set; }
 		public int W { get; set; }
 		public bool R { get; set; }
-		public string T { get; set; } = "";
+		public IEnumerable<string> T { get; set; } = Array.Empty<string>();
 		public DisplayableShape() { }
-		public DisplayableShape(Point[] border, Point center, Color fill, Color stroke, int strokeWidth, bool isStart, string text)
+		public DisplayableShape(Point[] border, Point center, Color fill, Color stroke, int strokeWidth, bool isStart, IEnumerable<string> text)
 		{
 			B = border;
 			C = center;
@@ -26,7 +27,7 @@ namespace ImperitWASM.Client.Data
 		}
 		public DisplayableShape UpdateText()
 		{
-			return new DisplayableShape(B, C, F, S, W, R, R ? T : string.Join("<br/>", T.Split("<br/>").Skip(1)));
+			return new DisplayableShape(B, C, F, S, W, R, T.Skip(R ? 0 : 1));
 		}
 	}
 }

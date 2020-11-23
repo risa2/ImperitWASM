@@ -26,7 +26,7 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 			this.cfg = cfg;
 		}
-		static Expression<Func<Game, bool>> TimeElapsed(Game.State state, DateTime deadline) => g => g.Current == state && g.LastChange >= deadline;
+		static Expression<Func<Game, bool>> TimeElapsed(Game.State state, DateTime time) => g => g.Current == state && g.LastChange <= time;
 		static Expression<Func<Game, bool>> InState(Game.State state) => g => g.Current == state;
 		static Expression<Func<Game, bool>> InState(Game.State a, Game.State b) => g => g.Current == a || g.Current == b;
 		public void RemoveOld(TimeSpan period) => ctx.Games.RemoveAt(TimeElapsed(Game.State.Finished, DateTime.UtcNow - period));

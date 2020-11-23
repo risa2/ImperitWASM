@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.State
 		public readonly bool IsStart, IsFinal, HasPort;
 		public readonly ImmutableArray<SoldierType> ExtraTypes;
 		public Land(string name, Shape shape, Player player, Soldiers soldiers, Soldiers defaultSoldiers, ImmutableList<IProvinceAction> actions, Settings settings, int earnings, bool isStart, bool isFinal, bool hasPort, ImmutableArray<SoldierType> extraTypes)
-			: base(new Description(name, string.Format("{0}<br/>{1}", name + (hasPort ? "\u2693" : ""), soldiers)), shape, player, soldiers, defaultSoldiers, actions)
+			: base(new Description(name, name + (hasPort ? "\u2693" : ""), soldiers.ToString()), shape, player, soldiers, defaultSoldiers, actions)
 		{
 			this.settings = settings;
 			Earnings = earnings;

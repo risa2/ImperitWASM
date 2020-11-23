@@ -10,13 +10,12 @@ namespace ImperitWASM.Server.Controllers
 	public class GameController : ControllerBase
 	{
 		readonly IGameService game;
-		readonly INewGame newGame;
+		readonly IGameCreator newGame;
 		readonly IPlayersProvinces pap;
 		readonly ISessionService login;
 		readonly IEndOfTurn end;
 		readonly IActive active;
-		readonly IContextService ctx;
-		public GameController(IGameService game, INewGame newGame, IPlayersProvinces pap, ISessionService login, IEndOfTurn end, IActive active, IContextService ctx)
+		public GameController(IGameService game, IGameCreator newGame, IPlayersProvinces pap, ISessionService login, IEndOfTurn end, IActive active)
 		{
 			this.game = game;
 			this.newGame = newGame;
@@ -24,7 +23,6 @@ namespace ImperitWASM.Server.Controllers
 			this.login = login;
 			this.end = end;
 			this.active = active;
-			this.ctx = ctx;
 		}
 		[HttpPost("Info")]
 		public Client.Data.BasicInfo Info([FromBody] Client.Data.Session p)
@@ -35,7 +33,7 @@ namespace ImperitWASM.Server.Controllers
 		public async Task<bool> RegisterAsync([FromBody] Client.Data.RegisteredPlayer player)
 		{
 			var p_p = pap[player.G];
-			if (!string.IsNullOrWhiteSpace(player.N) && !string.IsNullOrWhiteSpace(player.N) && p_p.Province(player.S) is Land land && land.IsStart && !land.Occupied)
+			if (!string.IsNullOrWhiteSpace(player.N) && !string.IsNullOrWhiteSpace(player.N) && !player.N.StartsWith("AI ") && p_p.Province(player.S) is Land land && land.IsStart && !land.Occupied)
 			{
 				await newGame.RegisterAsync(game.Find(player.G), player.N, new Password(player.P), player.S);
 				return true;
@@ -46,12 +44,7 @@ namespace ImperitWASM.Server.Controllers
 		public async Task<int> RegistrableGameAsync()
 		{
 			await newGame.StartAllAsync();
-			if (game.RegistrableGame is int registrable)
-			{
-				await ctx.SaveAsync();
-				return registrable;
-			}
-			return await newGame.CreateAsync();
+			return game.RegistrableGame is int registrable ? registrable : await newGame.CreateAsync();
 		}
 		[HttpPost("NextColor")]
 		public Color NextColor([FromBody] int gameId) => newGame.NextColor(gameId);

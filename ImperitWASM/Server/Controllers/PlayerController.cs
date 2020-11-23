@@ -17,8 +17,8 @@ namespace ImperitWASM.Server.Controllers
 		readonly ISessionService login;
 		readonly IPlayersProvinces pap;
 		readonly IContextService ctx;
-		readonly INewGame newGame;
-		public PlayerController(IPlayersProvinces pap, ISessionService login, IContextService ctx, INewGame newGame)
+		readonly IGameCreator newGame;
+		public PlayerController(IPlayersProvinces pap, ISessionService login, IContextService ctx, IGameCreator newGame)
 		{
 			this.pap = pap;
 			this.login = login;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
@@ -9,7 +10,7 @@ namespace ImperitWASM.Shared.State
 		public abstract Description Description { get; }
 		public string Name => Description.Name;
 		public string Symbol => Description.Symbol;
-		public string Text => Description.Text;
+		public ImmutableArray<string> Text => Description.Text;
 		public abstract int AttackPower { get; }
 		public abstract int DefensePower { get; }
 		public int Power => AttackPower + DefensePower;

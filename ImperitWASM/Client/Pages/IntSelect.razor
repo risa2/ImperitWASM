@@ -3,7 +3,6 @@
 
 @code {
 	[Parameter] public IEnumerable<T>? Options { get; set; }
-	[Parameter] public Func<T, int> Id { get; set; } = t => 0;
 	[Parameter] public Func<T, string> Name { get; set; } = t => "";
 	protected override bool TryParseValueFromString(string value, out int result, out string? errorMsg)
 	{
@@ -21,12 +20,12 @@
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
-		CurrentValue = Id(Options.First());
+		CurrentValue = 0;
 	}
 }
 <select @attributes="@AdditionalAttributes" class="@CssClass" @bind="@CurrentValue">
-    @foreach (var opt in Options!)
+    @foreach (var (opt, i) in Options!.Select((o, i) => (o, i)))
     {
-        <option class="@CssClass" value="@Id(opt)">@Name(opt)</option>
+        <option class="@CssClass" value="@i">@Name(opt)</option>
     }
 </select>

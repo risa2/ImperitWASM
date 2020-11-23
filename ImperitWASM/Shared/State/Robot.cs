@@ -10,11 +10,11 @@ namespace ImperitWASM.Shared.State
 	public class Robot : Player
 	{
 		readonly Settings settings;
-		public Robot(Color color, int money, bool alive, ImmutableList<IPlayerAction> actions, Settings settings)
-			: base(color, new Description(), money, alive, actions) => this.settings = settings;
-		public override Player ChangeMoney(int amount) => new Robot(Color, Money + amount, Alive, Actions, settings);
-		public override Player Die() => new Robot(Color, 0, false, ImmutableList<IPlayerAction>.Empty, settings);
-		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Robot(Color, Money, Alive, new_actions, settings);
+		public Robot(Color color, string name, int money, bool alive, ImmutableList<IPlayerAction> actions, Settings settings)
+			: base(color, new Description(name), money, alive, actions) => this.settings = settings;
+		public override Player ChangeMoney(int amount) => new Robot(Color, Name, Money + amount, Alive, Actions, settings);
+		public override Player Die() => new Robot(Color, Name, 0, false, ImmutableList<IPlayerAction>.Empty, settings);
+		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Robot(Color, Name, Money, Alive, new_actions, settings);
 
 		static Soldiers NextSoldiers(PlayersAndProvinces pap, Province p) => p.ActOnYourself(pap).Soldiers;
 		static int NextDefensePower(PlayersAndProvinces pap, Province p) => NextSoldiers(pap, p).DefensePower;

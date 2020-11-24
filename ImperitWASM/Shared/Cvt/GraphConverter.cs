@@ -12,12 +12,12 @@ namespace ImperitWASM.Shared.Cvt
 		public override Graph Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var array = JsonDocument.ParseValue(ref reader).RootElement.EnumerateArray();
-			var table = array.Select(line => line.EnumerateArray().Select(item => item.GetInt32()).ToList()).ToList();
-			var starts = ImmutableArray.CreateBuilder<int>(table.Count + 1);
-			starts[0] = 0;
-			for (int i = 1; i < starts.Capacity; ++i)
+			var table = array.Select(line => line.EnumerateArray().Select(item => item.GetInt32()).ToImmutableArray()).ToImmutableArray();
+			var starts = ImmutableArray.CreateBuilder<int>(table.Length + 1);
+			starts.Add(0);
+			for (int i = 0; i < table.Length; ++i)
 			{
-				starts[i] = starts[i - 1] + table[i - 1].Count;
+				starts.Add(starts[i] + table[i].Length);
 			}
 			return new Graph(table.SelectMany(n => n).ToImmutableArray(), starts.MoveToImmutable());
 		}

@@ -28,13 +28,13 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Colored")]
 		public IEnumerable<Client.Data.ColoredHuman> Colored([FromBody] int gameId)
 		{
-			return ctx.Players.Where(p => p.Type == EntityPlayer.Kind.Human && p.GameId == gameId).Select(p => new Client.Data.ColoredHuman(p.Name, Color.Parse(p.Color)));
+			return ctx.Players.Where(p => p.Type == EntityPlayer.Kind.Human && p.GameId == gameId).OrderBy(p => p.Index).Select(p => new Client.Data.ColoredHuman(p.Name, Color.Parse(p.Color)));
 		}
 		[HttpGet("Login")]
 		public async Task<IEnumerable<Client.Data.PlayerId>> Login()
 		{
 			await newGame.StartAllAsync();
-			return ctx.Players.Include(p => p.Game).Where(p => p.Type == EntityPlayer.Kind.Human && p.Game!.Current == Game.State.Started).Select(p => new Client.Data.PlayerId(p.Index, p.GameId, p.Name));
+			return ctx.Players.Include(p => p.Game).Where(p => p.Type == EntityPlayer.Kind.Human && p.Game!.Current == Game.State.Started).OrderBy(p => p.Index).Select(p => new Client.Data.PlayerId(p.Index, p.GameId, p.Name));
 		}
 		[HttpPost("Money")]
 		public int Money([FromBody] Client.Data.Session ses)

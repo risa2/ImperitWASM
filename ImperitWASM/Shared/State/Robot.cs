@@ -21,7 +21,7 @@ namespace ImperitWASM.Shared.State
 		static int NextAttackPower(PlayersAndProvinces pap, Province p) => NextSoldiers(pap, p).AttackPower;
 		bool IsEnemy(Province p) => !p.IsAllyOf(this) && p.Occupied;
 		IEnumerable<Province> EnemyNeighbors(PlayersAndProvinces pap, Province prov) => pap.NeighborsOf(prov).Where(IsEnemy);
-		int EnemiesPower(PlayersAndProvinces pap, Province prov) => EnemyNeighbors(pap, prov).GroupBy(p => p.Player).Max(p => p.Sum(neighbor => NextAttackPower(pap, neighbor)));
+		int EnemiesPower(PlayersAndProvinces pap, Province prov) => EnemyNeighbors(pap, prov).GroupBy(p => p.Player).Select(p => p.Sum(neighbor => NextAttackPower(pap, neighbor))).DefaultIfEmpty().Max();
 		int Bilance(PlayersAndProvinces pap, Province prov) => NextDefensePower(pap, prov) - EnemiesPower(pap, prov);
 
 		void Recruit(ref PlayersAndProvinces pap, ref int spent, Province province, Soldiers soldiers)

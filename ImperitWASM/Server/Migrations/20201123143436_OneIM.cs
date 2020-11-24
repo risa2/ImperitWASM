@@ -14,10 +14,7 @@ namespace ImperitWASM.Server.Migrations
 					Id = table.Column<int>(type: "INTEGER", nullable: false)
 						.Annotation("Sqlite:Autoincrement", true)
 				},
-				constraints: table =>
-				{
-					table.PrimaryKey("PK_EntitySoldier", x => x.Id);
-				});
+				constraints: table => table.PrimaryKey("PK_EntitySoldier", x => x.Id));
 
 			migrationBuilder.CreateTable(
 				name: "Games",

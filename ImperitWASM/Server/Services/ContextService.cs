@@ -50,11 +50,10 @@ namespace ImperitWASM.Server.Services
 			var game = Games.Include(g => g.EntityPlayers).ThenInclude(p => p.EntityPlayerActions)
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityPlayer).ThenInclude(p => p!.EntityPlayerActions)
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntitySoldier).ThenInclude(s => s!.EntitySoldierPairs)
+							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntityPlayer).ThenInclude(s => s!.EntityPlayerActions)
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntitySoldier).ThenInclude(s => s!.EntitySoldierPairs)
 							.AsNoTracking().Single(game => game.Id == gameId);
-			var players = game.EntityPlayers.OrderBy(p => p.Index).Select(p => p.Convert(cfg.Settings)).ToImmutableArray();
-			var provinces = game.EntityProvinces.OrderBy(p => p.Index).Select(p => p.Convert(cfg.Settings)).ToImmutableArray();
-			return new PlayersAndProvinces(players, new Provinces(provinces, cfg.Settings.Graph));
+			return new PlayersAndProvinces(game.GetPlayers(cfg.Settings), new Provinces(game.GetProvinces(cfg.Settings), cfg.Settings.Graph));
 		}
 
 		Game Insert(Game game, IEnumerable<Player> players, IEnumerable<Province> provinces)
@@ -77,7 +76,7 @@ namespace ImperitWASM.Server.Services
 		// PlayerPower -------------------------------------------------------------------
 		public List<PlayersPower> GetPlayersPowers(int gameId)
 		{
-			return PlayerPowers.Where(pp => pp.GameId == gameId).GroupBy(pp => pp.TurnIndex).OrderBy(ppg => ppg.Key).Select(EntityPlayerPower.ConvertOne).ToList();
+			return PlayerPowers.Where(pp => pp.GameId == gameId).AsNoTracking().AsEnumerable().GroupBy(pp => pp.TurnIndex).OrderBy(ppg => ppg.Key).Select(EntityPlayerPower.ConvertOne).ToList();
 		}
 		public int CountPlayersPowers(int gameId) => PlayerPowers.Where(pp => pp.GameId == gameId).Select(pp => pp.TurnIndex).Distinct().Count();
 		public void Add(int gameId, PlayersPower psp)

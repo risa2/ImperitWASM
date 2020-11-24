@@ -16,10 +16,7 @@
 		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Finished[model.Value]);
 	}
 }
-<nav>
-	<a @onclick="ReturnAsync">Zpět</a>
-	<a class="this">Historie</a>
-</nav>
+<NavMenu Options="Zpět;Historie" Selected="1" OnClickAsync="i => i == 0 ? ReturnAsync!() : Task.Run(() => { })"/>
 <main>
 	@if (Finished.IsDefaultOrEmpty)
 	{

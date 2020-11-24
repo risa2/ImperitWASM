@@ -59,9 +59,10 @@ namespace ImperitWASM.Server.Services
 		{
 			foreach (var g in game.ShouldStart)
 			{
-				AddRobots(g, pap[g.Id]);
-				_ = g.Start().SetActive(pap.FirstActive(g.Id));
-				powers.Add(g.Id);
+				var p_p = pap[g.Id];
+				AddRobots(g, p_p);
+				_ = g.Start().SetActive(p_p.Next(0));
+				powers.Add(g.Id, p_p);
 			}
 			return ctx.SaveAsync();
 		}

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load
 {
@@ -12,31 +15,28 @@ namespace ImperitWASM.Server.Load
 		public int Active { get; set; }
 		public State Current { get; set; }
 		public DateTime LastChange { get; set; }
-		[ForeignKey("GameId")] public ICollection<EntityPlayer>? EntityPlayers { get; set; }
-		[ForeignKey("GameId")] public ICollection<EntityProvince>? EntityProvinces { get; set; }
-		[ForeignKey("GameId")] public ICollection<EntitySession>? EntitySessions { get; set; }
-		[ForeignKey("GameId")] public ICollection<EntityPlayerPower>? EntityPlayerPowers { get; set; }
-		public bool Created => Current == State.Created;
-		public bool Countdown => Current == State.Countdown;
+		public ICollection<EntityPlayer>? EntityPlayers { get; set; }
+		public ICollection<EntityProvince>? EntityProvinces { get; set; }
+		public ICollection<EntitySession>? EntitySessions { get; set; }
+		public ICollection<EntityPlayerPower>? EntityPlayerPowers { get; set; }
 		public bool Started => Current == State.Started;
-		public bool Finished => Current == State.Finished;
 		public static Game Create => new Game { Current = State.Created, LastChange = DateTime.UtcNow };
 		public Game StartCountdown()
 		{
-			LastChange = Countdown ? LastChange : DateTime.UtcNow;
+			LastChange = DateTime.UtcNow;
 			Current = State.Countdown;
 			return this;
 		}
 		public Game Start()
 		{
-			LastChange = Started ? LastChange : DateTime.UtcNow;
+			LastChange = DateTime.UtcNow;
 			Current = State.Started;
 			return this;
 		}
 		public Game Finish()
 		{
-			LastChange = Finished ? LastChange : DateTime.UtcNow;
-			Current = State.Started;
+			LastChange = DateTime.UtcNow;
+			Current = State.Finished;
 			return this;
 		}
 		public Game SetActive(int i)
@@ -44,5 +44,7 @@ namespace ImperitWASM.Server.Load
 			Active = i;
 			return this;
 		}
+		public ImmutableArray<Player> GetPlayers(Settings set) => EntityPlayers!.OrderBy(p => p.Index).Select(p => p.Convert(set)).ToImmutableArray();
+		public ImmutableArray<Province> GetProvinces(Settings set) => EntityProvinces!.OrderBy(p => p.Index).Select(p => p.Convert(set)).ToImmutableArray();
 	}
 }

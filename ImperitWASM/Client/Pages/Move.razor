@@ -1,13 +1,12 @@
 @inject ImperitClient http;
 
 @code{
-	public enum Errors { Ok, FewSoldiers, LittleCapacity, NotPlaying, Else }
-	Errors error = Errors.Ok;
+	Data.MoveErrors error = Data.MoveErrors.Ok;
 	[Parameter] public Action Return { get; set; } = (() => { });
 	[Parameter] public int From { get; set; }
 	[Parameter] public int To { get; set; }
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	Data.Move model = new Data.Move();
+	Data.MoveModel model = new Data.MoveModel();
 	Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
@@ -20,8 +19,8 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostAsync<Data.MoveCmd, Errors>("api/Command/Move", new Data.MoveCmd(Session.U, Session.I, From, To, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
-		if (error == Errors.Ok || error == Errors.NotPlaying)
+		error = await http.PostAsync<Data.MoveCmd, Data.MoveErrors>("api/Command/Move", new Data.MoveCmd(Session.U, Session.I, From, To, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
+		if (error == Data.MoveErrors.Ok || error == Data.MoveErrors.NotPlaying)
 		{
 			Return();
 		}
@@ -34,15 +33,15 @@
 </nav>
 <main>
 	<SoldierTypeInfobox @ref="infobox" />
-	@if (error == Errors.FewSoldiers)
+	@if (error == Data.MoveErrors.FewSoldiers)
 	{
 		<p>V počáteční provincii není dostatek vojáků</p>
 	}
-	else if (error == Errors.LittleCapacity)
+	else if (error == Data.MoveErrors.LittleCapacity)
 	{
 		<p>Vojsko není přesunu schopné</p>
 	}
-	else if (error == Errors.Else)
+	else if (error == Data.MoveErrors.Else)
 	{
 		<p>Přesun není možný</p>
 	}
@@ -57,7 +56,7 @@
 				{
 					<tr>
 						<td>@type.Name<sup @onclick="() => infobox?.Open(type)">?</sup></td>
-						<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>
+						<td><InputNumber @bind-Value="model.Soldiers[i].Value"/></td>
 					</tr>
 				}
 				<tr><td></td><td><button type="submit">Přesunout</button></td></tr>

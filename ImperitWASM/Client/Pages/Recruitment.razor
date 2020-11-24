@@ -6,12 +6,11 @@
 	[Parameter] public Action<Mode> Switch { get; set; } = (x => { });
 	[Parameter] public int Land { get; set; }
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	Data.Recruit model = new Data.Recruit();
+	Data.RecruitModel model = new Data.RecruitModel();
 	Data.RecruitInfo Info = new Data.RecruitInfo();
 	protected override async Task OnInitializedAsync()
 	{
 		Info = await http.PostAsync<Data.CmdData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.CmdData(Land, Session.U, Session.G));
-		System.Console.WriteLine(Info.R.Length);
 		model.Soldiers = Data.Int.Array(Info.R.Length);
 	}
 	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
@@ -39,17 +38,16 @@
 			@Info.N
 			@if (!string.IsNullOrWhiteSpace(Info.S))
 			{
-				<text>má @Info.S</text>
+				<text> má @Info.S</text>
 			}
 			else
 			{
-				<text>nemá žádné vojáky</text>
+				<text> nemá žádné vojáky</text>
 			}
 		</p>
 		<table>
 			@foreach (var (i, (type, price)) in Info.R.Try().Index())
 			{
-				System.Console.WriteLine(i);
 				<tr>
 					<td>@type.Name @price@Sym.Money<sup @onclick="() => infobox?.Open(type)">?</sup></td>
 					<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>

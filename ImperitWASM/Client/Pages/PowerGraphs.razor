@@ -51,6 +51,6 @@
 	{
 		<polyline points="@(Polyline(ratio_sums.Select(r => (int)(r * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600) + " " +
 							Polyline(ratio_sums.Select((r,j) => (int)((r + ratios[j][i]) * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i].Color"></polyline>
-		ratio_sums.Each((sum, j) => sum += ratios[j][i]);
+		ratio_sums.Each((_, j) => ratio_sums[j] += ratios[j][i]);
 	}
 </svg>

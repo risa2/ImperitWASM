@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.State;
@@ -11,8 +12,7 @@ namespace ImperitWASM.Server.Services
 		int PlayersCount(int gameId);
 		EntityPlayer Add(Game game, Player player);
 		void Add(Game game, Player player, int start);
-		bool Add(int gameId, ICommand cmd);
-		int FirstActive(int gameId);
+		Task<bool> AddAsync(int gameId, ICommand cmd);
 		PlayersAndProvinces this[int gameId] { get; set; }
 		Game Add(PlayersAndProvinces pap);
 		Player Player(int gameId, int i);
@@ -36,13 +36,13 @@ namespace ImperitWASM.Server.Services
 			game.EntityPlayers!.Add(ePlayer);
 			return ePlayer;
 		}
-		public bool Add(int gameId, ICommand cmd)
+		public async Task<bool> AddAsync(int gameId, ICommand cmd)
 		{
 			var (new_pap, success) = this[gameId].Add(cmd);
 			this[gameId] = new_pap;
+			await ctx.SaveAsync();
 			return success;
 		}
-		public int FirstActive(int gameId) => ctx.Players.Where(p => p.GameId == gameId && p.Alive && p.Type != EntityPlayer.Kind.Savage).Select(p => p.Index).Min(i => i);
 		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).Single(p => p.Index == i && p.GameId == gameId).Convert(cfg.Settings);
 
 		public PlayersAndProvinces this[int gameId]

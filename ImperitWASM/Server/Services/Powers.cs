@@ -11,20 +11,14 @@ namespace ImperitWASM.Server.Services
 		List<PlayersPower> Get(int gameId);
 		ImmutableDictionary<int, ImmutableArray<PlayersPower>> All { get; }
 		int Count(int gameId);
-		void Add(int gameId);
+		void Add(int gameId, PlayersAndProvinces pap);
 	}
 	public class Powers : IPowers
 	{
-		readonly IPlayersProvinces pap;
 		readonly IContextService ctx;
-
-		public Powers(IPlayersProvinces pap, IContextService ctx)
-		{
-			this.pap = pap;
-			this.ctx = ctx;
-		}
+		public Powers(IContextService ctx) => this.ctx = ctx;
 		public List<PlayersPower> Get(int gameId) => ctx.GetPlayersPowers(gameId);
-		public void Add(int gameId) => ctx.Add(gameId, PlayersPower.Compute(pap[gameId]));
+		public void Add(int gameId, PlayersAndProvinces pap) => ctx.Add(gameId, PlayersPower.Compute(pap));
 		public int Count(int gameId) => ctx.CountPlayersPowers(gameId);
 		public ImmutableDictionary<int, ImmutableArray<PlayersPower>> All => ctx.PlayerPowers.GroupBy(p => p.GameId).ToImmutableDictionary(pps => pps.Key, pps => EntityPlayerPower.ConvertMore(pps));
 	}

@@ -8,14 +8,14 @@ namespace ImperitWASM.Client.Services
 {
 	public class ImperitClient
 	{
-		//static T Log<T>(T value, Func<T, string> s)
-		//{
-		//	Console.WriteLine("Log: " + s(value));
-		//	return value;
-		//}
-#pragma warning disable IDE0060 // Remove unused parameter
-		static T Log<T>(T value, Func<T, string> s) => value;
-#pragma warning restore IDE0060 // Remove unused parameter
+		static T Log<T>(T value, Func<T, string> s)
+		{
+			Console.WriteLine("Log: " + s(value));
+			return value;
+		}
+		//#pragma warning disable IDE0060 // Remove unused parameter
+		//		static T Log<T>(T value, Func<T, string> s) => value;
+		//#pragma warning restore IDE0060 // Remove unused parameter
 
 		class Policy : JsonNamingPolicy
 		{

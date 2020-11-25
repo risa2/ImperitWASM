@@ -28,13 +28,13 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Info")]
 		public Client.Data.BasicInfo Info([FromBody] Client.Data.Session p)
 		{
-			return new Client.Data.BasicInfo(p.U, pap.Player(p.G, p.U).Color, game.Started(p.G), active[p.G]);
+			var g = game.FindNoTracking(p.G);
+			return new Client.Data.BasicInfo(p.U == g.Active, pap.Player(p.G, p.U).Color, g.Started, g.Active);
 		}
 		[HttpPost("Register")]
 		public async Task<bool> RegisterAsync([FromBody] Client.Data.RegisteredPlayer player)
 		{
-			var p_p = pap[player.G];
-			if (!string.IsNullOrWhiteSpace(player.N) && !string.IsNullOrWhiteSpace(player.N) && !player.N.StartsWith("AI ") && p_p.Province(player.S) is Land land && land.IsStart && !land.Occupied)
+			if (!string.IsNullOrWhiteSpace(player.N) && !string.IsNullOrWhiteSpace(player.N) && !player.N.StartsWith("AI ") && pap.Province(player.G, player.S) is Land land && land.IsStart && !land.Occupied)
 			{
 				await newGame.RegisterAsync(game.Find(player.G), player.N, new Password(player.P), player.S);
 				return true;

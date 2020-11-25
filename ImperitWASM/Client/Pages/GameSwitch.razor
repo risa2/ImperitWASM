@@ -1,6 +1,6 @@
 @inject ImperitClient http;
 
-@using Mode = Data.Switch.Mode;
+@using Mode = Data.View;
 
 @code{
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
@@ -32,12 +32,12 @@
 	async Task CheckSession()
 	{
 		Info = await http.PostAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
-		if (!Info.IsGameActive)
+		if (!Info.C)
 		{
 			await LogoutAsync!();
 		}
 	}
-	Data.BasicInfo Info = new Data.BasicInfo(0, new Color(), true, 1);
+	Data.BasicInfo Info = new Data.BasicInfo(false, new Color(), true, 1);
 	Data.DisplayableShape[]? Provinces = null;
 	System.Timers.Timer? timer = null;
 	protected override async Task OnInitializedAsync()
@@ -52,27 +52,27 @@
 	{
 		if (Provinces != null && variables.Length <= Provinces.Length)
 		{
-			variables.Each((variable, i) => (Provinces[i].F, Provinces[i].T) = (variable.F, variable.T));
+			variables.Each((variable, i) => Provinces[i] = Provinces[i].Update(variable.F, variable.T));
 		}
 	}
 }
 
 <style>
 	nav > a:hover {
-		background-color: @Info.Color.WithAlpha(96);
+		background-color: @Info.B.WithAlpha(96);
 	}
 	nav > a.this {
-		background-color: @Info.Color;
+		background-color: @Info.B;
 	}
 </style>
 
 @if (Current == Mode.Map)
 {
-	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.A" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Preview)
 {
-	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.IsActive" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.A" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Donation && Player is (int Money, int Recipient, string Name))
 {

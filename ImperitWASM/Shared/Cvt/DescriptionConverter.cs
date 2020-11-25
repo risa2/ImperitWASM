@@ -12,7 +12,7 @@ namespace ImperitWASM.Shared.Cvt
 		public override Description Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			var doc = JsonDocument.ParseValue(ref reader).RootElement;
-			return new Description(doc.GetProperty("Name").GetString(), doc.GetProperty("Text").EnumerateArray().Select(line => line.GetString().Must()).ToImmutableArray(), doc.GetProperty("Symbol").GetString());
+			return new Description(doc.GetProperty("Name").GetString().Must(), doc.GetProperty("Text").EnumerateArray().Select(line => line.GetString().Must()).ToImmutableArray(), doc.GetProperty("Symbol").GetString().Must());
 		}
 		public override void Write(Utf8JsonWriter writer, Description d, JsonSerializerOptions options)
 		{

@@ -47,12 +47,10 @@ namespace ImperitWASM.Server.Services
 		// Players and Provinces -------------------------------------------------------------------
 		public PlayersAndProvinces GetPlayersAndProvinces(int gameId)
 		{
-			var game = Games.Include(g => g.EntityPlayers).ThenInclude(p => p.EntityPlayerActions)
-							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityPlayer).ThenInclude(p => p!.EntityPlayerActions)
-							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntitySoldier).ThenInclude(s => s!.EntitySoldierPairs)
+			var game = Games.AsNoTracking().Include(g => g.EntityPlayers).ThenInclude(p => p.EntityPlayerActions)
+							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntitySoldiers)
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntityPlayer).ThenInclude(s => s!.EntityPlayerActions)
-							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntitySoldier).ThenInclude(s => s!.EntitySoldierPairs)
-							.AsNoTracking().Single(game => game.Id == gameId);
+							.Single(game => game.Id == gameId);
 			return new PlayersAndProvinces(game.GetPlayers(cfg.Settings), new Provinces(game.GetProvinces(cfg.Settings), cfg.Settings.Graph));
 		}
 

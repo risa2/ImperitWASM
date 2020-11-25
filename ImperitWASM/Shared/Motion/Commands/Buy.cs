@@ -3,17 +3,8 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion.Commands
 {
-	public class Buy : ICommand
+	public record Buy(Player Player, Province Province, int Price) : ICommand
 	{
-		public readonly Player Player;
-		public readonly Province Province;
-		public readonly int Price;
-		public Buy(Player player, Province province, int price)
-		{
-			Player = player;
-			Province = province;
-			Price = price;
-		}
 		public bool Allowed(PlayersAndProvinces pap)
 			=> Player.Money >= Price && pap.NeighborsOf(Province).Any(prov => prov is Land land && land.IsAllyOf(Player));
 		public Province Perform(Province province)

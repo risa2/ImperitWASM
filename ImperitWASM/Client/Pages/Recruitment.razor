@@ -1,13 +1,13 @@
 @inject ImperitClient http;
 
-@using Mode = Data.Switch.Mode;
+@using Mode = Data.View;
 
 @code{
 	[Parameter] public Action<Mode> Switch { get; set; } = (x => { });
 	[Parameter] public int Land { get; set; }
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	Data.RecruitModel model = new Data.RecruitModel();
-	Data.RecruitInfo Info = new Data.RecruitInfo();
+	Data.RecruitInfo Info = new Data.RecruitInfo("", "", ImmutableArray<Data.SoldiersItem>.Empty, 0);
 	protected override async Task OnInitializedAsync()
 	{
 		Info = await http.PostAsync<Data.CmdData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.CmdData(Land, Session.U, Session.G));

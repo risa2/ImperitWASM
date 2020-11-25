@@ -7,24 +7,12 @@ using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
-	public abstract class Province : IEnumerable<Point>, IEquatable<Province>
+	public abstract record Province(Description Description, Shape Shape, Player Player, Soldiers Soldiers, Soldiers DefaultSoldiers, ImmutableList<IProvinceAction> Actions)
 	{
-		public readonly Description Description;
-		public readonly Shape Shape;
-		public readonly Player Player;
-		public readonly Soldiers Soldiers, DefaultSoldiers;
-		public readonly ImmutableList<IProvinceAction> Actions;
-		public Province(Description description, Shape shape, Player player, Soldiers soldiers, Soldiers defaultSoldiers, ImmutableList<IProvinceAction> actions)
-		{
-			Description = description;
-			Shape = shape;
-			Player = player;
-			Soldiers = soldiers;
-			DefaultSoldiers = defaultSoldiers;
-			Actions = actions;
-		}
 		public string Name => Description.Name;
 		public ImmutableArray<string> Text => Description.Text;
+		public ImmutableArray<Point> Border => Shape.Border;
+		public Point Center => Shape.Center;
 		public abstract Province GiveUpTo(Player player, Soldiers soldiers);
 		public Province GiveUpTo(Player p) => GiveUpTo(p, new Soldiers());
 		public Province Revolt() => GiveUpTo(new Savage(), DefaultSoldiers);
@@ -60,19 +48,13 @@ namespace ImperitWASM.Shared.State
 		public bool IsAllyOf(Player p) => p == Player;
 		public bool IsAllyOf(Province prov) => prov.Player == Player;
 		public IEnumerable<SoldierType> SoldierTypes => Soldiers.Types;
-		public bool Occupied => !(Player is Savage);
+		public bool Occupied => Player is not Savage;
 		public bool CanSoldiersSurvive => Soldiers.CanSurviveIn(this);
 		public virtual Color Fill => new Color();
 		public virtual Color Stroke => new Color();
 		public virtual int StrokeWidth => 0;
-		public IEnumerator<Point> GetEnumerator() => Shape.GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-		public Point Center => Shape.Center;
 
-		public bool Equals(Province? other) => other?.Description == Description;
-		public override bool Equals(object? obj) => Equals(obj as Province);
+		public virtual bool Equals(Province? other) => other is not null && other.Description == Description;
 		public override int GetHashCode() => Description.GetHashCode();
-		public static bool operator ==(Province? a, Province? b) => a?.Description == b?.Description;
-		public static bool operator !=(Province? a, Province? b) => a?.Description != b?.Description;
 	}
 }

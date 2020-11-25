@@ -1,6 +1,6 @@
 namespace ImperitWASM.Shared.State
 {
-	public class PlayerPower
+	public record PlayerPower
 	{
 		public readonly bool Alive;
 		public readonly int Soldiers, Lands, Income, Money, Final;

@@ -3,28 +3,16 @@ using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
-	public class Land : Province
+	public record Land(string Name, Shape Shape, Player Player, Soldiers Soldiers, Soldiers DefaultSoldiers, ImmutableList<IProvinceAction> Actions, Settings Settings, int Earnings, bool IsStart, bool IsFinal, bool HasPort, ImmutableArray<SoldierType> ExtraTypes)
+		: Province(new Description(Name, Name + (HasPort ? "\u2693" : ""), Soldiers.ToString()), Shape, Player, Soldiers, DefaultSoldiers, Actions)
 	{
-		protected readonly Settings settings;
-		public readonly int Earnings;
-		public readonly bool IsStart, IsFinal, HasPort;
-		public readonly ImmutableArray<SoldierType> ExtraTypes;
-		public Land(string name, Shape shape, Player player, Soldiers soldiers, Soldiers defaultSoldiers, ImmutableList<IProvinceAction> actions, Settings settings, int earnings, bool isStart, bool isFinal, bool hasPort, ImmutableArray<SoldierType> extraTypes)
-			: base(new Description(name, name + (hasPort ? "\u2693" : ""), soldiers.ToString()), shape, player, soldiers, defaultSoldiers, actions)
-		{
-			this.settings = settings;
-			Earnings = earnings;
-			IsStart = isStart;
-			IsFinal = isFinal;
-			HasPort = hasPort;
-			ExtraTypes = extraTypes;
-		}
-		public override Province GiveUpTo(Player p, Soldiers s) => new Land(Name, Shape, p, s, DefaultSoldiers, Actions, settings, Earnings, IsStart, IsFinal, HasPort, ExtraTypes);
-		protected override Province WithActions(ImmutableList<IProvinceAction> new_actions) => new Land(Name, Shape, Player, Soldiers, DefaultSoldiers, new_actions, settings, Earnings, IsStart, IsFinal, HasPort, ExtraTypes);
+		public bool IsInhabitable => IsStart && !Occupied;
+		public override Province GiveUpTo(Player p, Soldiers s) => new Land(Name, Shape, p, s, DefaultSoldiers, Actions, Settings, Earnings, IsStart, IsFinal, HasPort, ExtraTypes);
+		protected override Province WithActions(ImmutableList<IProvinceAction> new_actions) => new Land(Name, Shape, Player, Soldiers, DefaultSoldiers, new_actions, Settings, Earnings, IsStart, IsFinal, HasPort, ExtraTypes);
 
 		public int Price => (Earnings * 2) + Soldiers.Price;
-		public override Color Fill => Player.Color.Over(settings.LandColor);
-		public Ratio Instability => settings.Instability(Soldiers, DefaultSoldiers);
+		public override Color Fill => Player.Color.Over(Settings.LandColor);
+		public Ratio Instability => Settings.Instability(Soldiers, DefaultSoldiers);
 		public bool CanRecruit(SoldierType t) => ExtraTypes.Contains(t);
 	}
 }

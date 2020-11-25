@@ -3,13 +3,11 @@ using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
-	public class Sea : Province
+	public record Sea(string Name, Shape Shape, Player Player, Soldiers Soldiers, Soldiers DefaultSoldiers, ImmutableList<IProvinceAction> Actions, Settings Settings)
+		: Province(new Description(Name, Name, Soldiers.ToString()), Shape, Player, Soldiers, DefaultSoldiers, Actions)
 	{
-		readonly Settings settings;
-		public Sea(string name, Shape shape, Player player, Soldiers soldiers, Soldiers defaultSoldiers, ImmutableList<IProvinceAction> actions, Settings settings)
-			: base(new Description(name, name, soldiers.ToString()), shape, player, soldiers, defaultSoldiers, actions) => this.settings = settings;
-		public override Province GiveUpTo(Player p, Soldiers s) => new Sea(Name, Shape, p, s, DefaultSoldiers, Actions, settings);
-		protected override Province WithActions(ImmutableList<IProvinceAction> new_actions) => new Sea(Name, Shape, Player, Soldiers, DefaultSoldiers, new_actions, settings);
-		public override Color Fill => Player.Color.Mix(settings.SeaColor);
+		public override Province GiveUpTo(Player p, Soldiers s) => new Sea(Name, Shape, p, s, DefaultSoldiers, Actions, Settings);
+		protected override Province WithActions(ImmutableList<IProvinceAction> new_actions) => new Sea(Name, Shape, Player, Soldiers, DefaultSoldiers, new_actions, Settings);
+		public override Color Fill => Player.Color.Mix(Settings.SeaColor);
 	}
 }

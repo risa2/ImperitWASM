@@ -15,7 +15,7 @@ namespace ImperitWASM.Shared.Cvt
 			bool has_isStart = root.TryGetProperty("IsStart", out var isStart);
 			bool has_isFinal = root.TryGetProperty("IsFinal", out var isFinal);
 			bool has_hasPort = root.TryGetProperty("HasPort", out var hasPort);
-			return new ProvinceData(root.GetProperty("Name").GetString().Must(), Enum.Parse<ProvinceData.Kind>(root.GetProperty("Type").GetString()), JsonSerializer.Deserialize<Shape>(root.GetProperty("Shape").GetRawText()).Must(), JsonSerializer.Deserialize<ImmutableArray<Tuple<int, int>>>(root.GetProperty("Soldiers").GetRawText()), JsonSerializer.Deserialize<ImmutableArray<int>>(root.GetProperty("ExtraTypes").GetRawText()), has_earnings ? (int?)earnings.GetInt32() : null, has_isStart ? (bool?)isStart.GetBoolean() : null, has_isFinal ? (bool?)isFinal.GetBoolean() : null, has_hasPort ? (bool?)hasPort.GetBoolean() : null);
+			return new ProvinceData(root.GetProperty("Name").GetString().Must(), Enum.Parse<ProvinceData.Kind>(root.GetProperty("Type").GetString()!), JsonSerializer.Deserialize<Shape>(root.GetProperty("Shape").GetRawText()).Must(), JsonSerializer.Deserialize<ImmutableArray<ProvinceData.RegimentData>>(root.GetProperty("Soldiers").GetRawText()), JsonSerializer.Deserialize<ImmutableArray<int>>(root.GetProperty("ExtraTypes").GetRawText()), has_earnings ? (int?)earnings.GetInt32() : null, has_isStart ? (bool?)isStart.GetBoolean() : null, has_isFinal ? (bool?)isFinal.GetBoolean() : null, has_hasPort ? (bool?)hasPort.GetBoolean() : null);
 		}
 		public override void Write(Utf8JsonWriter writer, ProvinceData value, JsonSerializerOptions options)
 		{
@@ -29,8 +29,8 @@ namespace ImperitWASM.Shared.Cvt
 			writer.WriteStartArray();
 			foreach (var pair in value.Soldiers)
 			{
-				writer.WriteNumber("Item1", pair.Item1);
-				writer.WriteNumber("Item2", pair.Item2);
+				writer.WriteNumber("Type", pair.Type);
+				writer.WriteNumber("Count", pair.Count);
 			}
 			writer.WriteEndArray();
 			writer.WritePropertyName("ExtraTypes");

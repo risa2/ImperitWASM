@@ -1,6 +1,6 @@
 @inject ImperitClient http;
 
-@using Mode = Data.Switch.Mode;
+@using Mode = Data.View;
 
 @code{
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
@@ -20,7 +20,7 @@
 	ImmutableArray<Data.ProvinceInstability> Instabilities;
 	protected override async Task OnInitializedAsync()
 	{
-		PlayerInfos = await http.PostAsync<int, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", Session.G);
+		PlayerInfos = await http.PostAsync<Data.Session, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", Session);
 		Instabilities = await http.PostAsync<int, ImmutableArray<Data.ProvinceInstability>>("api/Provinces/Instabilities", Session.G);
 	}
 }
@@ -33,7 +33,7 @@
 	{
 		<p>Přihlášen: <span style="color:@PlayerInfos[Session.U].Color;">@PlayerInfos[Session.U].Name</span></p><br/>
 		<table class="players">
-			@foreach (var player in PlayerInfos.Where(p => p.Display))
+			@foreach (var player in PlayerInfos.Where(p => p.Real))
 			{
 				<tr>
 					<td style="color:@player.Color;">@player.Name</td>

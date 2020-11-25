@@ -21,7 +21,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Shapes")]
 		public IEnumerable<Client.Data.DisplayableShape> Shapes([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new Client.Data.DisplayableShape(p.ToImmutableArray(), p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && !land.Occupied && land.IsStart, p.Text));
+			return pap[gameId].Provinces.Select(p => new Client.Data.DisplayableShape(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && land.IsInhabitable, p.Text));
 		}
 		[HttpPost("Current")]
 		public IEnumerable<Client.Data.ProvinceVariables> Current([FromBody] int gameId)
@@ -37,7 +37,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Instabilities")]
 		public IEnumerable<Client.Data.ProvinceInstability> Instabilities([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.OfType<Land>().Where(l => l.Occupied && l.Instability.IsZero).Select(l => new Client.Data.ProvinceInstability(l.Name, l.Fill, l.Instability));
+			return pap[gameId].Provinces.OfType<Land>().Where(l => l.Occupied && !l.Instability.IsZero).Select(l => new Client.Data.ProvinceInstability(l.Name, l.Fill, l.Instability));
 		}
 	}
 }

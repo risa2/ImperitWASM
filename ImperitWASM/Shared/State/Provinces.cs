@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace ImperitWASM.Shared.State
 {
-	public class Provinces : IReadOnlyList<Province>
+	public record Provinces : IReadOnlyList<Province>
 	{
 		readonly ImmutableArray<Province> provinces;
 		readonly Graph graph;

@@ -19,7 +19,7 @@ namespace ImperitWASM.Shared.Cvt
 			writer.WriteStartObject();
 			writer.WriteString("Center", shape.Center.ToString());
 			writer.WriteStartArray();
-			foreach (var point in shape)
+			foreach (var point in shape.Border)
 			{
 				writer.WriteStringValue(point.ToString());
 			}

@@ -3,7 +3,7 @@ using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using Mode = ImperitWASM.Client.Data.Switch.Mode;
+using Mode = ImperitWASM.Client.Data.View;
 using Switch = ImperitWASM.Client.Data.Switch;
 
 namespace ImperitWASM.Server.Controllers
@@ -30,7 +30,7 @@ namespace ImperitWASM.Server.Controllers
 			_ => false
 		};
 		Switch IfPossible(PlayersAndProvinces p_p, int player, Switch s) => IsPossible(p_p, player, s) ? s : new Switch(s.S, Mode.Map, null, null);
-		Switch ClickedResult(PlayersAndProvinces p_p, int user, int? from, int clicked) => from switch
+		static Switch ClickedResult(PlayersAndProvinces p_p, int user, int? from, int clicked) => from switch
 		{
 			int start => new Switch(null, start == clicked ? Mode.Recruit : Mode.Move, start, clicked),
 			null when p_p.Province(clicked).IsAllyOf(p_p.Player(user)) => new Switch(clicked, Mode.Map, null, null),

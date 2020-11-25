@@ -3,26 +3,19 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion
 {
-	public class Loan : IPlayerAction
+	public record Loan(int Debt, Settings Settings) : IPlayerAction
 	{
-		readonly Settings settings;
-		public readonly int Debt;
-		public Loan(int debt, Settings set)
-		{
-			Debt = debt;
-			settings = set;
-		}
 		public (Player, IPlayerAction?) Perform(Player player, PlayersAndProvinces pap)
 		{
-			int next_debt = Debt + (int)Math.Ceiling(Debt * settings.Interest);
+			int next_debt = Debt + (int)Math.Ceiling(Debt * Settings.Interest);
 			return next_debt <= player.Money
 				? (player.ChangeMoney(-next_debt), null)
-				: (player.ChangeMoney(-player.Money), new Loan(next_debt - player.Money, settings));
+				: (player.ChangeMoney(-player.Money), new Loan(next_debt - player.Money, Settings));
 		}
 		public (Province, IPlayerAction?) Perform(Province province, Player active, PlayersAndProvinces pap)
 		{
-			return province is Land land && land.IsAllyOf(active) && Debt > settings.DebtLimit + active.Money
-				? (land.Revolt(), land.Price > Debt ? null : new Loan(Debt - land.Price, settings))
+			return province is Land land && land.IsAllyOf(active) && Debt > Settings.DebtLimit + active.Money
+				? (land.Revolt(), land.Price > Debt ? null : new Loan(Debt - land.Price, Settings))
 				: (province, this);
 		}
 	}

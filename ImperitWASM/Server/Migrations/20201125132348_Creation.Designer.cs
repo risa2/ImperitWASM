@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ImperitWASM.Server.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20201123143436_OneIM")]
-    partial class OneIM
+    [Migration("20201125132348_Creation")]
+    partial class Creation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -126,12 +126,6 @@ namespace ImperitWASM.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("EntityPlayerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("EntitySoldierId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("GameId")
                         .HasColumnType("INTEGER");
 
@@ -139,11 +133,6 @@ namespace ImperitWASM.Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EntityPlayerId");
-
-                    b.HasIndex("EntitySoldierId")
-                        .IsUnique();
 
                     b.HasIndex("GameId");
 
@@ -162,9 +151,6 @@ namespace ImperitWASM.Server.Migrations
                     b.Property<int>("EntityProvinceId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("EntitySoldierId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
@@ -173,9 +159,6 @@ namespace ImperitWASM.Server.Migrations
                     b.HasIndex("EntityPlayerId");
 
                     b.HasIndex("EntityProvinceId");
-
-                    b.HasIndex("EntitySoldierId")
-                        .IsUnique();
 
                     b.ToTable("EntityProvinceAction");
                 });
@@ -209,21 +192,10 @@ namespace ImperitWASM.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("EntitySoldier");
-                });
-
-            modelBuilder.Entity("ImperitWASM.Server.Load.EntitySoldierPair", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Count")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("EntitySoldierId")
+                    b.Property<int>("EntityProvinceActionId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Type")
@@ -231,9 +203,9 @@ namespace ImperitWASM.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EntitySoldierId");
+                    b.HasIndex("EntityProvinceActionId");
 
-                    b.ToTable("EntitySoldierPair");
+                    b.ToTable("EntitySoldier");
                 });
 
             modelBuilder.Entity("ImperitWASM.Server.Load.Game", b =>
@@ -291,27 +263,11 @@ namespace ImperitWASM.Server.Migrations
 
             modelBuilder.Entity("ImperitWASM.Server.Load.EntityProvince", b =>
                 {
-                    b.HasOne("ImperitWASM.Server.Load.EntityPlayer", "EntityPlayer")
-                        .WithMany()
-                        .HasForeignKey("EntityPlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ImperitWASM.Server.Load.EntitySoldier", "EntitySoldier")
-                        .WithOne()
-                        .HasForeignKey("ImperitWASM.Server.Load.EntityProvince", "EntitySoldierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ImperitWASM.Server.Load.Game", "Game")
                         .WithMany("EntityProvinces")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("EntityPlayer");
-
-                    b.Navigation("EntitySoldier");
 
                     b.Navigation("Game");
                 });
@@ -330,17 +286,9 @@ namespace ImperitWASM.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ImperitWASM.Server.Load.EntitySoldier", "EntitySoldier")
-                        .WithOne()
-                        .HasForeignKey("ImperitWASM.Server.Load.EntityProvinceAction", "EntitySoldierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("EntityPlayer");
 
                     b.Navigation("EntityProvince");
-
-                    b.Navigation("EntitySoldier");
                 });
 
             modelBuilder.Entity("ImperitWASM.Server.Load.EntitySession", b =>
@@ -354,15 +302,15 @@ namespace ImperitWASM.Server.Migrations
                     b.Navigation("Game");
                 });
 
-            modelBuilder.Entity("ImperitWASM.Server.Load.EntitySoldierPair", b =>
+            modelBuilder.Entity("ImperitWASM.Server.Load.EntitySoldier", b =>
                 {
-                    b.HasOne("ImperitWASM.Server.Load.EntitySoldier", "EntitySoldier")
-                        .WithMany("EntitySoldierPairs")
-                        .HasForeignKey("EntitySoldierId")
+                    b.HasOne("ImperitWASM.Server.Load.EntityProvinceAction", "EntityProvinceAction")
+                        .WithMany("EntitySoldiers")
+                        .HasForeignKey("EntityProvinceActionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("EntitySoldier");
+                    b.Navigation("EntityProvinceAction");
                 });
 
             modelBuilder.Entity("ImperitWASM.Server.Load.EntityPlayer", b =>
@@ -375,9 +323,9 @@ namespace ImperitWASM.Server.Migrations
                     b.Navigation("EntityProvinceActions");
                 });
 
-            modelBuilder.Entity("ImperitWASM.Server.Load.EntitySoldier", b =>
+            modelBuilder.Entity("ImperitWASM.Server.Load.EntityProvinceAction", b =>
                 {
-                    b.Navigation("EntitySoldierPairs");
+                    b.Navigation("EntitySoldiers");
                 });
 
             modelBuilder.Entity("ImperitWASM.Server.Load.Game", b =>

@@ -43,16 +43,9 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("MoveInfo")]
-		public Client.Data.MoveInfo MoveInfo([FromBody] Client.Data.CmdData move)
-		{
-			var (from, to, game) = move;
-			var p_p = pap[game];
-			bool possible = p_p.Province(from).SoldierTypes.Any(type => type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to)));
-			var types = p_p.Province(from).SoldierTypes.Select(type => type.Description).ToImmutableArray();
-			return new Client.Data.MoveInfo(possible, !p_p.Province(from).IsAllyOf(p_p.Province(to)), p_p.Province(to).Occupied, p_p.Province(from).Name, p_p.Province(to).Name, p_p.Province(from).Soldiers.ToString(), p_p.Province(to).Soldiers.ToString(), types);
-		}
+		public MoveInfo MoveInfo([FromBody] CmdData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.A) is Province from && p_p.Province(move.B) is Province to ? new MoveInfo(from.SoldierTypes.Any(type => type.CanMoveAlone(p_p, from, to)), !from.IsAllyOf(to), to.Occupied, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.SoldierTypes.Select(type => type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
 		[HttpPost("Move")]
-		public async Task<Client.Data.MoveErrors> Move([FromBody] Client.Data.MoveCmd m)
+		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
 		{
 			if (!Validate(m.LoggedIn, m.Game, m.LoginId))
 			{
@@ -60,47 +53,45 @@ namespace ImperitWASM.Server.Controllers
 			}
 			var p_p = pap[m.Game];
 			var (from, to) = (p_p.Province(m.From), p_p.Province(m.To));
-			var move = new Move(p_p.Player(m.LoggedIn), from, to, new Soldiers(m.Counts.Select((count, i) => (from.Soldiers[i].Type, count))));
+			var move = new Move(p_p.Player(m.LoggedIn), from, to, new Soldiers(m.Counts.Select((count, i) => new Regiment(from.Soldiers[i].Type, count))));
 			return (await pap.AddAsync(m.Game, move)) switch
 			{
 				true => MoveErrors.Ok,
-				false when !from.Soldiers.Contains(move.Soldiers) => Client.Data.MoveErrors.FewSoldiers,
-				false when move.Soldiers.Capacity(p_p, from, to) < 0 => Client.Data.MoveErrors.LittleCapacity,
+				false when !from.Soldiers.Contains(move.Soldiers) => MoveErrors.FewSoldiers,
+				false when move.Soldiers.Capacity(p_p, from, to) < 0 => MoveErrors.LittleCapacity,
 				_ => MoveErrors.Else
 			};
 		}
 		[HttpPost("PurchaseInfo")]
-		public PurchaseInfo PurchaseInfo([FromBody] CmdData purchase)
-		{
-			var (player, land, gameId) = purchase;
-			var p_p = pap[gameId];
-			return new Client.Data.PurchaseInfo(new Buy(p_p.Player(player), p_p.Province(land), 0).Allowed(p_p), p_p.Province(land).Name, (p_p.Province(land) as Land)?.Price ?? int.MaxValue, p_p.Player(player).Money);
-		}
+		public PurchaseInfo PurchaseInfo([FromBody] CmdData purchase) => pap.GameExists(purchase.G) && pap[purchase.G] is PlayersAndProvinces p_p && p_p.Province(purchase.B) is Land land && p_p.Player(purchase.B) is Player player ? new PurchaseInfo(new Buy(player, land, 0).Allowed(p_p), land.Name, land.Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
 		[HttpPost("Purchase")]
 		public void Purchase([FromBody] PurchaseCmd purchase)
 		{
-			var p_p = pap[purchase.Game];
-			if (Validate(purchase.LoggedIn, purchase.Game, purchase.LoginId) && p_p.Province(purchase.Land) is Land Land)
+			if (Validate(purchase.LoggedIn, purchase.Game, purchase.LoginId))
 			{
-				if (Land.Price > p_p.Player(purchase.LoggedIn).Money)
+				var p_p = pap[purchase.Game];
+				if (p_p.Province(purchase.Land) is Land Land && p_p.Player(purchase.LoggedIn) is Player Player)
 				{
-					(p_p, _) = p_p.Add(new Borrow(p_p.Player(purchase.LoggedIn), Land.Price - p_p.Player(purchase.LoggedIn).Money, cfg.Settings));
+					if (Land.Price > Player.Money)
+					{
+						(p_p, _) = p_p.Add(new Borrow(Player, Land.Price - Player.Money, cfg.Settings));
+					}
+					(pap[purchase.Game], _) = p_p.Add(new Buy(Player, Land, Land.Price));
 				}
-				(pap[purchase.Game], _) = p_p.Add(new Buy(p_p.Player(purchase.LoggedIn), p_p.Province(purchase.Land), Land.Price));
 			}
 		}
 		[HttpPost("RecruitInfo")]
 		public RecruitInfo RecruitInfo([FromBody] CmdData p)
 		{
-			var p_p = pap[p.G];
-			return new RecruitInfo(p_p.Province(p.A).Name, p_p.Province(p.A).Soldiers.ToString(), cfg.Settings.RecruitableTypes(p_p.Province(p.A)).Select(t => new Client.Data.SoldiersItem(t.Description, t.Price)).ToImmutableArray(), p_p.Player(p.B).Money);
+			var province = pap.Province(p.G, p.A);
+			return province is not null ? new RecruitInfo(province.Name, province.Soldiers.ToString(), cfg.Settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.B).Money) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0);
 		}
 		[HttpPost("Recruit")]
 		public async Task Recruit([FromBody] RecruitCmd r)
 		{
 			if (Validate(r.LoggedIn, r.Game, r.LoginId))
 			{
-				var soldiers = new Soldiers(r.Counts.Select((count, i) => (cfg.Settings.SoldierTypes[i], count)));
+				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(cfg.Settings.SoldierTypes[i], count)));
 				var p_p = pap[r.Game];
 				if (soldiers.Price > p_p.Player(r.LoggedIn).Money)
 				{
@@ -111,9 +102,6 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("Donate")]
-		public async Task<bool> Donate([FromBody] DonationCmd donation)
-		{
-			return login.IsValid(donation.LoggedIn, donation.Game, donation.LoginId) && await pap.AddAsync(donation.Game, new Donate(pap.Player(donation.Game, donation.LoggedIn), pap.Player(donation.Game, donation.Recipient), donation.Amount));
-		}
+		public async Task<bool> Donate([FromBody] DonationCmd donation) => login.IsValid(donation.LoggedIn, donation.Game, donation.LoginId) && await pap.AddAsync(donation.Game, new Donate(pap.Player(donation.Game, donation.LoggedIn), pap.Player(donation.Game, donation.Recipient), donation.Amount));
 	}
 }

@@ -36,17 +36,10 @@ namespace ImperitWASM.Server.Services
 		}
 
 		static Color ColorAt(int i) => Color.Generate(i, 120.0, 1.0, 1.0);
-		IEnumerable<(Land l, int i)> RemainingStarts(PlayersAndProvinces p_p) => p_p.Provinces.Select((p, i) => (p as Land, i)).Where(it => it.Item1 is Land && it.Item1.IsStart && !it.Item1.Occupied)!;
 
-		Player GetRobot(int count, int i, int earnings)
-		{
-			return new Robot(ColorAt(count + i - 1), "AI " + i, cfg.Settings.DefaultMoney - (earnings * 2), true, Actions, cfg.Settings);
-		}
-
-		void AddRobots(Game game, PlayersAndProvinces p_p)
-		{
-			RemainingStarts(p_p).Each((start, i) => pap.Add(game, GetRobot(p_p.PlayersCount, i, start.l.Earnings), start.i));
-		}
+		Player GetRobot(int i, int earnings) => new Robot(ColorAt(i), "AI " + i, cfg.Settings.DefaultMoney - (earnings * 2), true, Actions, cfg.Settings);
+		void AddRobot(int gameId, Land start, int land, int i) => pap.Add(gameId, GetRobot(i, start.Earnings), i, land);
+		void AddRobots(int gameId, PlayersAndProvinces p_p) => p_p.Inhabitable.Each((start, i) => AddRobot(gameId, start.Value, start.Key, p_p.PlayersCount + i - 1));
 		public async Task<int> CreateAsync()
 		{
 			var g = pap.Add(new PlayersAndProvinces(ImmutableArray.Create<Player>(new Savage()), cfg.Settings.Provinces));
@@ -60,7 +53,7 @@ namespace ImperitWASM.Server.Services
 			foreach (var g in game.ShouldStart)
 			{
 				var p_p = pap[g.Id];
-				AddRobots(g, p_p);
+				AddRobots(g.Id, p_p);
 				_ = g.Start().SetActive(p_p.Next(0));
 				powers.Add(g.Id, p_p);
 			}
@@ -75,7 +68,7 @@ namespace ImperitWASM.Server.Services
 		{
 			int count = pap.PlayersCount(game.Id);
 			var player = new Human(ColorAt(count - 1), name, cfg.Settings.DefaultMoney - (cfg.Settings.ProvinceData[land]?.Earnings * 2).GetValueOrDefault(), true, Actions, password);
-			pap.Add(game, player, land);
+			pap.Add(game.Id, player, count, land);
 			_ = count == 2 ? game.StartCountdown() : game;
 			return ctx.SaveAsync();
 		}

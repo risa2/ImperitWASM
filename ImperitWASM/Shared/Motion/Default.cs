@@ -2,7 +2,7 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion
 {
-	public class Default : IPlayerAction
+	public record Default : IPlayerAction
 	{
 		public (Player, IPlayerAction) Perform(Player player, PlayersAndProvinces pap)
 		{

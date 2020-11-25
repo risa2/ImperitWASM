@@ -12,18 +12,15 @@ namespace ImperitWASM.Server.Load
 		public Game? Game { get; set; }
 		public int GameId { get; set; }
 		public int Index { get; set; }
-		public EntityPlayer? EntityPlayer { get; set; }
-		public int EntityPlayerId { get; set; }
-		public EntitySoldier? EntitySoldier { get; set; }
-		public int EntitySoldierId { get; set; }
 		public ICollection<EntityProvinceAction>? EntityProvinceActions { get; set; }
 		public Province Convert(Settings set)
 		{
-			return set.ProvinceData[Index].Build(set, EntityPlayer!.Convert(set), EntitySoldier!.Convert(set.SoldierTypes), EntityProvinceActions?.Select(a => a.Convert(set))?.ToImmutableList());
+			var sein = EntityProvinceActions!.Single(a => a.Type == EntityProvinceAction.Kind.Existence);
+			return set.ProvinceData[Index].Build(set, sein.EntityPlayer!.Convert(set), sein.GetSoldiers(set.SoldierTypes), EntityProvinceActions?.Where(a => a.Type != EntityProvinceAction.Kind.Existence)?.Select(a => a.Convert(set))?.ToImmutableList());
 		}
 		public static EntityProvince From(Province p, IReadOnlyDictionary<Player, EntityPlayer> map, IReadOnlyDictionary<SoldierType, int> smap, int index)
 		{
-			return new EntityProvince { Index = index, EntityPlayer = map[p.Player], EntitySoldier = EntitySoldier.From(p.Soldiers, smap), EntityProvinceActions = p.Actions.Select(a => EntityProvinceAction.From(a, map, smap)).ToList() };
+			return new EntityProvince { Index = index, EntityProvinceActions = p.Actions.Select(a => EntityProvinceAction.From(a, map, smap)).Append(EntityProvinceAction.From(p.Soldiers, map[p.Player], smap)).ToList() };
 		}
 	}
 }

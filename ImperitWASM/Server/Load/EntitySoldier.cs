@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load
@@ -8,14 +7,11 @@ namespace ImperitWASM.Server.Load
 	public class EntitySoldier : IEntity
 	{
 		[Key] public int Id { get; set; }
-		public ICollection<EntitySoldierPair>? EntitySoldierPairs { get; set; }
-		public Soldiers Convert(IReadOnlyList<SoldierType> types)
-		{
-			return new Soldiers(EntitySoldierPairs.Select(item => item.Convert(types)));
-		}
-		public static EntitySoldier From(Soldiers soldiers, IReadOnlyDictionary<SoldierType, int> map)
-		{
-			return new EntitySoldier { EntitySoldierPairs = soldiers.Select(s => EntitySoldierPair.From(s, map)).ToList() };
-		}
+		public EntityProvinceAction? EntityProvinceAction { get; set; }
+		public int EntityProvinceActionId { get; set; }
+		public int Type { get; set; }
+		public int Count { get; set; }
+		public Regiment Convert(IReadOnlyList<SoldierType> types) => new Regiment(types[Type], Count);
+		public static EntitySoldier From(Regiment p, IReadOnlyDictionary<SoldierType, int> map) => new EntitySoldier { Type = map[p.Type], Count = p.Count };
 	}
 }

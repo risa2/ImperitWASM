@@ -7,14 +7,12 @@ using static System.Math;
 
 namespace ImperitWASM.Shared.State
 {
-	public class Robot : Player
+	public record Robot(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions, Settings Settings)
+		: Player(Color, Name, Money, Alive, Actions)
 	{
-		readonly Settings settings;
-		public Robot(Color color, string name, int money, bool alive, ImmutableList<IPlayerAction> actions, Settings settings)
-			: base(color, new Description(name), money, alive, actions) => this.settings = settings;
-		public override Player ChangeMoney(int amount) => new Robot(Color, Name, Money + amount, Alive, Actions, settings);
-		public override Player Die() => new Robot(Color, Name, 0, false, ImmutableList<IPlayerAction>.Empty, settings);
-		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Robot(Color, Name, Money, Alive, new_actions, settings);
+		public override Player ChangeMoney(int amount) => new Robot(Color, Name, Money + amount, Alive, Actions, Settings);
+		public override Player Die() => new Robot(Color, Name, 0, false, ImmutableList<IPlayerAction>.Empty, Settings);
+		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Robot(Color, Name, Money, Alive, new_actions, Settings);
 
 		static Soldiers NextSoldiers(PlayersAndProvinces pap, Province p) => p.ActOnYourself(pap).Soldiers;
 		static int NextDefensePower(PlayersAndProvinces pap, Province p) => NextSoldiers(pap, p).DefensePower;
@@ -32,7 +30,7 @@ namespace ImperitWASM.Shared.State
 
 		SoldierType? BestDefender(Province p, int money)
 		{
-			return settings.SoldierTypes.Where(type => type.IsRecruitable(p)).MinBy(type => -money / type.Price * type.DefensePower);
+			return Settings.SoldierTypes.Where(type => type.IsRecruitable(p)).MinBy(type => -money / type.Price * type.DefensePower);
 		}
 
 		static int DivUp(int a, int b) => (a / b) + (a % b > 0 ? 1 : 0);

@@ -6,15 +6,8 @@ using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
-	public class PlayersAndProvinces
+	public record PlayersAndProvinces(ImmutableArray<Player> Players, Provinces Provinces)
 	{
-		public readonly ImmutableArray<Player> Players;
-		public readonly Provinces Provinces;
-		public PlayersAndProvinces(ImmutableArray<Player> players, Provinces provinces)
-		{
-			Players = players;
-			Provinces = provinces;
-		}
 		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty) => Provinces.Passable(from, to, distance, difficulty);
 		public int NeighborCount(Province prov) => Provinces.NeighborCount(prov);
 		public IEnumerable<Province> NeighborsOf(Province prov) => Provinces.NeighborsOf(prov);
@@ -51,6 +44,7 @@ namespace ImperitWASM.Shared.State
 			return (new PlayersAndProvinces(Players, Provinces), false);
 		}
 		public int LivingHumans => Players.Count(p => p.Alive && p is Human);
-		public IEnumerable<IGrouping<Player, Province>> PlayersProvinces => Provinces.GroupBy(p => p.Player);
+		public PlayersPower PlayersPower(Func<Player, bool> which) => new PlayersPower(Players.Where(which).Select(p => p.Power(Provinces.ControlledBy(p).ToImmutableArray())).ToImmutableArray());
+		public IEnumerable<KeyValuePair<int, Land>> Inhabitable => Provinces.Select((p, i) => KeyValuePair.Create(i, p as Land)).Where(it => it.Value is Land && it.Value.IsInhabitable)!;
 	}
 }

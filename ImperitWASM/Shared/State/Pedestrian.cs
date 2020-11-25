@@ -1,20 +1,8 @@
 ﻿namespace ImperitWASM.Shared.State
 {
-	public class Pedestrian : SoldierType
+	public record Pedestrian(Description Description, int AttackPower, int DefensePower, int Weight, int Price)
+		: SoldierType(Description, AttackPower, DefensePower, Weight, Price)
 	{
-		public override Description Description { get; }
-		public override int AttackPower { get; }
-		public override int DefensePower { get; }
-		public override int Weight { get; }
-		public override int Price { get; }
-		public Pedestrian(Description description, int attackPower, int defensePower, int weight, int price)
-		{
-			Description = description;
-			AttackPower = attackPower;
-			DefensePower = defensePower;
-			Weight = weight;
-			Price = price;
-		}
 		public override int CanMove(PlayersAndProvinces pap, Province from, Province to)
 		{
 			return from is Land && to is Land && pap.Passable(from, to, 1, (a, b) => a is Land && b is Land ? 1 : 2) ? Weight : 0;

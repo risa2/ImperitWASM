@@ -2,17 +2,8 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion.Commands
 {
-	public class Recruit : ICommand
+	public record Recruit(Player Player, Province Province, Soldiers Soldiers) : ICommand
 	{
-		public readonly Player Player;
-		public readonly Province Province;
-		public readonly Soldiers Soldiers;
-		public Recruit(Player player, Province province, Soldiers soldeirs)
-		{
-			Player = player;
-			Province = province;
-			Soldiers = soldeirs;
-		}
 		public Player Perform(Player player, PlayersAndProvinces pap)
 		{
 			return player == Player ? player.ChangeMoney(-Soldiers.Price) : player;

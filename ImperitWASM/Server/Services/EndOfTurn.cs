@@ -25,13 +25,13 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 			this.game = game;
 		}
-		PlayersAndProvinces Actions(PlayersAndProvinces p_p, Game g)
+		static PlayersAndProvinces Actions(PlayersAndProvinces p_p, Game g)
 		{
 			p_p = p_p.Act(g.Active);
 			g.Active = p_p.Next(g.Active);
 			return p_p;
 		}
-		PlayersAndProvinces AllActions(PlayersAndProvinces p_p, Game g)
+		static PlayersAndProvinces AllActions(PlayersAndProvinces p_p, Game g)
 		{
 			p_p = Actions(p_p, g);
 			while (p_p.Player(g.Active) is Robot robot && p_p.LivingHumans > 0)

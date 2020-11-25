@@ -18,7 +18,7 @@
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		Players = await http.GetAsync<ImmutableArray<Data.PlayerId>>("api/Player/Login");
+		Players = await http.GetAsync<ImmutableArray<Data.PlayerId>>("api/Player/Logins");
 	}
 }
 <NavMenu Options="Přihlášení;Registrace;Historie" OnClick="i => Set((Mode)i)"/>

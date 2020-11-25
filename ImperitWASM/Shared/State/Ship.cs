@@ -1,22 +1,8 @@
 ﻿namespace ImperitWASM.Shared.State
 {
-	public class Ship : SoldierType
+	public record Ship(Description Description, int AttackPower, int DefensePower, int Weight, int Price, int Capacity)
+		: SoldierType(Description, AttackPower, DefensePower, Weight, Price)
 	{
-		public override Description Description { get; }
-		public override int AttackPower { get; }
-		public override int DefensePower { get; }
-		public override int Weight { get; }
-		public override int Price { get; }
-		public int Capacity { get; }
-		public Ship(Description description, int attackPower, int defensePower, int weight, int price, int capacity)
-		{
-			Description = description;
-			AttackPower = attackPower;
-			DefensePower = defensePower;
-			Weight = weight;
-			Price = price;
-			Capacity = capacity;
-		}
 		protected static bool IsPassable(Province p) => (p is Land l && l.HasPort) || p is Sea;
 		public override int CanMove(PlayersAndProvinces pap, Province from, Province dest)
 		{

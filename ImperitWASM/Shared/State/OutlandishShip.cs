@@ -1,11 +1,8 @@
 ﻿namespace ImperitWASM.Shared.State
 {
-	public class OutlandishShip : Ship
+	public record OutlandishShip(Description Description, int AttackPower, int DefensePower, int Weight, int Price, int Capacity, int Speed)
+		: Ship(Description, AttackPower, DefensePower, Weight, Price, Capacity)
 	{
-		public int Speed { get; }
-		public OutlandishShip(Description description, int attackPower, int defensePower, int weight, int price, int capacity, int speed)
-			: base(description, attackPower, defensePower, weight, price, capacity) => Speed = speed;
-
 		int Difficulty(Province to) => IsPassable(to) ? 1 : Speed + 1;
 		public override int CanMove(PlayersAndProvinces pap, Province from, Province dest)
 		{

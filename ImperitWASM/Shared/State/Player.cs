@@ -1,25 +1,13 @@
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
-	public abstract class Player : IEquatable<Player>
+	public abstract record Player(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions)
 	{
-		public Color Color { get; }
-		public Description Description { get; }
-		public int Money { get; }
-		public bool Alive { get; }
-		public ImmutableList<IPlayerAction> Actions { get; }
-		public Player(Color color, Description description, int money, bool alive, ImmutableList<IPlayerAction> actions)
-		{
-			Color = color;
-			Description = description;
-			Money = money;
-			Alive = alive;
-			Actions = actions;
-		}
-		public string Name => Description.Name;
+		public Description Description => new Description(Name);
 		public abstract Player ChangeMoney(int amount);
 		public abstract Player Die();
 		protected abstract Player WithActions(ImmutableList<IPlayerAction> new_actions);
@@ -53,10 +41,8 @@ namespace ImperitWASM.Shared.State
 			return (new_provinces, player);
 		}
 		public bool IsLivingHuman => this is Human && Alive;
-		public bool Equals(Player? obj) => obj != null && obj.Description == obj.Description;
-		public override bool Equals(object? obj) => Equals(obj as Player);
+		public virtual bool Equals(Player? obj) => obj is not null && obj.Name == obj.Name;
 		public override int GetHashCode() => Description.GetHashCode();
-		public static bool operator ==(Player? a, Player? b) => a?.Description == b?.Description;
-		public static bool operator !=(Player? a, Player? b) => a?.Description != b?.Description;
+		public PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(p => p is Land), Money, provinces.Sum(p => p.Soldiers.Power), provinces.Count(p => p is Land l && l.IsFinal));
 	}
 }

@@ -1,13 +1,13 @@
 @code{
 	[Parameter] public int Width { get; set; } = 1;
 	[Parameter] public int Height { get; set; } = 1;
-	[Parameter] public IEnumerable<Point>? Points { get; set; }
+	[Parameter] public ImmutableArray<Point>? Points { get; set; }
 	[Parameter] public Color Fill { get; set; } = new Color();
 	[Parameter] public Color Stroke { get; set; } = new Color();
 	[Parameter] public int StrokeWidth { get; set; } = 0;
 	[Parameter] public Func<Task>? OnClick { get; set; }
 	string Path => string.Join(" ", Points?.Select(point => Width * point.X + "," + Height * point.Y) ?? new[] { "" });
-	public void Select(IEnumerable<Point>? points, Color fill)
+	public void Select(ImmutableArray<Point>? points, Color fill)
 	{
 		Points = points;
 		Fill = fill;

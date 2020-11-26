@@ -2,7 +2,7 @@
 	[Parameter] public int Width { get; set; }
 	[Parameter] public int Height { get; set; }
 	[Parameter] public IReadOnlyList<Data.DisplayableShape>? Provinces { get; set; }
-	[Parameter] public Color SelectedColor { get; set; }
+	[Parameter] public Color SelectedColor { get; set; } = new Color();
 	[Parameter] public Func<int, int?, Task<int?>>? Select { get; set; }
 	[Parameter] public int FontSize { get; set; }
 	int? selected = null;

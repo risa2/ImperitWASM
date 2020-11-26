@@ -3,8 +3,8 @@
 	[Parameter] public int Height { get; set; }
 	[Parameter] public int FontSize { get; set; }
 	[Parameter] public Func<Task>? OnClick { get; set; }
-	[Parameter] public Point Center { get; set; }
-	[Parameter] public IEnumerable<string> Text { get; set; } = Array.Empty<string>();
+	[Parameter] public Point Center { get; set; } = new Point(0.0, 0.0);
+	[Parameter] public ImmutableArray<string> Text { get; set; }
 	double X => Center.X * Width;
 	double Y => Center.Y * Height;
 }

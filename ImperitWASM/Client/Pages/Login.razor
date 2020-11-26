@@ -27,7 +27,7 @@
 	{
 		<p>Buď to nejsi ty (máš hlad?), nebo to není tvoje heslo</p>
 	}
-	else if (!Players.IsDefault && Players.IsEmpty)
+	@if (!Players.IsDefault && Players.IsEmpty)
 	{
 		<p>Neprobíhá žádná hra, do níž by ses mohl přihlásit</p>
 	}

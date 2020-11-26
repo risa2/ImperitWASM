@@ -6,7 +6,7 @@
 	string Password { get; set; } = "";
 	int? Selected = null, GameId = null;
 	ImmutableArray<Data.DisplayableShape> Provinces;
-	Color NextColor;
+	Color NextColor = new Color();
 	async Task OnSubmit()
 	{
 		if (Selected is int selected && GameId is int gameId && await http.PostAsync<Data.RegisteredPlayer, bool>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, selected, gameId)))

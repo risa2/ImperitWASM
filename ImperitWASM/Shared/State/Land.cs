@@ -4,7 +4,7 @@ using ImperitWASM.Shared.Motion;
 namespace ImperitWASM.Shared.State
 {
 	public record Land(string Name, Shape Shape, Player Player, Soldiers Soldiers, Soldiers DefaultSoldiers, ImmutableList<IProvinceAction> Actions, Settings Settings, int Earnings, bool IsStart, bool IsFinal, bool HasPort, ImmutableArray<SoldierType> ExtraTypes)
-		: Province(new Description(Name, ImmutableArray.Create(Name + (HasPort ? "\u2693" : ""), Soldiers.ToString())), Shape, Player, Soldiers, DefaultSoldiers, Actions)
+		: Province(new Description(Name, ImmutableArray.Create(Name + (IsFinal ? "\u2605" : "") + (HasPort ? "\u2693" : ""), Soldiers.ToString(), Earnings + "\uD83D\uDCB0")), Shape, Player, Soldiers, DefaultSoldiers, Actions)
 	{
 		public bool IsInhabitable => IsStart && !Occupied;
 		public virtual bool Equals(Land? other) => other is not null && other.Name == Name;

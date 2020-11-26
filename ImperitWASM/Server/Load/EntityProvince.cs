@@ -16,7 +16,7 @@ namespace ImperitWASM.Server.Load
 		public Province Convert(Settings set)
 		{
 			var sein = EntityProvinceActions!.Single(a => a.Type == EntityProvinceAction.Kind.Existence);
-			return set.ProvinceData[Index].Build(set, sein.EntityPlayer!.Convert(set), sein.GetSoldiers(set.SoldierTypes), EntityProvinceActions?.Where(a => a.Type != EntityProvinceAction.Kind.Existence)?.Select(a => a.Convert(set))?.ToImmutableList());
+			return set.Provinces[Index].Build(set, sein.EntityPlayer!.Convert(set), sein.GetSoldiers(set.SoldierTypes), EntityProvinceActions?.Where(a => a.Type != EntityProvinceAction.Kind.Existence)?.Select(a => a.Convert(set))?.ToImmutableList());
 		}
 		public static EntityProvince From(Province p, IReadOnlyDictionary<Player, EntityPlayer> map, IReadOnlyDictionary<SoldierType, int> smap, int index)
 		{

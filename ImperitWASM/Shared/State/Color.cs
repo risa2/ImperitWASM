@@ -1,29 +1,23 @@
 using System;
 using System.Globalization;
-using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Cvt.ColorConverter))]
-	public readonly struct Color : IEquatable<Color>
+	public record Color(byte R, byte G, byte B, byte A = 255)
 	{
+		public Color() : this(0, 0, 0, 0) { }
 		static string ToHex(byte num) => num.ToString("x2", CultureInfo.InvariantCulture);
 		static byte FromHex(string s) => byte.Parse(s, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-		public readonly byte r, g, b, a;
-		public Color(byte R, byte G, byte B, byte A = 255) => (r, g, b, a) = (R, G, B, A);
-		public override string ToString() => "#" + ToHex(r) + ToHex(g) + ToHex(b) + ToHex(a);
 		public static Color Parse(string str) => new Color(FromHex(str[1..3]), FromHex(str[3..5]), FromHex(str[5..7]), str.Length < 9 ? (byte)255 : FromHex(str[7..9]));
+		public override string ToString() => "#" + ToHex(R) + ToHex(G) + ToHex(B) + ToHex(A);
+
 		static byte Mix(byte a, byte b, int w1, int w2) => (byte)(((a * w1) + (b * w2)) / (w1 + w2));
 		static byte Supl(byte x, byte y) => (byte)(255 - ((255 - x) * (255 - y) / 255));
-		public Color Mix(Color color) => new Color(Mix(r, color.r, a, color.a), Mix(g, color.g, a, color.a), Mix(b, color.b, a, color.a), Supl(a, color.a));
-		public Color Over(Color color) => new Color(Mix(r, color.r, 255, 255 - a), Mix(g, color.g, 255, 255 - a), Mix(b, color.b, 255, 255 - a), Supl(a, color.a));
-		public bool Equals(Color c2) => (r, g, b, a) == (c2.r, c2.g, c2.b, c2.a);
-		public override bool Equals(object? obj) => obj is Color col && Equals(col);
-		public override int GetHashCode() => (r, g, b, a).GetHashCode();
-		public static bool operator ==(Color left, Color right) => left.Equals(right);
-		public static bool operator !=(Color left, Color right) => !left.Equals(right);
-		public Color WithAlpha(byte alpha) => new Color(r, g, b, alpha);
-		public Color(double H, double S, double V)
+		public Color Mix(Color color) => new Color(Mix(R, color.R, A, color.A), Mix(G, color.G, A, color.A), Mix(B, color.B, A, color.A), Supl(A, color.A));
+		public Color Over(Color color) => new Color(Mix(R, color.R, 255, 255 - A), Mix(G, color.G, 255, 255 - A), Mix(B, color.B, 255, 255 - A), Supl(A, color.A));
+
+		public Color WithAlpha(byte alpha) => this with { A = alpha };
+		public static Color HSV(double H, double S, double V)
 		{
 			while (H < 0) { H += 360; }
 			while (H >= 360) { H -= 360; }
@@ -88,11 +82,8 @@ namespace ImperitWASM.Shared.State
 				}
 			}
 			static byte clamp(int i) => (byte)Math.Clamp(i, 0, 255);
-			r = clamp((int)(R * 255.0));
-			g = clamp((int)(G * 255.0));
-			b = clamp((int)(B * 255.0));
-			a = 255;
+			return new Color(clamp((int)(R * 255.0)), clamp((int)(G * 255.0)), clamp((int)(B * 255.0)));
 		}
-		public static Color Generate(int i, double h_0, double s, double v) => new Color(h_0 + (137.507764050037854 * i), s, v);
+		public static Color Generate(int i, double h_0, double s, double v) => HSV(h_0 + (137.507764050037854 * i), s, v);
 	}
 }

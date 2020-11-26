@@ -9,21 +9,21 @@ namespace ImperitWASM.Shared.State
 	public record Provinces : IReadOnlyList<Province>
 	{
 		readonly ImmutableArray<Province> provinces;
-		readonly Graph graph;
+		readonly Settings settings;
 		readonly ImmutableDictionary<Province, int> lookup;
-		public Provinces(ImmutableArray<Province> provinces, Graph graph, ImmutableDictionary<Province, int>? lookup = null)
+		public Provinces(ImmutableArray<Province> provinces, Settings settings, ImmutableDictionary<Province, int>? lookup = null)
 		{
 			this.provinces = provinces;
-			this.graph = graph;
+			this.settings = settings;
 			this.lookup = lookup ?? provinces.Lookup();
 		}
-		public Provinces With(ImmutableArray<Province> new_provinces) => new Provinces(new_provinces, graph, lookup);
+		public Provinces With(ImmutableArray<Province> new_provinces) => new Provinces(new_provinces, settings, lookup);
 		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty)
 		{
-			return graph.Passable(lookup[from], lookup[to], distance, (start, dest) => difficulty(this[start], this[dest]));
+			return settings.Passable(lookup[from], lookup[to], distance, (start, dest) => difficulty(this[start], this[dest]));
 		}
-		public int NeighborCount(Province p) => graph.NeighborCount(lookup[p]);
-		public IEnumerable<Province> NeighborsOf(Province p) => graph[lookup[p]].Select(vertex => provinces[vertex]);
+		public int NeighborCount(Province p) => settings.NeighborCount(lookup[p]);
+		public IEnumerable<Province> NeighborsOf(Province p) => settings.NeighborsOf(lookup[p]).Select(vertex => provinces[vertex]);
 		public IEnumerable<Province> ControlledBy(Player player) => provinces.Where(p => p.IsAllyOf(player));
 
 		public Province this[int key] => provinces[key];

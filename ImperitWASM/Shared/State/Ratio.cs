@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Globalization;
-using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Cvt.RatioConverter))]
+	[Newtonsoft.Json.JsonConverter(typeof(Cvt.NewtonsoftRatio))]
+	[System.Text.Json.Serialization.JsonConverter(typeof(Cvt.SystemRatio))]
 	public readonly struct Ratio : IEquatable<Ratio>, IComparable<Ratio>
 	{
 		static readonly Random rng = new Random();
@@ -45,6 +45,6 @@ namespace ImperitWASM.Shared.State
 		public int CompareTo(Ratio other) => value.CompareTo(other.value);
 		public bool Equals(Ratio other) => value.Equals(other.value);
 		public bool RandomBool => rng.Next() < value;
-		public bool IsZero => value <= 0;
+		public bool Any => value > 0;
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Client.Data
@@ -9,10 +8,10 @@ namespace ImperitWASM.Client.Data
 	public record Click(int U, int? F, int C, int G);
 	public record CmdData(int A, int B, int G);
 	public record ColoredHuman(string Name, Color Color);
-	public record DisplayableShape(ImmutableArray<Point> B, Point C, Color F, Color S, int W, bool R, IEnumerable<string> T)
+	public record DisplayableShape(ImmutableArray<Point> B, Point C, Color F, Color S, int W, bool R, ImmutableArray<string> T)
 	{
-		public DisplayableShape UpdateText() => R ? this : this with { T = T.Skip(1) };
-		public DisplayableShape Update(Color f, IEnumerable<string> t) => this with { F = f, T = t };
+		public DisplayableShape UpdateText() => R || T.IsDefaultOrEmpty ? this : this with { T = T.RemoveAt(0) };
+		public DisplayableShape Update(Color f, ImmutableArray<string> t) => this with { F = f, T = t };
 	}
 	public record DonationCmd(int LoggedIn, string LoginId, int Recipient, int Amount, int Game);
 	public record MoveCmd(int LoggedIn, string LoginId, int From, int To, ImmutableArray<int> Counts, int Game);
@@ -21,7 +20,7 @@ namespace ImperitWASM.Client.Data
 	public record PlayerId(int I, int G, string N);
 	public record PlayerInfo(int Id, bool Real, string Name, string Color, bool Alive, int Money, int Income, int Debt);
 	public record ProvinceInstability(string Name, Color Color, Ratio Instability);
-	public record ProvinceVariables(IEnumerable<string> T, Color F);
+	public record ProvinceVariables(ImmutableArray<string> T, Color F);
 	public record PurchaseCmd(int LoggedIn, string LoginId, int Land, int Game);
 	public record PurchaseInfo(bool Possible, string Name, int Price, int Money);
 	public record RecruitCmd(int LoggedIn, string LoginId, int Province, ImmutableArray<int> Counts, int Game);

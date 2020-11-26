@@ -4,11 +4,11 @@
 @code {
 	[Parameter] public IEnumerable<T>? Options { get; set; }
 	[Parameter] public Func<T, string> Name { get; set; } = t => "";
-	protected override bool TryParseValueFromString(string value, out int result, out string? errorMsg)
+	protected override bool TryParseValueFromString(string? value, out int result, out string errorMsg)
 	{
 		if (int.TryParse(value, out result))
 		{
-			errorMsg = null;
+			errorMsg = "";
 			return true;
 		}
 		else

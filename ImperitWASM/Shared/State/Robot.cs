@@ -10,9 +10,9 @@ namespace ImperitWASM.Shared.State
 	public record Robot(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions, Settings Settings)
 		: Player(Color, Name, Money, Alive, Actions)
 	{
-		public override Player ChangeMoney(int amount) => new Robot(Color, Name, Money + amount, Alive, Actions, Settings);
+		public virtual bool Equals(Robot? obj) => obj is not null && obj.Name == obj.Name;
+		public override int GetHashCode() => base.GetHashCode();
 		public override Player Die() => new Robot(Color, Name, 0, false, ImmutableList<IPlayerAction>.Empty, Settings);
-		protected override Player WithActions(ImmutableList<IPlayerAction> new_actions) => new Robot(Color, Name, Money, Alive, new_actions, Settings);
 
 		static Soldiers NextSoldiers(PlayersAndProvinces pap, Province p) => p.ActOnYourself(pap).Soldiers;
 		static int NextDefensePower(PlayersAndProvinces pap, Province p) => NextSoldiers(pap, p).DefensePower;
@@ -82,7 +82,7 @@ namespace ImperitWASM.Shared.State
 			(pap, _) = pap.Add(new Move(this, from, to, soldiers));
 		}
 
-		static Soldiers Units(int num) => new Soldiers(new Pedestrian(new Description("", "", ""), 1, 1, 1, 1), num);
+		static Soldiers Units(int num) => new Soldiers(new Pedestrian(new Description("", ImmutableArray<string>.Empty), 1, 1, 1, 1), num);
 
 		IEnumerable<(Province, Soldiers)> GetAttacks(PlayersAndProvinces pap, Province from)
 		{

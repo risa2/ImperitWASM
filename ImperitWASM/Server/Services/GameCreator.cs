@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared;
@@ -42,7 +40,7 @@ namespace ImperitWASM.Server.Services
 		void AddRobots(int gameId, PlayersAndProvinces p_p) => p_p.Inhabitable.Each((start, i) => AddRobot(gameId, start.Value, start.Key, p_p.PlayersCount + i - 1));
 		public async Task<int> CreateAsync()
 		{
-			var g = pap.Add(new PlayersAndProvinces(ImmutableArray.Create<Player>(new Savage()), cfg.Settings.Provinces));
+			var g = pap.Add(new PlayersAndProvinces(ImmutableArray.Create<Player>(new Savage()), cfg.Settings.GetProvinces()));
 			game.RemoveOld(TimeSpan.FromDays(1));
 			await ctx.SaveAsync();
 			return g.Id;
@@ -67,7 +65,7 @@ namespace ImperitWASM.Server.Services
 		public Task RegisterAsync(Game game, string name, Password password, int land)
 		{
 			int count = pap.PlayersCount(game.Id);
-			var player = new Human(ColorAt(count - 1), name, cfg.Settings.DefaultMoney - (cfg.Settings.ProvinceData[land]?.Earnings * 2).GetValueOrDefault(), true, Actions, password);
+			var player = new Human(ColorAt(count - 1), name, cfg.Settings.DefaultMoney - (cfg.Settings.Provinces[land].Earnings!.Value * 2), true, Actions, password);
 			pap.Add(game.Id, player, count, land);
 			_ = count == 2 ? game.StartCountdown() : game;
 			return ctx.SaveAsync();

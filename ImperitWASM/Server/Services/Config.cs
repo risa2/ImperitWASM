@@ -1,4 +1,6 @@
-﻿using ImperitWASM.Server.Load;
+﻿using System.IO;
+using Newtonsoft.Json;
+using ImperitWASM.Shared;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Services
@@ -10,6 +12,6 @@ namespace ImperitWASM.Server.Services
 	public class Config : IConfig
 	{
 		public Settings Settings { get; }
-		public Config(IFile settings) => Settings = settings.Read<Settings>();
+		public Config(params string[] parts) => Settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(Path.Combine(parts))).Must();
 	}
 }

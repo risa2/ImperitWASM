@@ -18,7 +18,7 @@ namespace ImperitWASM.Server
 			_ = services.AddControllersWithViews();
 			_ = services.AddRazorPages();
 			_ = services.AddDbContext<Context>()
-					.AddSingleton<IConfig, Config>(s => new Config(new File(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Settings.json")))
+					.AddSingleton<IConfig, Config>(s => new Config(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Settings.json"))
 					.AddTransient<IContextService, ContextService>().AddTransient<ISessionService, SessionService>()
 					.AddTransient<IPlayersProvinces, PlayersProvinces>().AddTransient<IPowers, Powers>()
 					.AddTransient<IGameService, GameService>().AddTransient<IActive, Active>()

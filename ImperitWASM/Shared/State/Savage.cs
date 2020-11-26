@@ -5,8 +5,8 @@ namespace ImperitWASM.Shared.State
 {
 	public record Savage() : Player(new Color(), "", 0, true, ImmutableList<IPlayerAction>.Empty)
 	{
-		public override Player ChangeMoney(int _) => this;
 		public override Player Die() => this;
-		protected override Player WithActions(ImmutableList<IPlayerAction> _) => this;
+		public virtual bool Equals(Savage? obj) => obj is not null;
+		public override int GetHashCode() => base.GetHashCode();
 	}
 }

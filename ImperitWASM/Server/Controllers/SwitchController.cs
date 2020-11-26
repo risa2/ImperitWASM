@@ -25,7 +25,7 @@ namespace ImperitWASM.Server.Controllers
 		bool IsPossible(PlayersAndProvinces p_p, int player, Switch s) => s.F is int from && s.T is int to && s.M switch
 		{
 			Mode.Recruit => cfg.Settings.RecruitableTypes(p_p.Province(to)).Any(),
-			Mode.Move => p_p.Province(from).SoldierTypes.Any(t => t.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to))),
+			Mode.Move => p_p.Province(from).Soldiers.Any(reg => reg.Type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to))),
 			Mode.Purchase => new Buy(p_p.Player(player), p_p.Province(to), 0).Allowed(p_p),
 			_ => false
 		};

@@ -9,6 +9,6 @@
 			return pap.Passable(from, dest, 1, (a, b) => IsPassable(a) && IsPassable(b) ? 1 : 2) ? Capacity + Weight : 0;
 		}
 		public override bool IsRecruitable(Province p) => p is Land l && l.HasPort;
-		public override int CanSustain(Province province) => province is Sea ? Capacity + Weight : (province is Land l && l.HasPort) ? Weight : 0;
+		public override int CanSustain(Province province) => province is Sea or Land ? Capacity + Weight : 0;
 	}
 }

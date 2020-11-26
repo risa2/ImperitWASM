@@ -5,8 +5,8 @@
 	[Parameter] public Func<Task>? OnClick { get; set; }
 	[Parameter] public Point Center { get; set; }
 	[Parameter] public IEnumerable<string> Text { get; set; } = Array.Empty<string>();
-	double X => Center.x * Width;
-	double Y => Center.y * Height;
+	double X => Center.X * Width;
+	double Y => Center.Y * Height;
 }
 
 <text x="@X" y="@(Y - (FontSize * 2))" @onclick="OnClick!" class="center" fill="#fff" dominant-baseline="middle" text-anchor="middle">

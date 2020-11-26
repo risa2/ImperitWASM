@@ -37,11 +37,11 @@
 	{
 		@if (IsActive)
 		{
-			<a @onclick="NextTurnAsync">Konec</a>
+			<a @onclick="NextTurnAsync.Must()">Konec</a>
 		}
 		else
 		{
-			<a @onclick="LogoutAsync">Odhlášení</a>
+			<a @onclick="LogoutAsync.Must()">Odhlášení</a>
 		}
 		<a class="this">Imperit</a>
 		<a @onclick="() => Switch(Mode.Players, null, null)">@(PlayerMoney)@Sym.Money</a>

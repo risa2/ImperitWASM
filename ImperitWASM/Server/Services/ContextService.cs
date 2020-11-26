@@ -51,14 +51,15 @@ namespace ImperitWASM.Server.Services
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntitySoldiers)
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntityPlayer).ThenInclude(s => s!.EntityPlayerActions)
 							.Single(game => game.Id == gameId);
-			return new PlayersAndProvinces(game.GetPlayers(cfg.Settings), new Provinces(game.GetProvinces(cfg.Settings), cfg.Settings.Graph));
+			return new PlayersAndProvinces(game.GetPlayers(cfg.Settings), new Provinces(game.GetProvinces(cfg.Settings), cfg.Settings));
 		}
 
 		Game Insert(Game game, IEnumerable<Player> players, IEnumerable<Province> provinces)
 		{
 			var map = players.Select((p, i) => (p, i)).ToImmutableDictionary(x => x.p, x => EntityPlayer.From(x.p, x.i));
+			var smap = cfg.Settings.GetSoldierTypeIndices();
 			game.EntityPlayers = map.Values.ToList();
-			game.EntityProvinces = provinces.Select((province, i) => EntityProvince.From(province, map, cfg.Settings.SoldierTypeIndices, i)).ToList();
+			game.EntityProvinces = provinces.Select((province, i) => EntityProvince.From(province, map, smap, i)).ToList();
 			return game;
 		}
 		public Game Set(int gameId, IEnumerable<Player> players, IEnumerable<Province> provinces)

@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Shared.Motion;
@@ -13,10 +11,11 @@ namespace ImperitWASM.Shared.State
 		public ImmutableArray<string> Text => Description.Text;
 		public ImmutableArray<Point> Border => Shape.Border;
 		public Point Center => Shape.Center;
-		public abstract Province GiveUpTo(Player player, Soldiers soldiers);
+		public Province GiveUpTo(Player player, Soldiers soldiers) => this with { Player = player, Soldiers = soldiers };
 		public Province GiveUpTo(Player p) => GiveUpTo(p, new Soldiers());
 		public Province Revolt() => GiveUpTo(new Savage(), DefaultSoldiers);
-		protected abstract Province WithActions(ImmutableList<IProvinceAction> new_actions);
+
+		Province WithActions(ImmutableList<IProvinceAction> new_actions) => this with { Actions = new_actions };
 		public Province Add(params IProvinceAction[] actions) => WithActions(Actions.AddRange(actions));
 		public Province Replace(Func<IProvinceAction, IProvinceAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
 		public Province ActOnYourself(PlayersAndProvinces pap)
@@ -47,14 +46,13 @@ namespace ImperitWASM.Shared.State
 		public Province ReinforcedBy(Soldiers another) => GiveUpTo(Player, Soldiers.Add(another));
 		public bool IsAllyOf(Player p) => p == Player;
 		public bool IsAllyOf(Province prov) => prov.Player == Player;
-		public IEnumerable<SoldierType> SoldierTypes => Soldiers.Types;
 		public bool Occupied => Player is not Savage;
 		public bool CanSoldiersSurvive => Soldiers.CanSurviveIn(this);
 		public virtual Color Fill => new Color();
 		public virtual Color Stroke => new Color();
 		public virtual int StrokeWidth => 0;
 
-		public virtual bool Equals(Province? other) => other is not null && other.Description == Description;
-		public override int GetHashCode() => Description.GetHashCode();
+		public virtual bool Equals(Province? other) => other is not null && other.Name == Name;
+		public override int GetHashCode() => Name.GetHashCode();
 	}
 }

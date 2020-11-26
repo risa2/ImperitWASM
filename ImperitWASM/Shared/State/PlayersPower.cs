@@ -2,26 +2,22 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text.Json.Serialization;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Cvt.PlayersPowerConverter))]
-	public class PlayersPower : IReadOnlyList<PlayerPower>
+	public record PlayersPower(ImmutableArray<PlayerPower> Powers) : IReadOnlyList<PlayerPower>
 	{
-		readonly ImmutableArray<PlayerPower> arr;
-		public PlayersPower(ImmutableArray<PlayerPower> pp) => arr = pp;
-		public PlayerPower this[int i] => arr[i];
-		public int Count => arr.Length;
-		public IEnumerator<PlayerPower> GetEnumerator() => ((IEnumerable<PlayerPower>)arr).GetEnumerator();
+		public PlayerPower this[int i] => Powers[i];
+		public int Count => Powers.Length;
+		public IEnumerator<PlayerPower> GetEnumerator() => (Powers as IEnumerable<PlayerPower>).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 		public ImmutableArray<double> GetRatios()
 		{
-			int sum = arr.Sum(p => p.Soldiers + p.Money);
-			return arr.Select(p => (double)(p.Soldiers + p.Money) / sum).ToImmutableArray();
+			int sum = Powers.Sum(p => p.Soldiers + p.Money);
+			return Powers.Select(p => (double)(p.Soldiers + p.Money) / sum).ToImmutableArray();
 		}
-		public int TotalSum => arr.Sum(p => p.Total);
+		public int TotalSum => Powers.Sum(p => p.Total);
 		public int TotalAvg => TotalSum / Count;
-		public int TotalMax => arr.Max(pp => pp.Total);
+		public int TotalMax => Powers.Max(pp => pp.Total);
 	}
 }

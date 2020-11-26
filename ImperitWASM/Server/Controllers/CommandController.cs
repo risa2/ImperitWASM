@@ -1,11 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using ImperitWASM.Client.Data;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -43,7 +43,7 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("MoveInfo")]
-		public MoveInfo MoveInfo([FromBody] CmdData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.A) is Province from && p_p.Province(move.B) is Province to ? new MoveInfo(from.SoldierTypes.Any(type => type.CanMoveAlone(p_p, from, to)), !from.IsAllyOf(to), to.Occupied, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.SoldierTypes.Select(type => type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
+		public MoveInfo MoveInfo([FromBody] CmdData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.A) is Province from && p_p.Province(move.B) is Province to ? new MoveInfo(from.Soldiers.Any(reg => reg.Type.CanMoveAlone(p_p, from, to)), !from.IsAllyOf(to), to.Occupied, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.Soldiers.Select(reg => reg.Type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
 		[HttpPost("Move")]
 		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
 		{

@@ -29,7 +29,7 @@ namespace ImperitWASM.Client.Services
 		{
 			PropertyNameCaseInsensitive = true,
 			PropertyNamingPolicy = new Policy()
-		};static async Task<T> Parse<T>(HttpResponseMessage msg) => (await JsonSerializer.DeserializeAsync<T>(await Log(msg.Content, c => c.ReadAsStringAsync().Result).ReadAsStreamAsync(), opt))!;
+		}; static async Task<T> Parse<T>(HttpResponseMessage msg) => (await JsonSerializer.DeserializeAsync<T>(await Log(msg.Content, c => c.ReadAsStringAsync().Result).ReadAsStreamAsync(), opt))!;
 		static StringContent MakeContent<T>(T data) => new StringContent(Log(JsonSerializer.Serialize(data, opt), x => x), Encoding.UTF8, "application/json");
 		public async Task<T> GetAsync<T>(string url) => await Parse<T>(await http.GetAsync(url));
 		public Task PostAsync<T>(string url, T data) => http.PostAsync(url, MakeContent(data));

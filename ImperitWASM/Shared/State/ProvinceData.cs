@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
-using System.Text.Json.Serialization;
 using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
-	[JsonConverter(typeof(Cvt.ProvinceDataConverter))]
-	public record ProvinceData(string Name, ProvinceData.Kind Type, Shape Shape, ImmutableArray<ProvinceData.RegimentData> Soldiers, ImmutableArray<int> ExtraTypes, int? Earnings, bool? IsStart, bool? IsFinal, bool? HasPort)
+	public record ProvinceData(string Name, ProvinceData.Kind Type, Shape Shape, ImmutableArray<int> Neighbors, ImmutableArray<ProvinceData.RegimentData> Soldiers, ImmutableArray<int> ExtraTypes = default, int? Earnings = null, bool? IsStart = null, bool? IsFinal = null, bool? HasPort = null)
 	{
 		public record RegimentData(int Type, int Count);
-		public enum Kind { Land, Sea, Mountains }
+		public enum Kind { Land = 0, Sea = 1, Mountains = 2 }
 		public Province Build(Settings set, Player player, Soldiers? soldiers = null, ImmutableList<IProvinceAction>? actions = null)
 		{
 			var defaultSoldiers = new Soldiers(Soldiers.Select(p => new Regiment(set.SoldierTypes[p.Type], p.Count)));

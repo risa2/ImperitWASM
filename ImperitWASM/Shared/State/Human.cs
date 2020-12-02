@@ -7,7 +7,7 @@ namespace ImperitWASM.Shared.State
 		: Player(Color, Name, Money, Alive, Actions)
 	{
 		public override Player Die() => new Human(Color, Name, 0, false, ImmutableList<IPlayerAction>.Empty, Password);
-		public virtual bool Equals(Human? obj) => obj is not null && obj.Name == obj.Name;
-		public override int GetHashCode() => base.GetHashCode();
+		public virtual bool Equals(Human? obj) => obj is not null && Name == obj.Name;
+		public override int GetHashCode() => Name.GetHashCode();
 	}
 }

@@ -133,6 +133,7 @@
 	"FinalLandsCount":4,
 	"Interest":0.1,
 	"LandColor":{"R":17,"G":17,"B":17,"A":255},
+	"Names": ["Antisthenes", "Demokritos", "Diogenes", "Gorgias", "Nietzsche", "Herakleitos", "Epikuros", "Parmenides", "Plotinus", "Xenofanes", "Zenon"],
 	"MountainsColor":{"R":96,"G":96,"B":96,"A":255},
 	"MountainsWidth":3,
 	"SeaColor":{"R":17,"G":132,"B":255,"A":255},

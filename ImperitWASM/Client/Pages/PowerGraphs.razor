@@ -18,21 +18,21 @@
 	var ratio_sums = new double[ratios.Length];
 	var life = Players.Select((_, i) => Math.Min(Powers.Count, Powers.Count(p => p[i].Alive) + 1)).ToImmutableArray();
 }
-@foreach (var (finals, player) in Powers[^1].Zip(Players, (a, b) => (a.Final, b)).Where(it => it.Final > 0))
+@foreach (var (player, finals) in Powers[^1].Finals.Select(f => (Players[f.Player], f.Count)))
 {
-	<p><span style="color:@player.Color;">@player.Name</span> @(new string(Sym.Star, finals)) </p>
+	<p><span style="color:@player.C;">@player.Name</span> @(new string(Sym.Star, finals)) </p>
 }
 <p>Síla:</p>
 <svg viewBox="-10 -10 1220 620" class="diagram">
 	@for (int i = 0; i < Players.Count; ++i)
 	{
-		<polyline points="@Polyline(Powers.Select(p => p[i].Total).Take(life[i]), Powers.Count, total_max, 0, 0, 1200, 600)" fill="none" stroke="@Players[i].Color" stroke-width="3"></polyline>
+		<polyline points="@Polyline(Powers.Select(p => p[i].Total).Take(life[i]), Powers.Count, total_max, 0, 0, 1200, 600)" fill="none" stroke="@Players[i].C" stroke-width="3"></polyline>
 	}
 	<polyline points="@Polyline(total_avg, Powers.Count, total_max, 0, 0, 1200, 600)" fill="none" stroke="#FFF" stroke-width="1"></polyline>
 </svg>
 @if (Powers.Count > 6)
 {
-	var changes = Powers.Zip(Powers.Skip(1), (prev, next) => prev.Zip(next, (p1, p2) => (double)p2.Total / p1.Total - 1.0).ToImmutableArray()).ToImmutableArray();
+	var changes = Powers.Zip(Powers.Skip(1), (prev, next) => next.ChangesFrom(prev)).ToImmutableArray();
 	<p>Poměrná změna síly:</p>
 	<svg viewBox="-10 -10 1220 620" class="diagram">
 		@for (int p = 0; p < Players.Count; ++p)
@@ -40,7 +40,7 @@
 			@for (int c = 0; c < changes.Length && c < life[p] - 1; ++c)
 			{
 				<circle cx="@(600 * (2 * c + 1) / (Powers.Count - 1))" cy="@(300 - (int)(300 * changes[c][p]))" 
-					fill="transparent" stroke="@Players[p].Color" r="@ToString(300.0 / Powers.Count)"></circle>
+					fill="transparent" stroke="@Players[p].C" r="@ToString(300.0 / Powers.Count)"></circle>
 			}
 		}
 	</svg>
@@ -50,7 +50,7 @@
 	@for (int i = 0; i < Players.Count; ++i)
 	{
 		<polyline points="@(Polyline(ratio_sums.Select(r => (int)(r * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600) + " " +
-							Polyline(ratio_sums.Select((r,j) => (int)((r + ratios[j][i]) * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i].Color"></polyline>
+							Polyline(ratio_sums.Select((r,j) => (int)((r + ratios[j][i]) * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i].C"></polyline>
 		ratio_sums.Each((_, j) => ratio_sums[j] += ratios[j][i]);
 	}
 </svg>

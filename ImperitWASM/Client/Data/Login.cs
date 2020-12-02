@@ -2,13 +2,11 @@ namespace ImperitWASM.Client.Data
 {
 	public class Login
 	{
-		public int I { get; set; }
-		public int G { get; set; }
+		public string N { get; set; } = "";
 		public string P { get; set; } = "";
-		public Login(int id, int game, string password)
+		public Login(string name, string password)
 		{
-			I = id;
-			G = game;
+			N = name;
 			P = password;
 		}
 		public Login() { }

@@ -10,22 +10,26 @@ namespace ImperitWASM.Shared.State
 	public record Robot(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions, Settings Settings)
 		: Player(Color, Name, Money, Alive, Actions)
 	{
-		public virtual bool Equals(Robot? obj) => obj is not null && obj.Name == obj.Name;
+		public virtual bool Equals(Robot? obj) => obj is not null && obj.Name == Name;
 		public override int GetHashCode() => base.GetHashCode();
 		public override Player Die() => new Robot(Color, Name, 0, false, ImmutableList<IPlayerAction>.Empty, Settings);
 
 		static Soldiers NextSoldiers(PlayersAndProvinces pap, Province p) => p.ActOnYourself(pap).Soldiers;
 		static int NextDefensePower(PlayersAndProvinces pap, Province p) => NextSoldiers(pap, p).DefensePower;
 		static int NextAttackPower(PlayersAndProvinces pap, Province p) => NextSoldiers(pap, p).AttackPower;
-		bool IsEnemy(Province p) => !p.IsAllyOf(this) && p.Occupied;
-		IEnumerable<Province> EnemyNeighbors(PlayersAndProvinces pap, Province prov) => pap.NeighborsOf(prov).Where(IsEnemy);
+		IEnumerable<Province> EnemyNeighbors(PlayersAndProvinces pap, Province prov) => pap.NeighborsOf(prov).Where(p => p.IsEnemyOf(this));
 		int EnemiesPower(PlayersAndProvinces pap, Province prov) => EnemyNeighbors(pap, prov).GroupBy(p => p.Player).Select(p => p.Sum(neighbor => NextAttackPower(pap, neighbor))).DefaultIfEmpty().Max();
 		int Bilance(PlayersAndProvinces pap, Province prov) => NextDefensePower(pap, prov) - EnemiesPower(pap, prov);
 
-		void Recruit(ref PlayersAndProvinces pap, ref int spent, Province province, Soldiers soldiers)
+		PlayersAndProvinces Recruit(PlayersAndProvinces pap, ref int spent, int province, Soldiers soldiers)
 		{
-			(pap, _) = pap.Add(new Recruit(this, province, soldiers));
 			spent += soldiers.Price;
+			return pap.Add(new Recruit(this, pap.Province(province), soldiers)).Item1;
+		}
+
+		PlayersAndProvinces Move(PlayersAndProvinces pap, int from, int to, Soldiers soldiers)
+		{
+			return pap.Add(new Move(this, pap.Province(from), pap.Province(to), soldiers)).Item1;
 		}
 
 		SoldierType? BestDefender(Province p, int money)
@@ -33,43 +37,43 @@ namespace ImperitWASM.Shared.State
 			return Settings.SoldierTypes.Where(type => type.IsRecruitable(p)).MinBy(type => -money / type.Price * type.DefensePower);
 		}
 
-		static int DivUp(int a, int b) => (a / b) + (a % b > 0 ? 1 : 0);
+		static int DivUp(int a, int b) => (a + b - 1) / b;
 
-		void DefensiveRecruits(ref PlayersAndProvinces pap, ref int spent, ImmutableArray<Province> my)
+		(Soldiers, bool) SoldiersRequired(PlayersAndProvinces pap, int spent, Province place, int desired) => desired - NextDefensePower(pap, place) is int shortage && shortage > 0 && BestDefender(place, Money - spent) is SoldierType type ? (new Soldiers(type, Min((Money - spent) / type.Price, DivUp(shortage, type.DefensePower))), shortage <= (Money - spent) / type.Price * type.DefensePower) : (new Soldiers(), false);
+
+		PlayersAndProvinces DefensiveRecruits(PlayersAndProvinces pap, ref int spent, ImmutableArray<int> my)
 		{
-			foreach (var place in my)
+			foreach (int place in my)
 			{
-				if (EnemiesPower(pap, place) - NextDefensePower(pap, place) is int shortage && shortage > 0 && BestDefender(place, Money - spent) is SoldierType type && shortage <= (Money - spent) / type.Price * type.DefensePower)
+				if (SoldiersRequired(pap, spent, pap.Province(place), EnemiesPower(pap, pap.Province(place))) is (Soldiers soldiers, true))
 				{
-					Recruit(ref pap, ref spent, place, new Soldiers(type, DivUp(shortage, type.DefensePower)));
+					pap = Recruit(pap, ref spent, place, soldiers);
 				}
 			}
+			return pap;
 		}
 
-		void StabilisatingRecruits(ref PlayersAndProvinces pap, ref int spent, ImmutableArray<Province> my)
+		PlayersAndProvinces StabilisatingRecruits(PlayersAndProvinces pap, ref int spent, ImmutableArray<int> my)
 		{
-			foreach (var place in my)
+			foreach (int place in my)
 			{
 				if (Money <= spent)
 				{
 					break;
 				}
-				if (place.DefaultSoldiers.DefensePower - NextDefensePower(pap, place) is int shortage && shortage > 0 && BestDefender(place, Money - spent) is SoldierType type)
+				if (SoldiersRequired(pap, spent, pap.Province(place), EnemiesPower(pap, pap.Province(place))) is (Soldiers soldiers, _))
 				{
-					Recruit(ref pap, ref spent, place, new Soldiers(type, Min((Money - spent) / type.Price, DivUp(shortage, type.DefensePower))));
+					pap = Recruit(pap, ref spent, place, soldiers);
 				}
 			}
+			return pap;
 		}
 
-		void Recruits(ref PlayersAndProvinces pap, ImmutableArray<Province> my)
+		PlayersAndProvinces Recruits(PlayersAndProvinces pap, ImmutableArray<int> my)
 		{
 			int spent = 0;
-			DefensiveRecruits(ref pap, ref spent, my);
-			StabilisatingRecruits(ref pap, ref spent, my);
-			if (my.Any() && BestDefender(my[0], Money - spent) is SoldierType type && Money - spent > 0)
-			{
-				Recruit(ref pap, ref spent, my[0], new Soldiers(type, (Money - spent) / type.Price));
-			}
+			pap = StabilisatingRecruits(DefensiveRecruits(pap, ref spent, my), ref spent, my);
+			return my.Any() && BestDefender(pap.Province(my[0]), Money - spent) is SoldierType type && Money - spent > 0 ? Recruit(pap, ref spent, my[0], new Soldiers(type, (Money - spent) / type.Price)) : pap;
 		}
 
 		static bool CanConquer(Soldiers from, Soldiers to) => from.AttackPower > to.DefensePower;
@@ -77,87 +81,75 @@ namespace ImperitWASM.Shared.State
 		static bool CanAttackSuccesfully(Soldiers attackers, Soldiers defenders, int enemies_to) => CanConquer(attackers, defenders) && CanKeepConqueredProvince(attackers, defenders, enemies_to);
 		bool ShouldAttack(Soldiers attackers, Province to, int enemies) => !to.IsAllyOf(this) && CanAttackSuccesfully(attackers, to.Soldiers, enemies);
 
-		void Attack(ref PlayersAndProvinces pap, Province from, Province to, Soldiers soldiers)
-		{
-			(pap, _) = pap.Add(new Move(this, from, to, soldiers));
-		}
-
 		static Soldiers Units(int num) => new Soldiers(new Pedestrian(new Description("", ImmutableArray<string>.Empty), 1, 1, 1, 1), num);
 
-		IEnumerable<(Province, Soldiers)> GetAttacks(PlayersAndProvinces pap, Province from)
+		IEnumerable<(int, Soldiers)> GetAttacks(PlayersAndProvinces pap, Province from)
 		{
 			int enemies = EnemiesPower(pap, from);
-			return pap.NeighborsOf(from).Select(to => (to, from.Soldiers.MaxAttackers(pap, from, to).AttackedBy(Units(enemies - (IsEnemy(to) ? to.Soldiers.AttackPower : 0))))).Where(to => ShouldAttack(to.Item2, to.to, EnemiesPower(pap, to.to)));
+			return pap.NeighborIndices(from).Select(to => (to, from.Soldiers.MaxAttackers(pap, from, pap.Province(to)).AttackedBy(Units(enemies - (pap.Province(to).IsEnemyOf(this) ? pap.Province(to).Soldiers.AttackPower : 0))))).Where(to => ShouldAttack(to.Item2, pap.Province(to.to), EnemiesPower(pap, pap.Province(to.to))));
 		}
 
-		void Attacks(ref PlayersAndProvinces pap, ImmutableArray<Province> my)
+		PlayersAndProvinces Attacks(PlayersAndProvinces pap, ImmutableArray<int> my)
 		{
-			foreach (var from in my)
+			foreach (int from in my)
 			{
-				foreach (var (to, soldiers) in GetAttacks(pap, from))
+				foreach (var (to, soldiers) in GetAttacks(pap, pap.Province(from)))
 				{
-					Attack(ref pap, from, to, soldiers);
+					pap = Move(pap, from, to, soldiers);
 				}
 			}
+			return pap;
 		}
 
-		IEnumerable<Province> NeighborAllies(PlayersAndProvinces pap, Province pr) => pap.NeighborsOf(pr).Where(n => n.IsAllyOf(this));
-		IEnumerable<Province> AttackPlaces(PlayersAndProvinces pap, ImmutableArray<Province> my) => my.SelectMany(place => pap.NeighborsOf(place).Where(p => p.Occupied && !p.IsAllyOf(this)));
+		IEnumerable<int> NeighborAllies(PlayersAndProvinces pap, int i) => pap.NeighborIndices(pap.Province(i)).Where(n => pap.Province(n).IsAllyOf(this));
+		IEnumerable<int> AttackPlaces(PlayersAndProvinces pap, ImmutableArray<int> my) => my.SelectMany(place => pap.NeighborIndices(pap.Province(place)).Where(p => pap.Province(p).IsEnemyOf(this)));
 
-		Soldiers AttackersFrom(PlayersAndProvinces pap, IEnumerable<Province> starts, Province to)
+		Soldiers AttackersFrom(PlayersAndProvinces pap, IEnumerable<int> starts, int to)
 		{
-			return starts.Aggregate(new Soldiers(), (s, from) => s.Add(from.Soldiers.MaxAttackers(pap, from, to).AttackedBy(Units(EnemiesPower(pap, from) - to.Soldiers.AttackPower))));
+			return starts.Aggregate(new Soldiers(), (s, from) => s.Add(pap.Province(from).Soldiers.MaxAttackers(pap, pap.Province(from), pap.Province(to)).AttackedBy(Units(EnemiesPower(pap, pap.Province(from)) - pap.Province(to).Soldiers.AttackPower))));
 		}
 
-		void MultiAttacks(ref PlayersAndProvinces pap, ImmutableArray<Province> my)
+		PlayersAndProvinces MultiAttacks(PlayersAndProvinces pap, ImmutableArray<int> my)
 		{
-			foreach (var to in AttackPlaces(pap, my).Distinct())
+			foreach (int to in AttackPlaces(pap, my).Distinct())
 			{
 				var starts = NeighborAllies(pap, to);
 				int total = AttackersFrom(pap, starts, to).AttackPower;
-				if (total > to.Soldiers.DefensePower + EnemiesPower(pap, to))
+				if (total > pap.Province(to).Soldiers.DefensePower + EnemiesPower(pap, pap.Province(to)))
 				{
-					foreach (var from in starts)
+					foreach (int from in starts)
 					{
-						Attack(ref pap, from, to, from.Soldiers.MaxAttackers(pap, from, to).AttackedBy(Units(EnemiesPower(pap, from) - to.Soldiers.AttackPower)));
+						pap = Move(pap, from, to, pap.Province(from).Soldiers.MaxAttackers(pap, pap.Province(from), pap.Province(to)).AttackedBy(Units(EnemiesPower(pap, pap.Province(from)) - pap.Province(to).Soldiers.AttackPower)));
 					}
 				}
 			}
+			return pap;
 		}
 
-		void Transport(ref PlayersAndProvinces pap, Province from, Province to, Soldiers soldiers)
+		PlayersAndProvinces SpreadSoldiers(PlayersAndProvinces pap, ImmutableArray<int> my)
 		{
-			(pap, _) = pap.Add(new Move(this, from, to, soldiers));
-		}
-
-		void SpreadSoldiers(ref PlayersAndProvinces pap, ImmutableArray<Province> my)
-		{
-			foreach (var from in my)
+			foreach (int from in my)
 			{
-				int enemies_from = EnemiesPower(pap, from);
-				int bilance_from = NextDefensePower(pap, from) - enemies_from;
-				var p_p = pap;
-				foreach (var (dest, bilance) in pap.NeighborsOf(from).Where(n => n.IsAllyOf(this)).Select(p => (p, Bilance(p_p, p))).OrderBy(n => n.Item2))
+				int enemies_from = EnemiesPower(pap, pap.Province(from));
+				int bilance_from = NextDefensePower(pap, pap.Province(from)) - enemies_from;
+				foreach (var (dest, bilance) in pap.NeighborIndices(pap.Province(from)).Where(n => pap.Province(n).IsAllyOf(this)).Select(p => (p, Bilance(pap, pap.Province(p)))).OrderBy(n => n.Item2))
 				{
-					if (enemies_from <= 0 && EnemyNeighbors(pap, dest).Any())
+					if (enemies_from <= 0 && EnemyNeighbors(pap, pap.Province(dest)).Any())
 					{
-						Transport(ref pap, from, dest, from.Soldiers);
+						pap = Move(pap, from, dest, pap.Province(from).Soldiers);
 					}
-					else if (bilance_from > 0 && bilance_from >= bilance && from.Soldiers.DefensePower >= from.DefaultSoldiers.DefensePower)
+					else if (bilance_from > 0 && bilance_from >= bilance && pap.Province(from).Soldiers.DefensePower >= pap.Province(from).DefaultSoldiers.DefensePower)
 					{
-						Transport(ref pap, from, dest, from.Soldiers.AttackedBy(from.DefaultSoldiers));
+						pap = Move(pap, from, dest, pap.Province(from).Soldiers.AttackedBy(pap.Province(from).DefaultSoldiers));
 					}
 				}
 			}
+			return pap;
 		}
 		public PlayersAndProvinces Think(PlayersAndProvinces pap)
 		{
-			var my = pap.Provinces.ControlledBy(this).ToImmutableArray();
-			Recruits(ref pap, my);
-			Attacks(ref pap, my);
-			MultiAttacks(ref pap, my);
-			SpreadSoldiers(ref pap, my);
-			return pap;
+			var my = pap.Provinces.Indices(p => p.IsAllyOf(this)).ToImmutableArray();
+			return SpreadSoldiers(MultiAttacks(Attacks(Recruits(pap, my), my), my), my);
 		}
 	}
 }

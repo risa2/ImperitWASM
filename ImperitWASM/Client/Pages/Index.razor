@@ -5,10 +5,9 @@
 
 @code{
 	Data.Session? Session = null;
-	async Task<bool> LoginAsync(int player, int gameId, string password)
+	async Task<bool> LoginAsync(Data.Login login)
 	{
-		string? login = (await http.PostAsync<Data.Login, Data.StringValue>("api/Player/Login", new Data.Login(player, gameId, password))).Value;
-		Session = login is string ? new Data.Session(player, gameId, login) : null;
+		Session = await http.PostAsync<Data.Login, Data.Session?>("api/Player/Login", login);
 		await cookies.SetAsync(Session);
 		this.StateHasChanged();
 		return Session != null;

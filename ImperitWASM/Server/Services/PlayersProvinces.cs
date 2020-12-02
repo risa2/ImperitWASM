@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
@@ -18,6 +19,8 @@ namespace ImperitWASM.Server.Services
 		Player Player(int gameId, int i);
 		Province? Province(int gameId, int i);
 		bool GameExists(int gameId) => PlayersCount(gameId) > 0;
+		bool IsNameFree(string name);
+		string ObsfuscateName(string name);
 	}
 	public class PlayersProvinces : IPlayersProvinces
 	{
@@ -56,5 +59,13 @@ namespace ImperitWASM.Server.Services
 		}
 		public Game Add(PlayersAndProvinces pap) => ctx.Add(pap.Players, pap.Provinces);
 		public int PlayersCount(int gameId) => ctx.Players.Count(p => p.GameId == gameId);
+
+		public bool IsNameFree(string name) => ctx.Players.All(p => p.Name != name);
+		public string ObsfuscateName(string original)
+		{
+			original = original.Trim();
+			int number = ctx.Players.Select(p => p.Name).Where(name => name.StartsWith(original)).OrderBy(n => n.Length).DefaultIfEmpty("").ToList().Max(name => int.TryParse(name[original.Length..], out int value) ? value : -1);
+			return number < 0 ? original : original + (number + 1);
+		}
 	}
 }

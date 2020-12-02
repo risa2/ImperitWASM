@@ -8,6 +8,7 @@ namespace ImperitWASM.Shared
 {
 	public static class ListExtensions
 	{
+		public static IEnumerable<int> Indices<T>(this IEnumerable<T> en, Func<T, bool> pred) => en.Select((v, i) => (v, i)).Where(x => pred(x.v)).Select(x => x.i);
 		public static T Must<T>(this T? value) where T : class => value ?? throw new ArgumentNullException(typeof(T).FullName);
 		public static T FirstOr<T>(this IEnumerable<T> e, T x) => e.DefaultIfEmpty(x).First();
 		public static T? MinBy<T, TC>(this IEnumerable<T> e, Func<T, TC> selector, T? v = default) where T : class => e.OrderBy(selector).FirstOr(v);

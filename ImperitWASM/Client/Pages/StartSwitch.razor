@@ -1,7 +1,7 @@
 ﻿@inject ImperitClient http;
 
 @code{
-	[Parameter] public Func<int, int, string, Task<bool>>? LoginAsync { get; set; }
+	[Parameter] public Func<Data.Login, Task<bool>>? LoginAsync { get; set; }
 	public enum Mode { Login, Registration, History }
 	Mode mode = Mode.Login;
 	void Set(Mode new_mode)

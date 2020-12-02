@@ -11,6 +11,7 @@ namespace ImperitWASM.Shared.State
 		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty) => Provinces.Passable(from, to, distance, difficulty);
 		public int NeighborCount(Province prov) => Provinces.NeighborCount(prov);
 		public IEnumerable<Province> NeighborsOf(Province prov) => Provinces.NeighborsOf(prov);
+		public IEnumerable<int> NeighborIndices(Province prov) => Provinces.NeighborIndices(prov);
 		public int IncomeOf(Player player) => Provinces.ControlledBy(player).OfType<Land>().Sum(p => p.Earnings);
 		public bool HasAny(Player player) => Provinces.ControlledBy(player).Any();
 		public Player? Winner(int finalCount) => Players.FirstOrDefault(p => Provinces.ControlledBy(p).OfType<Land>().Count(l => l.IsFinal) >= finalCount);
@@ -18,7 +19,7 @@ namespace ImperitWASM.Shared.State
 		public int ProvincesCount => Provinces.Count;
 		public Player Player(int i) => Players[i];
 		public Province Province(int i) => Provinces[i];
-		public int Next(int active) => (Players.Select((p, i) => (p, i)).Where(x => x.p.Alive && !(x.p is Savage)).Min(x => (x.i - active - 1 + PlayersCount) % PlayersCount) + active + 1) % PlayersCount;
+		public int Next(int active) => (Players.Indices(p => p.Alive && p is not Savage).Min(i => (i - active - 1 + PlayersCount) % PlayersCount) + active + 1) % PlayersCount;
 		public PlayersAndProvinces Act(int active, bool includePlayerActions = true)
 		{
 			var new_players = Players.ToBuilder();

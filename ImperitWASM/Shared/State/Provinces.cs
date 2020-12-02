@@ -23,7 +23,8 @@ namespace ImperitWASM.Shared.State
 			return settings.Passable(lookup[from], lookup[to], distance, (start, dest) => difficulty(this[start], this[dest]));
 		}
 		public int NeighborCount(Province p) => settings.NeighborCount(lookup[p]);
-		public IEnumerable<Province> NeighborsOf(Province p) => settings.NeighborsOf(lookup[p]).Select(vertex => provinces[vertex]);
+		public IEnumerable<int> NeighborIndices(Province p) => settings.NeighborsOf(lookup[p]);
+		public IEnumerable<Province> NeighborsOf(Province p) => NeighborIndices(p).Select(vertex => provinces[vertex]);
 		public IEnumerable<Province> ControlledBy(Player player) => provinces.Where(p => p.IsAllyOf(player));
 
 		public Province this[int key] => provinces[key];

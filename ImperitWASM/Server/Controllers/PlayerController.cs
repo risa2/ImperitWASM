@@ -28,29 +28,27 @@ namespace ImperitWASM.Server.Controllers
 		}
 		[HttpPost("Colored")]
 		public IEnumerable<ColoredHuman> Colored([FromBody] int gameId) => ctx.Players.Where(p => p.Type == EntityPlayer.Kind.Human && p.GameId == gameId).OrderBy(p => p.Index).Select(p => new Client.Data.ColoredHuman(p.Name, Color.Parse(p.Color)));
-		[HttpGet("Logins")]
-		public async Task<IEnumerable<PlayerId>> Login()
-		{
-			await newGame.StartAllAsync();
-			return ctx.Players.Include(p => p.Game).Where(p => p.Type == EntityPlayer.Kind.Human && p.Game!.Current == Game.State.Started).OrderBy(p => p.Index).Select(p => new Client.Data.PlayerId(p.Index, p.GameId, p.Name));
-		}
 		[HttpPost("Money")]
-		public int Money([FromBody] Session ses) => ctx.Players.SingleOrDefault(p => p.GameId == ses.G && p.Index == ses.U)?.Money ?? 0;
+		public int Money([FromBody] Session ses) => ctx.Players.SingleOrDefault(p => p.GameId == ses.G && p.Index == ses.P)?.Money ?? 0;
 		[HttpPost("Infos")]
 		public IEnumerable<PlayerInfo> Infos([FromBody] Session ses)
 		{
-			if (!login.IsValid(ses.U, ses.G, ses.I))
+			if (!login.IsValid(ses.P, ses.G, ses.Key))
 			{
 				return Enumerable.Empty<PlayerInfo>();
 			}
 			var p_p = pap[ses.G];
-			return p_p.Players.Select((p, i) => new PlayerInfo(i, p is Human, p.Name, p.Color.ToString(), p.Alive, p.Money, p_p.IncomeOf(p), p.Actions.OfType<Loan>().Sum(l => l.Debt)));
+			return p_p.Players.Select((p, i) => new PlayerInfo(i, p is Human, p.Name, p.Color, p.Alive, p.Money, p_p.IncomeOf(p), p.Actions.OfType<Loan>().Sum(l => l.Debt)));
 		}
 		[HttpPost("Correct")]
-		public bool Correct([FromBody] Session user) => login.IsValid(user.U, user.G, user.I);
+		public bool Correct([FromBody] Session user) => login.IsValid(user.P, user.G, user.Key);
 		[HttpPost("Login")]
-		public async Task<StringValue> Login([FromBody] Login trial) => new StringValue(pap.Player(trial.G, trial.I) is Human h && h.Password.IsCorrect(trial.P) ? await login.AddAsync(trial.I, trial.G) : null);
+		public async Task<Session?> Login([FromBody] Login trial)
+		{
+			await newGame.StartAllAsync();
+			return ctx.Players.Include(p => p.Game).SingleOrDefault(p => p.Type == EntityPlayer.Kind.Human && p.Name == trial.N && p.Game!.Current == Game.State.Started) is EntityPlayer p && Password.Parse(p.Password).IsCorrect(trial.P) ? new Session(p.Index, p.GameId, await login.AddAsync(p.Index, p.GameId)) : null;
+		}
 		[HttpPost("Logout")]
-		public Task Logout([FromBody] Session user) => login.RemoveAsync(user.U, user.G, user.I);
+		public Task Logout([FromBody] Session user) => login.RemoveAsync(user.P, user.G, user.Key);
 	}
 }

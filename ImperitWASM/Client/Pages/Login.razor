@@ -3,46 +3,29 @@
 @using Mode = StartSwitch.Mode; 
 
 @code{
-	[Parameter] public Func<int, int, string, Task<bool>>? LoginAsync { get; set; }
+	[Parameter] public Func<Data.Login, Task<bool>>? LoginAsync { get; set; }
 	[Parameter] public Action<Mode> Set { get; set; } = x => { };
-	ImmutableArray<Data.PlayerId> Players;
 	Data.Login model = new Data.Login();
 	bool Wrong = false;
 	async Task LoginAction()
 	{
-		if(!await LoginAsync!(Players[model.I].I, Players[model.I].G, model.P))
+		if(!await LoginAsync!(model))
 		{
 			Wrong = true;
 			model.P = "";
 		}
-	}
-	protected override async Task OnInitializedAsync()
-	{
-		Players = await http.GetAsync<ImmutableArray<Data.PlayerId>>("api/Player/Logins");
 	}
 }
 <NavMenu Options="Přihlášení;Registrace;Historie" OnClick="i => Set((Mode)i)"/>
 <main>
 	@if (Wrong)
 	{
-		<p>Buď to nejsi ty (máš hlad?), nebo to není tvoje heslo</p>
+		<p>Zadané jméno, heslo nebo obojí je špatně, možná ještě nezačala tvá hra</p>
 	}
-	@if (!Players.IsDefault && Players.IsEmpty)
-	{
-		<p>Neprobíhá žádná hra, do níž by ses mohl přihlásit</p>
-	}
-	else
-	{
-		<EditForm Model="model" OnSubmit="LoginAction">
-			<DataAnnotationsValidator/><ValidationSummary/>
-			<p>Hráč:</p>
-			@if (!Players.IsDefaultOrEmpty)
-			{
-				<IntSelect @bind-Value="model.I" Options="Players" Name="@(p => p.N + " (hra " + p.G + ")" )"/><br/>
-			}
-			<p>Heslo:</p><InputText type="password" @bind-Value="model.P" autocomplete="current-password"/><br/>
-			<button type="submit">Přihlásit se</button>
-		</EditForm>
-	}
-	
+	<EditForm Model="model" OnSubmit="LoginAction">
+		<DataAnnotationsValidator/><ValidationSummary/>
+		<p>Jméno:</p><InputText @bind-Value="model.N" autocomplete="username"/>
+		<p>Heslo:</p><InputText type="password" @bind-Value="model.P" autocomplete="current-password"/><br/>
+		<button type="submit">Přihlásit se</button>
+	</EditForm>
 </main>

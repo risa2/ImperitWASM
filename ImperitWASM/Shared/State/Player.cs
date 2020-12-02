@@ -42,7 +42,7 @@ namespace ImperitWASM.Shared.State
 		}
 		public bool IsLivingHuman => this is Human && Alive;
 		public PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(p => p is Land), Money, provinces.Sum(p => p.Soldiers.Power), provinces.Count(p => p is Land l && l.IsFinal));
-		public virtual bool Equals(Player? obj) => obj is not null && obj.Name == obj.Name;
+		public virtual bool Equals(Player? obj) => obj is not null && Name == obj.Name;
 		public override int GetHashCode() => Name.GetHashCode();
 	}
 }

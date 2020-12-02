@@ -33,10 +33,10 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("GiveUp")]
 		public async Task GiveUp([FromBody] Session player)
 		{
-			if (login.IsValid(player.U, player.G, player.I))
+			if (login.IsValid(player.P, player.G, player.Key))
 			{
-				_ = await pap.AddAsync(player.G, new GiveUp(pap.Player(player.G, player.U)));
-				if (active[player.G] == player.U)
+				_ = await pap.AddAsync(player.G, new GiveUp(pap.Player(player.G, player.P)));
+				if (active[player.G] == player.P)
 				{
 					_ = await end.NextTurnAsync(player.G);
 				}
@@ -47,13 +47,13 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Move")]
 		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
 		{
-			if (!Validate(m.LoggedIn, m.Game, m.LoginId))
+			if (!Validate(m.P, m.Game, m.Key))
 			{
 				return MoveErrors.NotPlaying;
 			}
 			var p_p = pap[m.Game];
 			var (from, to) = (p_p.Province(m.From), p_p.Province(m.To));
-			var move = new Move(p_p.Player(m.LoggedIn), from, to, new Soldiers(m.Counts.Select((count, i) => new Regiment(from.Soldiers[i].Type, count))));
+			var move = new Move(p_p.Player(m.P), from, to, new Soldiers(m.Counts.Select((count, i) => new Regiment(from.Soldiers[i].Type, count))));
 			return (await pap.AddAsync(m.Game, move)) switch
 			{
 				true => MoveErrors.Ok,
@@ -67,10 +67,10 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Purchase")]
 		public void Purchase([FromBody] PurchaseCmd purchase)
 		{
-			if (Validate(purchase.LoggedIn, purchase.Game, purchase.LoginId))
+			if (Validate(purchase.P, purchase.Game, purchase.Key))
 			{
 				var p_p = pap[purchase.Game];
-				if (p_p.Province(purchase.Land) is Land Land && p_p.Player(purchase.LoggedIn) is Player Player)
+				if (p_p.Province(purchase.Land) is Land Land && p_p.Player(purchase.P) is Player Player)
 				{
 					if (Land.Price > Player.Money)
 					{
@@ -81,27 +81,23 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("RecruitInfo")]
-		public RecruitInfo RecruitInfo([FromBody] CmdData p)
-		{
-			var province = pap.Province(p.G, p.A);
-			return province is not null ? new RecruitInfo(province.Name, province.Soldiers.ToString(), cfg.Settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.B).Money) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0);
-		}
+		public RecruitInfo RecruitInfo([FromBody] CmdData p) => pap.Province(p.G, p.A) is Province province ? new RecruitInfo(province.Name, province.Soldiers.ToString(), cfg.Settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.B).Money) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0);
 		[HttpPost("Recruit")]
 		public async Task Recruit([FromBody] RecruitCmd r)
 		{
-			if (Validate(r.LoggedIn, r.Game, r.LoginId))
+			if (Validate(r.P, r.Game, r.Key))
 			{
 				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(cfg.Settings.SoldierTypes[i], count)));
 				var p_p = pap[r.Game];
-				if (soldiers.Price > p_p.Player(r.LoggedIn).Money)
+				if (soldiers.Price > p_p.Player(r.P).Money)
 				{
-					(p_p, _) = p_p.Add(new Borrow(p_p.Player(r.LoggedIn), soldiers.Price - p_p.Player(r.LoggedIn).Money, cfg.Settings));
+					(p_p, _) = p_p.Add(new Borrow(p_p.Player(r.P), soldiers.Price - p_p.Player(r.P).Money, cfg.Settings));
 				}
-				(pap[r.Game], _) = p_p.Add(new Recruit(p_p.Player(r.LoggedIn), p_p.Province(r.Province), soldiers));
+				(pap[r.Game], _) = p_p.Add(new Recruit(p_p.Player(r.P), p_p.Province(r.Province), soldiers));
 				await ctx.SaveAsync();
 			}
 		}
 		[HttpPost("Donate")]
-		public async Task<bool> Donate([FromBody] DonationCmd donation) => login.IsValid(donation.LoggedIn, donation.Game, donation.LoginId) && await pap.AddAsync(donation.Game, new Donate(pap.Player(donation.Game, donation.LoggedIn), pap.Player(donation.Game, donation.Recipient), donation.Amount));
+		public async Task<bool> Donate([FromBody] DonationCmd donation) => login.IsValid(donation.P, donation.Game, donation.Key) && await pap.AddAsync(donation.Game, new Donate(pap.Player(donation.Game, donation.P), pap.Player(donation.Game, donation.Recipient), donation.Amount));
 	}
 }

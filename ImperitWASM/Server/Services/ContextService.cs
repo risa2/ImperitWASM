@@ -82,7 +82,7 @@ namespace ImperitWASM.Server.Services
 		{
 			int turn = CountPlayersPowers(gameId);
 			var game = Games.Include(g => g.EntityPlayerPowers).Single(game => game.Id == gameId);
-			psp.Each((pp, i) => game.EntityPlayerPowers!.Add(EntityPlayerPower.From(pp, turn, i)));
+			psp.Powers.Each((pp, i) => game.EntityPlayerPowers!.Add(EntityPlayerPower.From(pp, turn, i)));
 		}
 	}
 }

@@ -3,8 +3,7 @@ using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Motion.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
-using Mode = ImperitWASM.Client.Data.View;
-using Switch = ImperitWASM.Client.Data.Switch;
+using ImperitWASM.Client.Data;
 
 namespace ImperitWASM.Server.Controllers
 {
@@ -22,26 +21,26 @@ namespace ImperitWASM.Server.Controllers
 			this.active = active;
 		}
 
-		bool IsPossible(PlayersAndProvinces p_p, int player, Switch s) => s.F is int from && s.T is int to && s.M switch
+		bool IsPossible(PlayersAndProvinces p_p, int player, Switch s) => s.From is int from && s.To is int to && s.View switch
 		{
-			Mode.Recruit => cfg.Settings.RecruitableTypes(p_p.Province(to)).Any(),
-			Mode.Move => p_p.Province(from).Soldiers.Any(reg => reg.Type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to))),
-			Mode.Purchase => new Buy(p_p.Player(player), p_p.Province(to), 0).Allowed(p_p),
+			View.Recruit => cfg.Settings.RecruitableTypes(p_p.Province(to)).Any(),
+			View.Move => p_p.Province(from).Soldiers.Any(reg => reg.Type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to))),
+			View.Purchase => new Buy(p_p.Player(player), p_p.Province(to), 0).Allowed(p_p),
 			_ => false
 		};
-		Switch IfPossible(PlayersAndProvinces p_p, int player, Switch s) => IsPossible(p_p, player, s) ? s : new Switch(s.S, Mode.Map, null, null);
-		static Switch ClickedResult(PlayersAndProvinces p_p, int user, int? from, int clicked) => from switch
+		Switch IfPossible(PlayersAndProvinces p_p, int player, Switch s) => IsPossible(p_p, player, s) ? s : new Switch(s.Select, View.Map, null, null);
+		static Switch ClickedResult(PlayersAndProvinces p_p, Click c) => c.From switch
 		{
-			int start => new Switch(null, start == clicked ? Mode.Recruit : Mode.Move, start, clicked),
-			null when p_p.Province(clicked).IsAllyOf(p_p.Player(user)) => new Switch(clicked, Mode.Map, null, null),
-			null when p_p.Province(clicked) is Land L1 && !L1.Occupied => new Switch(null, Mode.Purchase, clicked, clicked),
-			_ => new Switch(null, Mode.Map, null, null)
+			int start => new Switch(null, start == c.Clicked ? View.Recruit : View.Move, start, c.Clicked),
+			null when p_p.Province(c.Clicked).IsAllyOf(p_p.Player(c.Player)) => new Switch(c.Clicked, View.Map, null, null),
+			null when p_p.Province(c.Clicked) is Land L1 && !L1.Occupied => new Switch(null, View.Purchase, c.Clicked, c.Clicked),
+			_ => new Switch(null, View.Map, null, null)
 		};
 		[HttpPost("Clicked")]
-		public Switch Clicked([FromBody] Client.Data.Click c)
+		public Switch Clicked([FromBody] Click c)
 		{
-			var (p_p, player) = (pap[c.G], active[c.G]);
-			return IfPossible(p_p, player, c.U == player ? ClickedResult(p_p, c.U, c.F, c.C) : new Switch(null, Mode.Map, null, null));
+			var (p_p, player) = (pap[c.Game], active[c.Game]);
+			return IfPossible(p_p, player, c.Player == player ? ClickedResult(p_p, c) : new Switch(null, View.Map, null, null));
 		}
 	}
 }

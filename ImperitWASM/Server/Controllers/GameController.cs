@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Threading.Tasks;
+using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
@@ -26,13 +27,13 @@ namespace ImperitWASM.Server.Controllers
 			this.active = active;
 		}
 		[HttpPost("Info")]
-		public Client.Data.BasicInfo Info([FromBody] Client.Data.Session p)
+		public BasicInfo Info([FromBody] Session ses)
 		{
-			var g = game.FindNoTracking(p.G);
-			return new Client.Data.BasicInfo(p.U == g.Active, pap.Player(p.G, p.U).Color, g.Started, g.Active);
+			var g = game.FindNoTracking(ses.G);
+			return new BasicInfo(ses.P == g.Active, pap.Player(ses.G, ses.P).Color, g.Started, g.Active);
 		}
 		[HttpPost("Register")]
-		public async Task<bool> RegisterAsync([FromBody] Client.Data.RegisteredPlayer player)
+		public async Task<bool> RegisterAsync([FromBody] RegisteredPlayer player)
 		{
 			if (!string.IsNullOrWhiteSpace(player.N) && !string.IsNullOrWhiteSpace(player.N) && !player.N.StartsWith("AI ") && pap.Province(player.G, player.S) is Land land && land.IsStart && !land.Occupied)
 			{
@@ -50,9 +51,9 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("NextColor")]
 		public Color NextColor([FromBody] int gameId) => newGame.NextColor(gameId);
 		[HttpPost("NextTurn")]
-		public async Task<bool> NextTurnAsync([FromBody] Client.Data.Session loggedIn)
+		public async Task<bool> NextTurnAsync([FromBody] Session loggedIn)
 		{
-			return active[loggedIn.G] == loggedIn.U && login.IsValid(loggedIn.U, loggedIn.G, loggedIn.I) && await end.NextTurnAsync(loggedIn.G);
+			return active[loggedIn.G] == loggedIn.P && login.IsValid(loggedIn.P, loggedIn.G, loggedIn.Key) && await end.NextTurnAsync(loggedIn.G);
 		}
 		[HttpGet("Finished")]
 		public ImmutableArray<int> Finished() => game.FinishedGames;

@@ -1,4 +1,3 @@
-using System;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion
@@ -7,7 +6,7 @@ namespace ImperitWASM.Shared.Motion
 	{
 		public (Player, IPlayerAction?) Perform(Player player, PlayersAndProvinces pap)
 		{
-			int next_debt = Debt + (int)Math.Ceiling(Debt * Settings.Interest);
+			int next_debt = Debt + Debt * Settings.Interest;
 			return next_debt <= player.Money
 				? (player.ChangeMoney(-next_debt), null)
 				: (player.ChangeMoney(-player.Money), new Loan(next_debt - player.Money, Settings));

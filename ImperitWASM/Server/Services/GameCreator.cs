@@ -35,7 +35,7 @@ namespace ImperitWASM.Server.Services
 
 		static Color ColorAt(int i) => Color.Generate(i, 120.0, 1.0, 1.0);
 
-		Player GetRobot(int i, int earnings) => new Robot(ColorAt(i), "AI " + i, cfg.Settings.DefaultMoney - (earnings * 2), true, Actions, cfg.Settings);
+		Player GetRobot(int i, int earnings) => new Robot(ColorAt(i), "AI " + i, cfg.Settings.StartMoney(earnings), true, Actions, cfg.Settings);
 		void AddRobot(int gameId, Land start, int land, int i) => pap.Add(gameId, GetRobot(i, start.Earnings), i, land);
 		void AddRobots(int gameId, PlayersAndProvinces p_p) => p_p.Inhabitable.Each((start, i) => AddRobot(gameId, start.Value, start.Key, p_p.PlayersCount + i - 1));
 		public async Task<int> CreateAsync()
@@ -65,7 +65,7 @@ namespace ImperitWASM.Server.Services
 		public Task RegisterAsync(Game game, string name, Password password, int land)
 		{
 			int count = pap.PlayersCount(game.Id);
-			var player = new Human(ColorAt(count - 1), name, cfg.Settings.DefaultMoney - (cfg.Settings.Provinces[land].Earnings!.Value * 2), true, Actions, password);
+			var player = new Human(ColorAt(count - 1), name, cfg.Settings.StartMoney(cfg.Settings.Provinces[land].Earnings!.Value), true, Actions, password);
 			pap.Add(game.Id, player, count, land);
 			_ = count == 2 ? game.StartCountdown() : game;
 			return ctx.SaveAsync();

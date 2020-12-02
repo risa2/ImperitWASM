@@ -8,7 +8,7 @@
 	[Parameter] public Action<Mode, int?, int?, (int, int, string)?> Switch { get; set; } = ((a, x, y, z) => { });
 	void Donate(int player)
 	{
-		Switch(Mode.Donation, null, null, (PlayerInfos.Try(Session.U)?.Money ?? 0, player, PlayerInfos.Try(player)?.Name ?? ""));
+		Switch(Mode.Donation, null, null, (PlayerInfos.Try(Session.P)?.Money ?? 0, player, PlayerInfos.Try(player)?.Name ?? ""));
 	}
 	async Task DoGiveUp()
 	{
@@ -26,28 +26,28 @@
 }
 <nav>
 	<a @onclick="() => Switch(Mode.Map, null, null, null)">Zpět</a>
-	<a class="this">@PlayerInfos.Try(Session.U)?.Money@Sym.Money</a>
+	<a class="this">@PlayerInfos.Try(Session.P)?.Money@Sym.Money</a>
 </nav>
 <main>
 	@if (!PlayerInfos.IsDefault)
 	{
-		<p>Přihlášen: <span style="color:@PlayerInfos[Session.U].Color;">@PlayerInfos[Session.U].Name</span></p><br/>
+		<p>Přihlášen: <span style="color:@PlayerInfos[Session.P].C;">@PlayerInfos[Session.P].Name</span></p><br/>
 		<table class="players">
 			@foreach (var player in PlayerInfos.Where(p => p.Real))
 			{
 				<tr>
-					<td style="color:@player.Color;">@player.Name</td>
+					<td style="color:@player.C;">@player.Name</td>
 					@if (player.Alive)
 					{
 						<td>@player.Money@Sym.Money</td>
 						<td>(+@player.Income@Sym.Money)</td>
-						@if (player.Id == Session.U)
+						@if (player.P == Session.P)
 						{
 							<td class="link-like" @onclick="DoGiveUp">Vzdát se</td>
 						}
 						else
 						{
-							<td class="link-like" @onclick="() => Donate(player.Id)">Věnovat</td>
+							<td class="link-like" @onclick="() => Donate(player.P)">Věnovat</td>
 						}
 					}
 					else
@@ -59,18 +59,18 @@
 		</table><br/>
 		@foreach (var info in PlayerInfos.Where(i => i.Debt > 0))
 		{
-			<p><span style="color:@info.Color;">@info.Name</span> dluží @info.Debt@Sym.Money</p>
+			<p><span style="color:@info.C;">@info.Name</span> dluží @info.Debt@Sym.Money</p>
 		}
 	}
 	@if (!Instabilities.IsDefaultOrEmpty)
 	{
 		<p>Rizika odtržení provincie:</p>
 		<table class="players">
-			@foreach (var it in Instabilities.GroupBy(it => it.Color).SelectMany(g => g.OrderByDescending(it => it.Instability)))
+			@foreach (var it in Instabilities.GroupBy(it => it.C).SelectMany(g => g.OrderByDescending(it => it.I)))
 			{
 				<tr>
-					<td style="color:@it.Color;">@it.Name</td>
-					<td>@it.Instability.ToString("{0}.{1} %", 100, 10)</td>
+					<td style="color:@it.C;">@it.Name</td>
+					<td>@it.I.ToString("{0}.{1} %", 100, 10)</td>
 				</tr>
 			}
 		</table>

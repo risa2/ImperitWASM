@@ -44,9 +44,10 @@ namespace ImperitWASM.Shared.State
 		public Province Subtract(Soldiers army) => GiveUpTo(Player, Soldiers.Subtract(army));
 		public Province AttackedBy(Player p, Soldiers s) => s.AttackPower > Soldiers.DefensePower ? GiveUpTo(p, Soldiers.AttackedBy(s)) : GiveUpTo(Player, Soldiers.AttackedBy(s));
 		public Province ReinforcedBy(Soldiers another) => GiveUpTo(Player, Soldiers.Add(another));
+		public bool Occupied => Player is not Savage;
 		public bool IsAllyOf(Player p) => p == Player;
 		public bool IsAllyOf(Province prov) => prov.Player == Player;
-		public bool Occupied => Player is not Savage;
+		public bool IsEnemyOf(Player p) => Occupied && p != Player;
 		public bool CanSoldiersSurvive => Soldiers.CanSurviveIn(this);
 		public virtual Color Fill => new Color();
 		public virtual Color Stroke => new Color();

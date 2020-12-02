@@ -19,7 +19,7 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostAsync<Data.MoveCmd, Data.MoveErrors>("api/Command/Move", new Data.MoveCmd(Session.U, Session.I, From, To, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
+		error = await http.PostAsync<Data.MoveCmd, Data.MoveErrors>("api/Command/Move", new Data.MoveCmd(Session.P, Session.Key, From, To, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
 		if (error == Data.MoveErrors.Ok || error == Data.MoveErrors.NotPlaying)
 		{
 			Return();

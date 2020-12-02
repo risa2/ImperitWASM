@@ -9,7 +9,7 @@
 	Data.Int model = new Data.Int();
 	async Task DoDonate()
 	{
-		if (await http.PostAsync<Data.DonationCmd, bool>("api/Command/Donate", new Data.DonationCmd(Session.U, Session.I, Recipient, model.Value, Session.G)))
+		if (await http.PostAsync<Data.DonationCmd, bool>("api/Command/Donate", new Data.DonationCmd(Session.P, Session.Key, Recipient, model.Value, Session.G)))
 		{
 			Return();
 		}

@@ -10,7 +10,7 @@
 	Data.RecruitInfo Info = new Data.RecruitInfo("", "", ImmutableArray<Data.SoldiersItem>.Empty, 0);
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostAsync<Data.CmdData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.CmdData(Land, Session.U, Session.G));
+		Info = await http.PostAsync<Data.CmdData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.CmdData(Land, Session.P, Session.G));
 		model.Soldiers = Data.Int.Array(Info.R.Length);
 	}
 	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
@@ -19,7 +19,7 @@
 	{
 		if (Missing <= 0 || model.Borrow)
 		{
-			await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.U, Session.I, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
+			await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.P, Session.Key, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
 			Switch(Mode.Map);
 		}
 	}

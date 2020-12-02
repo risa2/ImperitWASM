@@ -5,11 +5,14 @@ using System.Linq;
 
 namespace ImperitWASM.Shared.State
 {
-	public record Settings(Ratio DefaultInstability, double Interest, int DebtLimit, int DefaultMoney, int MountainsWidth, Color LandColor, Color MountainsColor, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes, int FinalLandsCount, int CountdownSeconds, ImmutableArray<ProvinceData> Provinces)
+	public record Settings(Ratio DefaultInstability, Ratio Interest, int DebtLimit, int DefaultMoney, int MountainsWidth, Color LandColor, Color MountainsColor, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes, int FinalLandsCount, int CountdownSeconds, ImmutableArray<ProvinceData> Provinces)
 	{
 		public TimeSpan CountdownTime => TimeSpan.FromSeconds(CountdownSeconds);
 		public ImmutableDictionary<SoldierType, int> GetSoldierTypeIndices() => SoldierTypes.Lookup();
+
 		public Ratio Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
+		public int StartMoney(int earnings) => DefaultMoney - (earnings * 2);
+
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
 		public Provinces GetProvinces() => new Provinces(Provinces.Select(p => p.Build(this, new Savage())).ToImmutableArray(), this);
 

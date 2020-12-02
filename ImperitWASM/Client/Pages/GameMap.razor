@@ -13,9 +13,9 @@
 	[Parameter] public Action<Data.ProvinceVariables[]>? UpdateProvinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
-		var r = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.U, from, clicked, Session.G));
-		Switch(r.M, r.F, r.T);
-		return r.S;
+		var r = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.P, from, clicked, Session.G));
+		Switch(r.View, r.From, r.To);
+		return r.Select;
 	}
 	int PowersCount = 0, PlayerMoney = 0;
 	public async Task Update()

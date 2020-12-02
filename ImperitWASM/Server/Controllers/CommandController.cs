@@ -15,15 +15,15 @@ namespace ImperitWASM.Server.Controllers
 	{
 		readonly IPlayersProvinces pap;
 		readonly ISessionService login;
-		readonly IConfig cfg;
+		readonly Settings settings;
 		readonly IContextService ctx;
 		readonly IEndOfTurn end;
 		readonly IActive active;
-		public CommandController(IPlayersProvinces pap, ISessionService login, IConfig cfg, IEndOfTurn end, IActive active, IContextService ctx)
+		public CommandController(IPlayersProvinces pap, ISessionService login, Settings settings, IEndOfTurn end, IActive active, IContextService ctx)
 		{
 			this.pap = pap;
 			this.login = login;
-			this.cfg = cfg;
+			this.settings = settings;
 			this.end = end;
 			this.active = active;
 			this.ctx = ctx;
@@ -43,7 +43,7 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("MoveInfo")]
-		public MoveInfo MoveInfo([FromBody] CmdData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.A) is Province from && p_p.Province(move.B) is Province to ? new MoveInfo(from.Soldiers.Any(reg => reg.Type.CanMoveAlone(p_p, from, to)), !from.IsAllyOf(to), to.Occupied, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.Soldiers.Select(reg => reg.Type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
+		public MoveInfo MoveInfo([FromBody] CmdData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.A) is Province from && p_p.Province(move.B) is Province to ? new MoveInfo(from.CanAnyMove(p_p, from, to), !from.IsAllyOf(to), to.Occupied, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.Soldiers.Select(reg => reg.Type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
 		[HttpPost("Move")]
 		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
 		{
@@ -57,8 +57,8 @@ namespace ImperitWASM.Server.Controllers
 			return (await pap.AddAsync(m.Game, move)) switch
 			{
 				true => MoveErrors.Ok,
-				false when !from.Soldiers.Contains(move.Soldiers) => MoveErrors.FewSoldiers,
-				false when move.Soldiers.Capacity(p_p, from, to) < 0 => MoveErrors.LittleCapacity,
+				false when !from.Has(move.Soldiers) => MoveErrors.FewSoldiers,
+				false when move.HasEnoughCapacity(p_p, from, to) => MoveErrors.LittleCapacity,
 				_ => MoveErrors.Else
 			};
 		}
@@ -74,24 +74,24 @@ namespace ImperitWASM.Server.Controllers
 				{
 					if (Land.Price > Player.Money)
 					{
-						(p_p, _) = p_p.Add(new Borrow(Player, Land.Price - Player.Money, cfg.Settings));
+						(p_p, _) = p_p.Add(new Borrow(Player, Land.Price - Player.Money, settings));
 					}
 					(pap[purchase.Game], _) = p_p.Add(new Buy(Player, Land, Land.Price));
 				}
 			}
 		}
 		[HttpPost("RecruitInfo")]
-		public RecruitInfo RecruitInfo([FromBody] CmdData p) => pap.Province(p.G, p.A) is Province province ? new RecruitInfo(province.Name, province.Soldiers.ToString(), cfg.Settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.B).Money) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0);
+		public RecruitInfo RecruitInfo([FromBody] CmdData p) => pap.Province(p.G, p.A) is Province province ? new RecruitInfo(province.Name, province.Soldiers.ToString(), settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.B).Money) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0);
 		[HttpPost("Recruit")]
 		public async Task Recruit([FromBody] RecruitCmd r)
 		{
 			if (Validate(r.P, r.Game, r.Key))
 			{
-				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(cfg.Settings.SoldierTypes[i], count)));
+				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(settings.SoldierTypes[i], count)));
 				var p_p = pap[r.Game];
 				if (soldiers.Price > p_p.Player(r.P).Money)
 				{
-					(p_p, _) = p_p.Add(new Borrow(p_p.Player(r.P), soldiers.Price - p_p.Player(r.P).Money, cfg.Settings));
+					(p_p, _) = p_p.Add(new Borrow(p_p.Player(r.P), soldiers.Price - p_p.Player(r.P).Money, settings));
 				}
 				(pap[r.Game], _) = p_p.Add(new Recruit(p_p.Player(r.P), p_p.Province(r.Province), soldiers));
 				await ctx.SaveAsync();

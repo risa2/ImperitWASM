@@ -12,19 +12,19 @@ namespace ImperitWASM.Server.Controllers
 	public class SwitchController : ControllerBase
 	{
 		readonly IPlayersProvinces pap;
-		readonly IConfig cfg;
+		readonly Settings settings;
 		readonly IActive active;
-		public SwitchController(IPlayersProvinces pap, IConfig cfg, IActive active)
+		public SwitchController(IPlayersProvinces pap, Settings settings, IActive active)
 		{
 			this.pap = pap;
-			this.cfg = cfg;
+			this.settings = settings;
 			this.active = active;
 		}
 
 		bool IsPossible(PlayersAndProvinces p_p, int player, Switch s) => s.From is int from && s.To is int to && s.View switch
 		{
-			View.Recruit => cfg.Settings.RecruitableTypes(p_p.Province(to)).Any(),
-			View.Move => p_p.Province(from).Soldiers.Any(reg => reg.Type.CanMoveAlone(p_p, p_p.Province(from), p_p.Province(to))),
+			View.Recruit => settings.RecruitableTypes(p_p.Province(to)).Any(),
+			View.Move => p_p.Province(from).CanAnyMove(p_p, p_p.Province(from), p_p.Province(to)),
 			View.Purchase => new Buy(p_p.Player(player), p_p.Province(to), 0).Allowed(p_p),
 			_ => false
 		};

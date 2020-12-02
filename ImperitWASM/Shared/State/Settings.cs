@@ -29,9 +29,10 @@ namespace ImperitWASM.Shared.State
 				{
 					return true;
 				}
-				foreach (int vertex in Provinces[stack[i].Pos].Neighbors.Where(n => !visited[n]))
+				for (int j = 0, len = Provinces[stack[i].Pos].Neighbors.Length; j < len; j++)
 				{
-					if (stack[i].Distance + difficulty(stack[i].Pos, vertex) <= limit)
+					int vertex = Provinces[stack[i].Pos].Neighbors[j];
+					if (!visited[vertex] && stack[i].Distance + difficulty(stack[i].Pos, vertex) <= limit)
 					{
 						stack.Add((vertex, stack[i].Distance + difficulty(stack[i].Pos, vertex)));
 						visited[vertex] = true;

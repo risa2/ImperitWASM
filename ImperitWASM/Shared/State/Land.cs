@@ -7,6 +7,8 @@ namespace ImperitWASM.Shared.State
 		: Province(new Description(Name, ImmutableArray.Create(Name + (IsFinal ? "\u2605" : "") + (HasPort ? "\u2693" : ""), Soldiers.ToString(), Earnings + "\uD83D\uDCB0")), Shape, Player, Soldiers, DefaultSoldiers, Actions)
 	{
 		public bool IsInhabitable => IsStart && !Occupied;
+		public bool WillRevolt => Instability.RandomBool;
+		public bool CanRevolt => Occupied && Instability.Any;
 		public virtual bool Equals(Land? other) => other is not null && other.Name == Name;
 		public override int GetHashCode() => base.GetHashCode();
 

@@ -18,7 +18,7 @@ namespace ImperitWASM.Shared.State
 		Province WithActions(ImmutableList<IProvinceAction> new_actions) => this with { Actions = new_actions };
 		public Province Add(params IProvinceAction[] actions) => WithActions(Actions.AddRange(actions));
 		public Province Replace(Func<IProvinceAction, IProvinceAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
-		public Province ActOnYourself(PlayersAndProvinces pap)
+		Province ActOnYourself(PlayersAndProvinces pap)
 		{
 			var (a, p) = Actions.Fold(this, (province, action) => action.Perform(province, pap));
 			return p.WithActions(a);
@@ -41,14 +41,27 @@ namespace ImperitWASM.Shared.State
 			}
 			return (province, new_players);
 		}
+		public Soldiers NextSoldiers(PlayersAndProvinces pap) => ActOnYourself(pap).Soldiers;
+		public Soldiers MaxAttackers(PlayersAndProvinces pap, Province to) => Soldiers.MaxAttackers(pap, this, to);
+		public int AttackPower => Soldiers.AttackPower;
+		public int DefensePower => Soldiers.DefensePower;
+		public int Power => Soldiers.Power;
+		public int DefaultDefensePower => DefaultSoldiers.DefensePower;
+
 		public Province Subtract(Soldiers army) => GiveUpTo(Player, Soldiers.Subtract(army));
-		public Province AttackedBy(Player p, Soldiers s) => s.AttackPower > Soldiers.DefensePower ? GiveUpTo(p, Soldiers.AttackedBy(s)) : GiveUpTo(Player, Soldiers.AttackedBy(s));
+		public Province AttackedBy(Player p, Soldiers s) => GiveUpTo(s.AttackPower > Soldiers.DefensePower ? p : Player, Soldiers.AttackedBy(s));
 		public Province ReinforcedBy(Soldiers another) => GiveUpTo(Player, Soldiers.Add(another));
 		public bool Occupied => Player is not Savage;
 		public bool IsAllyOf(Player p) => p == Player;
 		public bool IsAllyOf(Province prov) => prov.Player == Player;
 		public bool IsEnemyOf(Player p) => Occupied && p != Player;
+
+		public bool Has(Soldiers soldiers) => Soldiers.Contains(soldiers);
+		public bool HasSoldiers => Soldiers.Any;
 		public bool CanSoldiersSurvive => Soldiers.CanSurviveIn(this);
+		public bool CanSurviveWithout(Soldiers s) => Subtract(s).CanSoldiersSurvive;
+		public bool CanAnyMove(PlayersAndProvinces pap, Province from, Province to) => Soldiers.Any(reg => reg.CanMoveAlone(pap, from, to));
+
 		public virtual Color Fill => new Color();
 		public virtual Color Stroke => new Color();
 		public virtual int StrokeWidth => 0;

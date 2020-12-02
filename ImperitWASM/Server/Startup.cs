@@ -1,5 +1,6 @@
 using ImperitWASM.Server.Load;
 using ImperitWASM.Server.Services;
+using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,7 @@ namespace ImperitWASM.Server
 			_ = services.AddControllersWithViews();
 			_ = services.AddRazorPages();
 			_ = services.AddDbContext<Context>()
-					.AddSingleton<IConfig, Config>(s => new Config(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Settings.json"))
+					.AddSingleton(s => Config.Load(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Settings.json"))
 					.AddTransient<IContextService, ContextService>().AddTransient<ISessionService, SessionService>()
 					.AddTransient<IPlayersProvinces, PlayersProvinces>().AddTransient<IPowers, Powers>()
 					.AddTransient<IGameService, GameService>().AddTransient<IActive, Active>()

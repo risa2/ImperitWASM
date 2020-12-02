@@ -27,7 +27,7 @@ namespace ImperitWASM.Server.Controllers
 			this.newGame = newGame;
 		}
 		[HttpPost("Colored")]
-		public IEnumerable<ColoredHuman> Colored([FromBody] int gameId) => ctx.Players.Where(p => p.Type == EntityPlayer.Kind.Human && p.GameId == gameId).OrderBy(p => p.Index).Select(p => new Client.Data.ColoredHuman(p.Name, Color.Parse(p.Color)));
+		public IEnumerable<ColoredHuman> Colored([FromBody] int gameId) => ctx.Players.Where(p => p.Type == EntityPlayer.Kind.Human && p.GameId == gameId).OrderBy(p => p.Index).Select(p => new ColoredHuman(p.Name, Color.Parse(p.Color)));
 		[HttpPost("Money")]
 		public int Money([FromBody] Session ses) => ctx.Players.SingleOrDefault(p => p.GameId == ses.G && p.Index == ses.P)?.Money ?? 0;
 		[HttpPost("Infos")]

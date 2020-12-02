@@ -15,13 +15,13 @@ namespace ImperitWASM.Server.Services
 		readonly IContextService ctx;
 		readonly IGameService game;
 		readonly IPowers powers;
-		readonly IConfig cfg;
-		public EndOfTurn(IPlayersProvinces pap, IPowers powers, IGameCreator newGame, IConfig cfg, IContextService ctx, IGameService game)
+		readonly Settings settings;
+		public EndOfTurn(IPlayersProvinces pap, IPowers powers, IGameCreator newGame, Settings settings, IContextService ctx, IGameService game)
 		{
 			this.pap = pap;
 			this.powers = powers;
 			this.newGame = newGame;
-			this.cfg = cfg;
+			this.settings = settings;
 			this.ctx = ctx;
 			this.game = game;
 		}
@@ -44,7 +44,7 @@ namespace ImperitWASM.Server.Services
 		{
 			var p_p = pap[gameId] = AllActions(pap[gameId], game.Find(gameId));
 			powers.Add(gameId, p_p);
-			if (p_p.LivingHumans <= 0 || p_p.Winner(cfg.Settings.FinalLandsCount) is Human)
+			if (p_p.LivingHumans <= 0 || p_p.Winner(settings.FinalLandsCount) is Human)
 			{
 				await newGame.FinishAsync(gameId);
 				return true;

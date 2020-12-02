@@ -6,11 +6,12 @@ namespace ImperitWASM.Shared.Motion.Commands
 	{
 		public bool Allowed(PlayersAndProvinces pap)
 		{
-			return From.IsAllyOf(Player) && Soldiers.CanMove(pap, From, To) && To.Subtract(Soldiers).CanSoldiersSurvive;
+			return From.IsAllyOf(Player) && Soldiers.CanMove(pap, From, To) && To.CanSurviveWithout(Soldiers);
 		}
 		public Province Perform(Province province)
 		{
 			return province == From ? province.Subtract(Soldiers) : province == To ? province.Add(new Manoeuvre(Player, Soldiers)) : province;
 		}
+		public bool HasEnoughCapacity(PlayersAndProvinces pap, Province from, Province to) => Soldiers.Capacity(pap, from, to) >= 0;
 	}
 }

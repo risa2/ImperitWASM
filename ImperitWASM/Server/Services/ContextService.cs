@@ -31,16 +31,16 @@ namespace ImperitWASM.Server.Services
 	public class ContextService : IContextService
 	{
 		readonly Context ctx;
-		readonly IConfig cfg;
+		readonly Settings settings;
 		public DbSet<Game> Games => ctx.Games ?? throw new NullReferenceException();
 		public DbSet<EntityPlayer> Players => ctx.EntityPlayers ?? throw new NullReferenceException();
 		public DbSet<EntityPlayerPower> PlayerPowers => ctx.EntityPlayerPowers ?? throw new NullReferenceException();
 		public DbSet<EntityProvince> Provinces => ctx.EntityProvinces ?? throw new NullReferenceException();
 		public DbSet<EntitySession> Sessions => ctx.EntitySessions ?? throw new NullReferenceException();
-		public ContextService(Context ctx, IConfig cfg)
+		public ContextService(Context ctx, Settings settings)
 		{
 			this.ctx = ctx;
-			this.cfg = cfg;
+			this.settings = settings;
 		}
 		public Task SaveAsync() => ctx.SaveChangesAsync();
 
@@ -51,13 +51,13 @@ namespace ImperitWASM.Server.Services
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntitySoldiers)
 							.Include(g => g.EntityProvinces).ThenInclude(p => p.EntityProvinceActions).ThenInclude(a => a.EntityPlayer).ThenInclude(s => s!.EntityPlayerActions)
 							.Single(game => game.Id == gameId);
-			return new PlayersAndProvinces(game.GetPlayers(cfg.Settings), new Provinces(game.GetProvinces(cfg.Settings), cfg.Settings));
+			return new PlayersAndProvinces(game.GetPlayers(settings), new Provinces(game.GetProvinces(settings), settings));
 		}
 
 		Game Insert(Game game, IEnumerable<Player> players, IEnumerable<Province> provinces)
 		{
 			var map = players.Select((p, i) => (p, i)).ToImmutableDictionary(x => x.p, x => EntityPlayer.From(x.p, x.i));
-			var smap = cfg.Settings.GetSoldierTypeIndices();
+			var smap = settings.GetSoldierTypeIndices();
 			game.EntityPlayers = map.Values.ToList();
 			game.EntityProvinces = provinces.Select((province, i) => EntityProvince.From(province, map, smap, i)).ToList();
 			return game;

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using ImperitWASM.Server.Load;
+using ImperitWASM.Shared.State;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperitWASM.Server.Services
@@ -23,11 +24,11 @@ namespace ImperitWASM.Server.Services
 	public class GameService : IGameService
 	{
 		readonly IContextService ctx;
-		readonly IConfig cfg;
-		public GameService(IContextService ctx, IConfig cfg)
+		readonly Settings settings;
+		public GameService(IContextService ctx, Settings settings)
 		{
 			this.ctx = ctx;
-			this.cfg = cfg;
+			this.settings = settings;
 		}
 
 		static Expression<Func<Game, bool>> TimeElapsed(Game.State state, DateTime time) => g => g.Current == state && g.LastChange <= time;
@@ -38,7 +39,7 @@ namespace ImperitWASM.Server.Services
 		public Game FindNoTracking(int gameId) => ctx.Games.AsNoTracking().Single(game => game.Id == gameId);
 		public void Finish(int gameId) => ctx.Games.UpdateAt(gameId, g => g.Finish());
 		public bool Started(int gameId) => ctx.Games.Find(gameId).Started;
-		public List<Game> ShouldStart => ctx.Games.Include(g => g.EntityPlayers).Where(TimeElapsed(Game.State.Countdown, DateTime.UtcNow - cfg.Settings.CountdownTime)).ToList();
+		public List<Game> ShouldStart => ctx.Games.Include(g => g.EntityPlayers).Where(TimeElapsed(Game.State.Countdown, DateTime.UtcNow - settings.CountdownTime)).ToList();
 		public ImmutableArray<int> StartedGames => ctx.Games.Where(InState(Game.State.Started)).Select(g => g.Id).ToImmutableArray();
 		public ImmutableArray<int> FinishedGames => ctx.Games.Where(InState(Game.State.Finished)).Select(g => g.Id).ToImmutableArray();
 		public int? RegistrableGame => ctx.Games.FirstOrDefault(InState(Game.State.Countdown, Game.State.Created))?.Id;

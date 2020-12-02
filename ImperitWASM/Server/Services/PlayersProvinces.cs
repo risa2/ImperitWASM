@@ -25,11 +25,11 @@ namespace ImperitWASM.Server.Services
 	public class PlayersProvinces : IPlayersProvinces
 	{
 		readonly IContextService ctx;
-		readonly IConfig cfg;
-		public PlayersProvinces(IContextService ctx, IConfig cfg)
+		readonly Settings settings;
+		public PlayersProvinces(IContextService ctx, Settings settings)
 		{
 			this.ctx = ctx;
-			this.cfg = cfg;
+			this.settings = settings;
 		}
 		public void Add(int gameId, Player player, int i, int start)
 		{
@@ -48,10 +48,10 @@ namespace ImperitWASM.Server.Services
 			await ctx.SaveAsync();
 			return success;
 		}
-		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).AsNoTracking().SingleOrDefault(p => p.Index == i && p.GameId == gameId)?.Convert(cfg.Settings) ?? new Savage();
+		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).AsNoTracking().SingleOrDefault(p => p.Index == i && p.GameId == gameId)?.Convert(settings) ?? new Savage();
 		public Province? Province(int gameId, int i) => ctx.Provinces.AsNoTracking().Include(p => p.EntityProvinceActions).ThenInclude(s => s.EntitySoldiers)
 							.Include(p => p.EntityProvinceActions).ThenInclude(a => a.EntityPlayer).ThenInclude(s => s!.EntityPlayerActions)
-							.SingleOrDefault(p => p.GameId == gameId && p.Index == i)?.Convert(cfg.Settings);
+							.SingleOrDefault(p => p.GameId == gameId && p.Index == i)?.Convert(settings);
 		public PlayersAndProvinces this[int gameId]
 		{
 			get => ctx.GetPlayersAndProvinces(gameId);

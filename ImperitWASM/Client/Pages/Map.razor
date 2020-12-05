@@ -15,7 +15,7 @@
 	}
 }
 <svg viewBox="0 0 @Width @Height">
-	@if (Provinces != null)
+	@if (Provinces is not null)
 	{
 		@foreach (var (i, province) in Provinces.Index())
 		{

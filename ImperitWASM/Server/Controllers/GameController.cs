@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
+using ImperitWASM.Server.Load;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
@@ -27,21 +28,21 @@ namespace ImperitWASM.Server.Controllers
 			this.active = active;
 		}
 		[HttpPost("Info")]
-		public BasicInfo Info([FromBody] Session ses)
+		public GameInfo Info([FromBody] int gameId) => game.FindNoTracking(gameId) is Game g ? new GameInfo(g.Started, g.Active) : new GameInfo();
+		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player)
 		{
-			var g = game.FindNoTracking(ses.G);
-			return new BasicInfo(ses.P == g.Active, pap.Player(ses.G, ses.P).Color, g.Started, g.Active);
+			await newGame.RegisterAsync(game.Find(player.G), player.N.Trim(), new Password(player.P.Trim()), player.S);
+			return RegistrationErrors.Ok;
 		}
 		[HttpPost("Register")]
-		public async Task<bool> RegisterAsync([FromBody] RegisteredPlayer player)
+		public async Task<RegistrationErrors> RegisterAsync([FromBody] RegisteredPlayer player) => player.N.Trim() switch
 		{
-			if (!string.IsNullOrWhiteSpace(player.N) && !string.IsNullOrWhiteSpace(player.N) && !player.N.StartsWith("AI ") && pap.Province(player.G, player.S) is Land land && land.IsStart && !land.Occupied)
-			{
-				await newGame.RegisterAsync(game.Find(player.G), player.N, new Password(player.P), player.S);
-				return true;
-			}
-			return false;
-		}
+			null or string { Length: 0 } => RegistrationErrors.NoName,
+			_ when string.IsNullOrWhiteSpace(player.P) => RegistrationErrors.NoPassword,
+			string n when !pap.IsNameFree(n) => RegistrationErrors.UsedName,
+			_ when pap.Province(player.G, player.S) is not Land { IsInhabitable: true } => RegistrationErrors.InvalidStart,
+			_ => await DoRegistrationAsync(player)
+		};
 		[HttpGet("RegistrableGame")]
 		public async Task<int> RegistrableGameAsync()
 		{

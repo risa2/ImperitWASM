@@ -48,7 +48,7 @@ namespace ImperitWASM.Server.Services
 			await ctx.SaveAsync();
 			return success;
 		}
-		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).AsNoTracking().SingleOrDefault(p => p.Index == i && p.GameId == gameId)?.Convert(settings) ?? new Savage();
+		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).AsNoTracking().SingleOrDefault(p => p.Index == i && p.GameId == gameId)?.Convert(settings) ?? new Savage(settings);
 		public Province? Province(int gameId, int i) => ctx.Provinces.AsNoTracking().Include(p => p.EntityProvinceActions).ThenInclude(s => s.EntitySoldiers)
 							.Include(p => p.EntityProvinceActions).ThenInclude(a => a.EntityPlayer).ThenInclude(s => s!.EntityPlayerActions)
 							.SingleOrDefault(p => p.GameId == gameId && p.Index == i)?.Convert(settings);

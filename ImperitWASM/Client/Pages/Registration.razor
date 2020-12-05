@@ -7,12 +7,15 @@
 	int? Selected = null, GameId = null;
 	ImmutableArray<Data.DisplayableShape> Provinces;
 	Color NextColor = new Color();
+	Data.RegistrationErrors Error = Data.RegistrationErrors.Ok;
 	async Task OnSubmit()
 	{
-		if (Selected is int selected && GameId is int gameId && await http.PostAsync<Data.RegisteredPlayer, bool>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, selected, gameId)))
+		Error = await http.PostAsync<Data.RegisteredPlayer, Data.RegistrationErrors>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, Selected ?? 0, GameId ?? 0));
+		if (Error == Data.RegistrationErrors.Ok)
 		{
 			await ReturnAsync!();
 		}
+		this.StateHasChanged();
 	}
 	protected override async Task OnInitializedAsync()
 	{
@@ -20,7 +23,7 @@
 		NextColor = await http.PostAsync<int, Color>("api/Game/NextColor", GameId.Value);
 		Provinces = (await http.PostAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", GameId.Value)).Select(s => s.UpdateText()).ToImmutableArray();
 	}
-	#pragma warning disable 1998
+#pragma warning disable 1998
 	async Task<int?> Select(int i, int? from)
 	{
 		if (Provinces![i].R)
@@ -30,7 +33,7 @@
 		return Selected;
 	}
 }
-<NavMenu Options="Zpět;Registrace;Potvrdit" Selected="1" OnClick="@(async i =>
+<NavMenu Options="Zpět;Registrace;Potvrdit" Selected="1" OnClickAsync="async i =>
 {
 	if (i == 0)
 	{
@@ -40,8 +43,24 @@
 	{
 		await OnSubmit();
 	}
-})"/>
+}"/>
 <main>
+	@if (Error == Data.RegistrationErrors.InvalidStart)
+	{
+		<p>Musíš vybrat počáteční zemi</p>
+	}
+	else if (Error == Data.RegistrationErrors.NoName)
+	{
+		<p>Musíš zadat jméno</p>
+	}
+	else if (Error == Data.RegistrationErrors.NoPassword)
+	{
+		<p>Musíš zadat heslo</p>
+	}
+	else if (Error == Data.RegistrationErrors.UsedName)
+	{
+		<p>Zvolené jméno již používá jiný hráč</p>
+	}
 	<p>Jméno:</p><p><input type="text" @bind-value="Username" autocomplete="username"/></p>
 	<p>Heslo:</p><p><input type="password" @bind-value="Password" autocomplete="current-password"/></p>
 	<p>Vyber si zemi, kde budeš začínat:</p>

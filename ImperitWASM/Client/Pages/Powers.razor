@@ -16,7 +16,7 @@
 	<a class="this">Výsledky</a>
 </nav>
 <main>
-	@if (Players != null && PowersArray != null)
+	@if (Players is not null && PowersArray is not null)
 	{
 		<PowerGraphs Players="Players" Powers="PowersArray"/>
 	}

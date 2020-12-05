@@ -8,6 +8,7 @@ namespace ImperitWASM.Shared.State
 {
 	public record PlayersAndProvinces(ImmutableArray<Player> Players, Provinces Provinces)
 	{
+		public IEnumerable<Land> Lands => Provinces.OfType<Land>();
 		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty) => Provinces.Passable(from, to, distance, difficulty);
 		public int NeighborCount(Province prov) => Provinces.NeighborCount(prov);
 		public IEnumerable<Province> NeighborsOf(Province prov) => Provinces.NeighborsOf(prov);

@@ -5,6 +5,11 @@
 @code{
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
+	Task DoLogoutAsync()
+	{
+		timer.Stop();
+		return LogoutAsync!();
+	}
 	Mode Current;
 	int? From = null, To = null;
 	(int, int, string)? Player = null;
@@ -21,36 +26,37 @@
 	{
 		if (await http.PostAsync<Data.Session, bool>("api/Game/NextTurn", Session))
 		{
-			await LogoutAsync!();
+			await DoLogoutAsync();
 		}
 		else
 		{
-			Info = await http.PostAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
+			Info = await http.PostAsync<int, Data.GameInfo>("api/Game/Info", Session.G);
 			Map?.Update();
 		}
 	}
 	async Task CheckSession()
 	{
-		Info = await http.PostAsync<Data.Session, Data.BasicInfo>("api/Game/Info", Session);
-		if (!Info.C)
+		Info = await http.PostAsync<int, Data.GameInfo>("api/Game/Info", Session.G);
+		if (!Info.S)
 		{
-			await LogoutAsync!();
+			await DoLogoutAsync();
 		}
 	}
-	Data.BasicInfo Info = new Data.BasicInfo(false, new Color(), true, 1);
+	Color PlayerColor = new Color();
+	Data.GameInfo Info = new Data.GameInfo();
 	Data.DisplayableShape[]? Provinces = null;
-	System.Timers.Timer? timer = null;
+	System.Timers.Timer timer = new System.Timers.Timer(400);
 	protected override async Task OnInitializedAsync()
 	{
 		await CheckSession();
+		PlayerColor = await http.PostAsync<Data.PlayerId, Color>("api/Player/Color", new Data.PlayerId(Session.P, Session.G));
 		Provinces = await http.PostAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", Session.G);
-		timer = new System.Timers.Timer(400);
 		timer.Elapsed += async (sender, e) => await CheckSession();
 		timer.Start();
 	}
 	public void UpdateProvinces(Data.ProvinceVariables[] variables)
 	{
-		if (Provinces != null && variables.Length <= Provinces.Length)
+		if (Provinces is not null && variables.Length <= Provinces.Length)
 		{
 			variables.Each((variable, i) => Provinces[i] = Provinces[i].Update(variable.F, variable.T));
 		}
@@ -59,20 +65,20 @@
 
 <style>
 	nav > a:hover {
-		background-color: @Info.B.WithAlpha(96);
+		background-color: @PlayerColor.WithAlpha(96);
 	}
 	nav > a.this {
-		background-color: @Info.B;
+		background-color: @PlayerColor;
 	}
 </style>
 
 @if (Current == Mode.Map)
 {
-	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.A" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.P == Session.P" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" Session="Session" LogoutAsync="DoLogoutAsync" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Preview)
 {
-	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.A" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" Session="Session" LogoutAsync="LogoutAsync!" NextTurnAsync="NextTurnAsync"/>
+	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.P == Session.P" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" Session="Session" LogoutAsync="DoLogoutAsync" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Donation && Player is (int Money, int Recipient, string Name))
 {
@@ -84,7 +90,7 @@ else if (Current == Mode.Move && From is int from && To is int to)
 }
 else if (Current == Mode.Players)
 {
-	<Players Session="Session" Switch="Switch" LogoutAsync="LogoutAsync!"/>
+	<Players Session="Session" Switch="Switch" LogoutAsync="DoLogoutAsync"/>
 }
 else if (Current == Mode.Powers)
 {

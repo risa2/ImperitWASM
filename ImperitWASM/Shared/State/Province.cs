@@ -5,15 +5,15 @@ using ImperitWASM.Shared.Motion;
 
 namespace ImperitWASM.Shared.State
 {
-	public abstract record Province(Description Description, Shape Shape, Player Player, Soldiers Soldiers, Soldiers DefaultSoldiers, ImmutableList<IProvinceAction> Actions)
+	public abstract record Province(string Name, Shape Shape, Player Player, Soldiers Soldiers, Soldiers DefaultSoldiers, ImmutableList<IProvinceAction> Actions, Settings Settings)
 	{
-		public string Name => Description.Name;
-		public ImmutableArray<string> Text => Description.Text;
+		public Description Description => new Description(Name, Text);
+		public abstract ImmutableArray<string> Text { get; }
 		public ImmutableArray<Point> Border => Shape.Border;
 		public Point Center => Shape.Center;
 		public Province GiveUpTo(Player player, Soldiers soldiers) => this with { Player = player, Soldiers = soldiers };
 		public Province GiveUpTo(Player p) => GiveUpTo(p, new Soldiers());
-		public Province Revolt() => GiveUpTo(new Savage(), DefaultSoldiers);
+		public Province Revolt() => GiveUpTo(new Savage(Settings), DefaultSoldiers);
 
 		Province WithActions(ImmutableList<IProvinceAction> new_actions) => this with { Actions = new_actions };
 		public Province Add(params IProvinceAction[] actions) => WithActions(Actions.AddRange(actions));

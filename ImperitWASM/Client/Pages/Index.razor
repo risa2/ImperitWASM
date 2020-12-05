@@ -4,31 +4,31 @@
 @inject SessionService cookies;
 
 @code{
-	Data.Session? Session = null;
+	Data.Session Session = new Data.Session();
 	async Task<bool> LoginAsync(Data.Login login)
 	{
-		Session = await http.PostAsync<Data.Login, Data.Session?>("api/Player/Login", login);
+		Session = await http.PostAsync<Data.Login, Data.Session>("api/Player/Login", login);
 		await cookies.SetAsync(Session);
 		this.StateHasChanged();
-		return Session != null;
+		return Session.IsSet();
 	}
 	async Task LogoutAsync()
 	{
-		if (Session != null)
+		if (Session.IsSet())
 		{
 			await http.PostAsync<Data.Session>("api/Player/Logout", Session);
 			await cookies.RemoveAsync();
-			Session = null;
+			Session = new Data.Session();
 			this.StateHasChanged();
 		}
 	}
 	protected override async Task OnInitializedAsync()
 	{
 		Session = await cookies.GetAsync();
-		Session = Session != null && await http.PostAsync<Data.Session, bool>("api/Player/Correct", Session!) ? Session : null;
+		Session = Session.IsSet() && await http.PostAsync<Data.Session, bool>("api/Player/Correct", Session) ? Session : new Data.Session();
 	}
 }
-@if (Session != null)
+@if (Session.IsSet())
 {
 	<GameSwitch LogoutAsync="LogoutAsync" Session="Session"/>
 }

@@ -14,7 +14,7 @@ namespace ImperitWASM.Shared.State
 		public int StartMoney(int earnings) => DefaultMoney - (earnings * 2);
 
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
-		public Provinces GetProvinces() => new Provinces(Provinces.Select(p => p.Build(this, new Savage())).ToImmutableArray(), this);
+		public Provinces GetProvinces() => new Provinces(Provinces.Select(p => p.Build(this, new Savage(this))).ToImmutableArray(), this);
 
 		public ImmutableArray<int> NeighborsOf(int vertex) => Provinces[vertex].Neighbors;
 		public int NeighborCount(int vertex) => NeighborsOf(vertex).Length;

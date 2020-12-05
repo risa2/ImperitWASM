@@ -36,7 +36,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Instabilities")]
 		public IEnumerable<ProvinceInstability> Instabilities([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.OfType<Land>().Where(l => l.CanRevolt).Select(l => new ProvinceInstability(l.Name, l.Fill, l.Instability));
+			return pap[gameId].Lands.Where(l => l.CanRevolt).Select(l => new ProvinceInstability(l.Name, l.Fill, l.Instability));
 		}
 	}
 }

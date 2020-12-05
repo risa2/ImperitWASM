@@ -12,7 +12,7 @@ namespace ImperitWASM.Server.Services
 	public interface IGameService
 	{
 		Game Find(int gameId);
-		Game FindNoTracking(int gameId);
+		Game? FindNoTracking(int gameId);
 		void Finish(int gameId);
 		void RemoveOld(TimeSpan period);
 		bool Started(int gameId);
@@ -36,7 +36,7 @@ namespace ImperitWASM.Server.Services
 		static Expression<Func<Game, bool>> InState(Game.State a, Game.State b) => g => g.Current == a || g.Current == b;
 		public void RemoveOld(TimeSpan period) => ctx.Games.RemoveAt(TimeElapsed(Game.State.Finished, DateTime.UtcNow - period));
 		public Game Find(int gameId) => ctx.Games.Find(gameId);
-		public Game FindNoTracking(int gameId) => ctx.Games.AsNoTracking().Single(game => game.Id == gameId);
+		public Game? FindNoTracking(int gameId) => ctx.Games.AsNoTracking().SingleOrDefault(game => game.Id == gameId);
 		public void Finish(int gameId) => ctx.Games.UpdateAt(gameId, g => g.Finish());
 		public bool Started(int gameId) => ctx.Games.Find(gameId).Started;
 		public List<Game> ShouldStart => ctx.Games.Include(g => g.EntityPlayers).Where(TimeElapsed(Game.State.Countdown, DateTime.UtcNow - settings.CountdownTime)).ToList();

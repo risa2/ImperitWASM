@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.Motion.Commands
 		}
 		public Player Perform(Player player, PlayersAndProvinces pap)
 		{
-			return player == Player ? player.ChangeMoney(Amount).Replace(a => true, new Loan(Amount, Settings), (x, y) => new Loan(x.Debt + y.Debt, Settings)) : player;
+			return player == Player ? player.Borrow(Amount) : player;
 		}
 	}
 }

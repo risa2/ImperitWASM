@@ -18,8 +18,10 @@
 
 	ImmutableArray<Data.PlayerInfo> PlayerInfos;
 	ImmutableArray<Data.ProvinceInstability> Instabilities;
+	int Active = 0;
 	protected override async Task OnInitializedAsync()
 	{
+		Active = (await http.PostAsync<int, Data.GameInfo>("api/Game/Info", Session.G)).P;
 		PlayerInfos = await http.PostAsync<Data.Session, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", Session);
 		Instabilities = await http.PostAsync<int, ImmutableArray<Data.ProvinceInstability>>("api/Provinces/Instabilities", Session.G);
 	}
@@ -31,9 +33,10 @@
 <main>
 	@if (!PlayerInfos.IsDefault)
 	{
-		<p>Přihlášen: <span style="color:@PlayerInfos[Session.P].C;">@PlayerInfos[Session.P].Name</span></p><br/>
+		<p>Přihlášen: <span style="color:@PlayerInfos[Session.P].C;">@PlayerInfos[Session.P].Name</span></p>
+		<p>Na tahu je: <span style="color:@PlayerInfos[Active].C;">@PlayerInfos[Active].Name</span></p>
 		<table class="players">
-			@foreach (var player in PlayerInfos.Where(p => p.Real))
+			@foreach (var player in PlayerInfos.Where(p => p.D))
 			{
 				<tr>
 					<td style="color:@player.C;">@player.Name</td>

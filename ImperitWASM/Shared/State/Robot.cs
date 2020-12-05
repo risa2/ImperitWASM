@@ -8,11 +8,10 @@ using static System.Math;
 namespace ImperitWASM.Shared.State
 {
 	public record Robot(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions, Settings Settings)
-		: Player(Color, Name, Money, Alive, Actions)
+		: Player(Color, Name, Money, Alive, Actions, Settings)
 	{
 		public virtual bool Equals(Robot? obj) => obj is not null && obj.Name == Name;
 		public override int GetHashCode() => base.GetHashCode();
-		public override Player Die() => new Robot(Color, Name, 0, false, ImmutableList<IPlayerAction>.Empty, Settings);
 
 		static int NextDefensePower(PlayersAndProvinces pap, Province p) => p.NextSoldiers(pap).DefensePower;
 		static int NextAttackPower(PlayersAndProvinces pap, Province p) => p.NextSoldiers(pap).AttackPower;

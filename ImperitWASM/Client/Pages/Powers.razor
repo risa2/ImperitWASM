@@ -3,12 +3,12 @@
 @code{
 	[Parameter] public Action Return { get; set; } = (() => { });
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	Data.ColoredHuman[]? Players = null;
-	PlayersPower[]? PowersArray = null;
+	ImmutableArray<Data.ColoredPlayer> Players;
+	ImmutableArray<PlayersPower> PowersArray;
 	protected override async Task OnInitializedAsync()
 	{
-		Players = await http.PostAsync<int, Data.ColoredHuman[]>("api/Player/Colored", Session.G);
-		PowersArray = (await http.PostAsync<int, PlayersPower[]>("api/Powers/List", Session.G));
+		Players = await http.PostAsync<int, ImmutableArray<Data.ColoredPlayer>>("api/Player/Colored", Session.G);
+		PowersArray = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Session.G);
 	}
 }
 <nav>
@@ -16,7 +16,7 @@
 	<a class="this">Výsledky</a>
 </nav>
 <main>
-	@if (Players is not null && PowersArray is not null)
+	@if (!Players.IsDefaultOrEmpty && !PowersArray.IsDefaultOrEmpty)
 	{
 		<PowerGraphs Players="Players" Powers="PowersArray"/>
 	}

@@ -10,6 +10,7 @@ namespace ImperitWASM.Shared.State
 	public record Robot(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions, Settings Settings)
 		: Player(Color, Name, Money, Alive, Actions, Settings)
 	{
+		public static Robot Create(Color Color, string Name, int Money, Settings Settings) => new Robot(Color, Name, Money, true, DefaultActions, Settings);
 		public virtual bool Equals(Robot? obj) => obj is not null && obj.Name == Name;
 		public override int GetHashCode() => base.GetHashCode();
 

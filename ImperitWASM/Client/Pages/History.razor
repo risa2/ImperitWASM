@@ -8,11 +8,11 @@
 		Finished = await http.GetAsync<ImmutableArray<int>>("api/Game/Finished");
 	}
 	Data.Int model = new Data.Int();
-	ImmutableArray<Data.ColoredHuman> Former;
+	ImmutableArray<Data.ColoredPlayer> Former;
 	ImmutableArray<PlayersPower> Powers;
 	async Task UpdateHistoryGraphs()
 	{
-		Former = await http.PostAsync<int, ImmutableArray<Data.ColoredHuman>>("api/Player/Colored", Finished[model.Value]);
+		Former = await http.PostAsync<int, ImmutableArray<Data.ColoredPlayer>>("api/Player/Colored", Finished[model.Value]);
 		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Finished[model.Value]);
 	}
 }
@@ -27,7 +27,7 @@
 		<EditForm Model="model" OnSubmit="UpdateHistoryGraphs">
 			<DataAnnotationsValidator/><ValidationSummary/>
 			<p>Hra:</p>
-			<IntSelect @bind-Value="model.Value" Options="Finished" Name="g => g.ToString()"/><br/>
+			<p><IntSelect @bind-Value="model.Value" Options="Finished" Name="g => g.ToString()"/></p>
 			<button type="submit">Zobrazit</button>
 		</EditForm>
 		<PowerGraphs Players="Former" Powers="Powers"/>

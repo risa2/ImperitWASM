@@ -6,7 +6,7 @@
 	[Parameter] public Color Stroke { get; set; } = new Color();
 	[Parameter] public int StrokeWidth { get; set; } = 0;
 	[Parameter] public Func<Task>? OnClick { get; set; }
-	string Path => string.Join(" ", Points?.Select(point => Width * point.X + "," + Height * point.Y) ?? new[] { "" });
+	string Path => string.Join(" ", Points?.Select(point => Width * point.X + "," + Height * point.Y) ?? Enumerable.Empty<string>());
 	public void Select(ImmutableArray<Point>? points, Color fill)
 	{
 		Points = points;

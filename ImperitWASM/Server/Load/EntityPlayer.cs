@@ -24,7 +24,7 @@ namespace ImperitWASM.Server.Load
 		{
 			Kind.Human => new Human(Shared.State.Color.Parse(Color), Name, Money, Alive, EntityPlayerActions!.Select(a => a.Convert(settings)).ToImmutableList(), settings, Shared.State.Password.Parse(Password)),
 			Kind.Robot => new Robot(Shared.State.Color.Parse(Color), Name, Money, Alive, EntityPlayerActions!.Select(a => a.Convert(settings)).ToImmutableList(), settings),
-			_ => new Savage(settings),
+			_ => settings.Savage,
 		};
 		public static EntityPlayer From(Player p, int index) => p switch
 		{

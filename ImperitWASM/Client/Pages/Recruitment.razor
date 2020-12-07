@@ -10,19 +10,17 @@
 	Data.RecruitInfo Info = new Data.RecruitInfo("", "", ImmutableArray<Data.SoldiersItem>.Empty, 0);
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostAsync<Data.CmdData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.CmdData(Land, Session.P, Session.G));
-		model.Soldiers = Data.Int.Array(Info.R.Length);
+		Info = await http.PostAsync<Data.RecruitData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.RecruitData(Land, Session.P, Session.G));
+		model.Soldiers = Data.Int.Create(Info.R.Length);
 	}
 	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
 	int Missing => Price - Info.M;
-	async Task DoRecruit()
+	async Task JustRecruit()
 	{
-		if (Missing <= 0 || model.Borrow)
-		{
-			await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.P, Session.Key, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
-			Switch(Mode.Map);
-		}
+		await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.P, Session.Key, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
+		Switch(Mode.Map);
 	}
+	Task DoRecruit() => Missing <= 0 ? JustRecruit() : Task.Run(() => { });
 	SoldierTypeInfobox? infobox;
 }
 <nav>
@@ -34,17 +32,14 @@
 	<SoldierTypeInfobox @ref="infobox" />
 	<EditForm Model="model" OnValidSubmit="DoRecruit">
 		<DataAnnotationsValidator /><ValidationSummary />
-		<p>
-			@Info.N
-			@if (!string.IsNullOrWhiteSpace(Info.S))
-			{
-				<text> má @Info.S</text>
-			}
-			else
-			{
-				<text> nemá žádné vojáky</text>
-			}
-		</p>
+		@if (!string.IsNullOrWhiteSpace(Info.S))
+		{
+			<p>@Info.N má @Info.S</p>
+		}
+		else
+		{
+			<p>@Info.N nemá žádné vojáky</p>
+		}
 		<table>
 			@foreach (var (i, (type, price)) in Info.R.Try().Index())
 			{
@@ -53,21 +48,22 @@
 					<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>
 				</tr>
 			}
-			@if (Missing > 0)
-			{
-				<tr>
-					<td>Chybí ti @Missing@Sym.Money</td>
-					<td>Půjčit si: <InputCheckbox @bind-Value="model.Borrow" /></td>
-				</tr>
-			}
-			else
-			{
-				model.Borrow = false;
-			}
-			@if (Missing <= 0 || model.Borrow)
-			{
-				<tr><td></td><td><button type="submit">Verbovat</button></td></tr>
-			}
+			<tr>
+				<td>
+					@if (Missing > 0)
+					{
+						<text>Chybí ti @Missing@Sym.Money</text>
+					}
+				</td>
+				@if (Missing > 0)
+				{
+					<td><button @onclick="JustRecruit">Půjčit si a verbovat</button></td>
+				}
+				else
+				{
+					<td><button type="submit">Verbovat</button></td>
+				}
+			</tr>
 		</table>
 	</EditForm>
 </main>

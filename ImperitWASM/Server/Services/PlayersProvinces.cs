@@ -20,7 +20,7 @@ namespace ImperitWASM.Server.Services
 		Province? Province(int gameId, int i);
 		bool GameExists(int gameId) => PlayersCount(gameId) > 0;
 		bool IsNameFree(string name);
-		string ObsfuscateName(string name);
+		string ObsfuscateName(string name, int repetition);
 	}
 	public class PlayersProvinces : IPlayersProvinces
 	{
@@ -48,7 +48,7 @@ namespace ImperitWASM.Server.Services
 			await ctx.SaveAsync();
 			return success;
 		}
-		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).AsNoTracking().SingleOrDefault(p => p.Index == i && p.GameId == gameId)?.Convert(settings) ?? new Savage(settings);
+		public Player Player(int gameId, int i) => ctx.Players.Include(p => p.EntityPlayerActions).AsNoTracking().SingleOrDefault(p => p.Index == i && p.GameId == gameId)?.Convert(settings) ?? settings.Savage;
 		public Province? Province(int gameId, int i) => ctx.Provinces.AsNoTracking().Include(p => p.EntityProvinceActions).ThenInclude(s => s.EntitySoldiers)
 							.Include(p => p.EntityProvinceActions).ThenInclude(a => a.EntityPlayer).ThenInclude(s => s!.EntityPlayerActions)
 							.SingleOrDefault(p => p.GameId == gameId && p.Index == i)?.Convert(settings);
@@ -60,12 +60,15 @@ namespace ImperitWASM.Server.Services
 		public Game Add(PlayersAndProvinces pap) => ctx.Add(pap.Players, pap.Provinces);
 		public int PlayersCount(int gameId) => ctx.Players.Count(p => p.GameId == gameId);
 
-		public bool IsNameFree(string name) => ctx.Players.All(p => p.Name != name);
-		public string ObsfuscateName(string original)
+		public bool IsNameFree(string name) => name.All(c => !char.IsDigit(c)) && ctx.Players.All(p => p.Name != name);
+		public string ObsfuscateName(string original, int repetition)
 		{
 			original = original.Trim();
-			int number = ctx.Players.Select(p => p.Name).Where(name => name.StartsWith(original)).OrderBy(n => n.Length).DefaultIfEmpty("").ToList().Max(name => int.TryParse(name[original.Length..], out int value) ? value : -1);
-			return number < 0 ? original : original + (number + 1);
+			return ctx.Players.Select(p => p.Name).Where(name => name.StartsWith(original)).ToList().Select(name => name[original.Length..]).Where(suf => suf.All(c => c is >= '0' and <= '9')).DefaultIfEmpty("").Max(n => n ?? "") switch
+			{
+				{ Length: > 0} suf when suf[^1] >= '0' && suf[^1] < (char)('9' - repetition) => original + suf[..^1] + (char)(suf[^1] + 1 + repetition),
+				var suf => original + suf + "1"
+			};
 		}
 	}
 }

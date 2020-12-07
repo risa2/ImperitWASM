@@ -5,7 +5,7 @@
 	string Username { get; set; } = "";
 	string Password { get; set; } = "";
 	int? Selected = null, GameId = null;
-	ImmutableArray<Data.DisplayableShape> Provinces;
+	ImmutableArray<Data.ProvinceAppearance> Provinces;
 	Color NextColor = new Color();
 	Data.RegistrationErrors Error = Data.RegistrationErrors.Ok;
 	async Task OnSubmit()
@@ -21,7 +21,7 @@
 	{
 		GameId = await http.GetAsync<int>("api/Game/RegistrableGame");
 		NextColor = await http.PostAsync<int, Color>("api/Game/NextColor", GameId.Value);
-		Provinces = (await http.PostAsync<int, Data.DisplayableShape[]>("api/Provinces/Shapes", GameId.Value)).Select(s => s.UpdateText()).ToImmutableArray();
+		Provinces = (await http.PostAsync<int, ImmutableArray<Data.ProvinceAppearance>>("api/Provinces/Shapes", GameId.Value)).Select(s => s.UpdateText()).ToImmutableArray();
 	}
 #pragma warning disable 1998
 	async Task<int?> Select(int i, int? from)

@@ -43,7 +43,7 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("MoveInfo")]
-		public MoveInfo MoveInfo([FromBody] CmdData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.A) is Province from && p_p.Province(move.B) is Province to ? new MoveInfo(from.CanAnyMove(p_p, from, to), !from.IsAllyOf(to), to.Occupied, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.Soldiers.Select(reg => reg.Type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
+		public MoveInfo MoveInfo([FromBody] MoveData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.F) is Province from && p_p.Province(move.T) is Province to ? new MoveInfo(from.CanAnyMove(p_p, to), !from.IsAllyOf(to), to.Occupied, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.Soldiers.Select(reg => reg.Type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
 		[HttpPost("Move")]
 		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
 		{
@@ -57,13 +57,13 @@ namespace ImperitWASM.Server.Controllers
 			return (await pap.AddAsync(m.Game, move)) switch
 			{
 				true => MoveErrors.Ok,
-				false when !from.Has(move.Soldiers) => MoveErrors.FewSoldiers,
-				false when move.HasEnoughCapacity(p_p, from, to) => MoveErrors.LittleCapacity,
+				_ when !from.Has(move.Soldiers) => MoveErrors.FewSoldiers,
+				_ when move.HasEnoughCapacity(p_p) => MoveErrors.LittleCapacity,
 				_ => MoveErrors.Else
 			};
 		}
 		[HttpPost("PurchaseInfo")]
-		public PurchaseInfo PurchaseInfo([FromBody] CmdData purchase) => pap.GameExists(purchase.G) && pap[purchase.G] is PlayersAndProvinces p_p && p_p.Province(purchase.B) is Land land && p_p.Player(purchase.B) is Player player ? new PurchaseInfo(new Buy(player, land, 0).Allowed(p_p), land.Name, land.Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
+		public PurchaseInfo PurchaseInfo([FromBody] PurchaseData purchase) => pap.GameExists(purchase.G) && pap[purchase.G] is PlayersAndProvinces p_p && p_p.Province(purchase.L) is Land land && p_p.Player(purchase.P) is Player player ? new PurchaseInfo(new Buy(player, land, 0).Allowed(p_p), land.Name, land.Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
 		[HttpPost("Purchase")]
 		public void Purchase([FromBody] PurchaseCmd purchase)
 		{
@@ -81,7 +81,7 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("RecruitInfo")]
-		public RecruitInfo RecruitInfo([FromBody] CmdData p) => pap.Province(p.G, p.A) is Province province ? new RecruitInfo(province.Name, province.Soldiers.ToString(), settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.B).Money) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0);
+		public RecruitInfo RecruitInfo([FromBody] RecruitData p) => pap.Province(p.G, p.W) is Province province ? new RecruitInfo(province.Name, province.Soldiers.ToString(), settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.P).Money) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0);
 		[HttpPost("Recruit")]
 		public async Task Recruit([FromBody] RecruitCmd r)
 		{

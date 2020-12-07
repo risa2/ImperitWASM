@@ -13,11 +13,12 @@ namespace ImperitWASM.Shared.State
 		public Point Center => Shape.Center;
 		public Province GiveUpTo(Player player, Soldiers soldiers) => this with { Player = player, Soldiers = soldiers };
 		public Province GiveUpTo(Player p) => GiveUpTo(p, new Soldiers());
-		public Province Revolt() => GiveUpTo(new Savage(Settings), DefaultSoldiers);
+		public Province Revolt() => GiveUpTo(Settings.Savage, DefaultSoldiers);
 
 		Province WithActions(ImmutableList<IProvinceAction> new_actions) => this with { Actions = new_actions };
 		public Province Add(params IProvinceAction[] actions) => WithActions(Actions.AddRange(actions));
 		public Province Replace(Func<IProvinceAction, IProvinceAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
+
 		Province ActOnYourself(PlayersAndProvinces pap)
 		{
 			var (a, p) = Actions.Fold(this, (province, action) => action.Perform(province, pap));
@@ -60,7 +61,8 @@ namespace ImperitWASM.Shared.State
 		public bool HasSoldiers => Soldiers.Any;
 		public bool CanSoldiersSurvive => Soldiers.CanSurviveIn(this);
 		public bool CanSurviveWithout(Soldiers s) => Subtract(s).CanSoldiersSurvive;
-		public bool CanAnyMove(PlayersAndProvinces pap, Province from, Province to) => Soldiers.Any(reg => reg.CanMoveAlone(pap, from, to));
+		public bool CanAnyMove(PlayersAndProvinces pap, Province to) => Soldiers.Any(reg => reg.CanMoveAlone(pap, this, to));
+		public bool CanMove(PlayersAndProvinces pap, Province to, Player player, Soldiers soldiers) => IsAllyOf(player) && Soldiers.CanMove(pap, this, to) && CanSurviveWithout(soldiers);
 
 		public virtual Color Fill => new Color();
 		public virtual Color Stroke => new Color();

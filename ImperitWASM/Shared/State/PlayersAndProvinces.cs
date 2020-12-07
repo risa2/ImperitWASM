@@ -51,6 +51,18 @@ namespace ImperitWASM.Shared.State
 		public PlayersAndProvinces JustAdd(ICommand cmd) => Add(cmd).Item1;
 		public int LivingHumans => Players.Count(p => p.Alive && p is Human);
 		public PlayersPower PlayersPower(Func<Player, bool> which) => new PlayersPower(Players.Where(which).Select(p => p.Power(Provinces.ControlledBy(p).ToImmutableArray())).ToImmutableArray());
-		public IEnumerable<KeyValuePair<int, Land>> Inhabitable => Provinces.Select((p, i) => KeyValuePair.Create(i, p as Land)).Where(it => it.Value is Land && it.Value.IsInhabitable)!;
+		public IEnumerable<int> Inhabitable => Provinces.Indices(it => it is Land { IsInhabitable: true });
+		public PlayersAndProvinces AddRobots(Settings settings, Func<string, int, string> mod)
+		{
+			var new_players = Players.ToBuilder();
+			var new_provinces = Provinces.ToBuilder();
+			foreach (int start in Inhabitable)
+			{
+				new_players.Add(Robot.Create(Settings.ColorOf(new_players.Count), settings.GetName(new_players.Count - Players.Length, mod), settings.StartMoney(start), settings));
+				new_provinces[start] = new_provinces[start].GiveUpTo(new_players[^1], new_provinces[start].Soldiers);
+			}
+			return new PlayersAndProvinces(new_players.ToImmutable(), new Provinces(new_provinces.MoveToImmutable(), settings));
+		}
+		
 	}
 }

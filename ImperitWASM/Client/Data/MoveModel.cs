@@ -1,7 +1,9 @@
-﻿namespace ImperitWASM.Client.Data
+﻿using System.Collections.Generic;
+
+namespace ImperitWASM.Client.Data
 {
 	public class MoveModel
 	{
-		public Int[] Soldiers = System.Array.Empty<Int>();
+		public List<Int> Soldiers = new List<Int>();
 	}
 }

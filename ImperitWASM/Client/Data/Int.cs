@@ -1,14 +1,16 @@
-﻿namespace ImperitWASM.Client.Data
+﻿using System.Collections.Generic;
+
+namespace ImperitWASM.Client.Data
 {
 	public class Int
 	{
 		public int Value { get; set; } = 0;
-		public static Int[] Array(int count)
+		public static List<Int> Create(int count)
 		{
-			var arr = new Int[count];
+			var arr = new List<Int>(count);
 			for (int i = 0; i < count; ++i)
 			{
-				arr[i] = new Int();
+				arr.Add(new Int());
 			}
 			return arr;
 		}

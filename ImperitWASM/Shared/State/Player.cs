@@ -7,6 +7,7 @@ namespace ImperitWASM.Shared.State
 {
 	public abstract record Player(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions, Settings Settings)
 	{
+		protected static readonly ImmutableList<IPlayerAction> DefaultActions = ImmutableList.Create<IPlayerAction>(new Default(), new Instability());
 		public Description Description => new Description(Name, ImmutableArray<string>.Empty);
 		public Player ChangeMoney(int amount) => this with { Money =  amount + Money };
 		protected Player WithActions(ImmutableList<IPlayerAction> new_actions) => this with { Actions = new_actions };

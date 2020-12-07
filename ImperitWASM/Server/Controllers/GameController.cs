@@ -35,13 +35,13 @@ namespace ImperitWASM.Server.Controllers
 			return RegistrationErrors.Ok;
 		}
 		[HttpPost("Register")]
-		public async Task<RegistrationErrors> RegisterAsync([FromBody] RegisteredPlayer player) => player.N.Trim() switch
+		public async Task<RegistrationErrors> RegisterAsync([FromBody] RegisteredPlayer player) => player.N?.Trim() switch
 		{
-			null or string { Length: 0 } => RegistrationErrors.NoName,
+			null or { Length: 0 } => RegistrationErrors.NoName,
+			string name when !pap.IsNameFree(name) => RegistrationErrors.UsedName,
 			_ when string.IsNullOrWhiteSpace(player.P) => RegistrationErrors.NoPassword,
-			string n when !pap.IsNameFree(n) => RegistrationErrors.UsedName,
-			_ when pap.Province(player.G, player.S) is not Land { IsInhabitable: true } => RegistrationErrors.InvalidStart,
-			_ => await DoRegistrationAsync(player)
+			_ when pap.Province(player.G, player.S) is Land { IsInhabitable: true } => await DoRegistrationAsync(player),
+			_ => RegistrationErrors.InvalidStart
 		};
 		[HttpGet("RegistrableGame")]
 		public async Task<int> RegistrableGameAsync()

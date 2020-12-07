@@ -12,6 +12,7 @@ namespace ImperitWASM.Shared
 		public static T Must<T>(this T? value) where T : class => value ?? throw new ArgumentNullException(typeof(T).FullName);
 		public static T FirstOr<T>(this IEnumerable<T> e, T x) => e.DefaultIfEmpty(x).First();
 		public static T? MinBy<T, TC>(this IEnumerable<T> e, Func<T, TC> selector, T? v = default) where T : class => e.OrderBy(selector).FirstOr(v);
+		public static IEnumerable<T> Select<T>(this int len, Func<int, T> cvt) => Enumerable.Range(0, len).Select(cvt);
 		public static (ImmutableList<A>, P) Fold<A, P>(this IEnumerable<A> e, P init, Func<P, A, (P, A?)> fn) where A : class
 		{
 			var result = ImmutableList.CreateBuilder<A>();

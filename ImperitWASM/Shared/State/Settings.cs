@@ -5,16 +5,19 @@ using System.Linq;
 
 namespace ImperitWASM.Shared.State
 {
-	public record Settings(Ratio DefaultInstability, Ratio Interest, int DebtLimit, int DefaultMoney, int MountainsWidth, Color LandColor, Color MountainsColor, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes, int FinalLandsCount, int CountdownSeconds, ImmutableArray<ProvinceData> Provinces)
+	public record Settings(int CountdownSeconds, Ratio DefaultInstability, int DebtLimit, int DefaultMoney, int FinalLandsCount, Ratio Interest, Color LandColor, Color MountainsColor, int MountainsWidth, ImmutableArray<string> Names, ImmutableArray<ProvinceData> Provinces, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes)
 	{
+		public Savage Savage => new Savage(this);
 		public TimeSpan CountdownTime => TimeSpan.FromSeconds(CountdownSeconds);
 		public ImmutableDictionary<SoldierType, int> GetSoldierTypeIndices() => SoldierTypes.Lookup();
 
 		public Ratio Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
-		public int StartMoney(int earnings) => DefaultMoney - (earnings * 2);
+		public int StartMoney(int province) => DefaultMoney - (Provinces[province].Earnings!.Value * 2);
+		public static Color ColorOf(int i) => Color.Generate(i, 120.0, 1.0, 1.0);
 
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
-		public Provinces GetProvinces() => new Provinces(Provinces.Select(p => p.Build(this, new Savage(this))).ToImmutableArray(), this);
+		public Provinces GetProvinces() => new Provinces(Provinces.Select(p => p.Build(this, Savage)).ToImmutableArray(), this);
+		public string GetName(int i, Func<string, int, string> obf) => obf(Names[i % Names.Length], i / Names.Length);
 
 		public ImmutableArray<int> NeighborsOf(int vertex) => Provinces[vertex].Neighbors;
 		public int NeighborCount(int vertex) => NeighborsOf(vertex).Length;

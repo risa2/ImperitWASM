@@ -9,8 +9,8 @@
 	[Parameter] public bool Preview { get; set; }
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
-	[Parameter] public Data.DisplayableShape[]? Provinces { get; set; }
-	[Parameter] public Action<Data.ProvinceVariables[]>? UpdateProvinces { get; set; }
+	[Parameter] public List<Data.ProvinceAppearance>? Provinces { get; set; }
+	[Parameter] public Action<ImmutableArray<Data.ProvinceUpdate>>? UpdateProvinces { get; set; }
 	async Task<int?> OnClick(int clicked, int? from)
 	{
 		var r = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.P, from, clicked, Session.G));
@@ -22,7 +22,7 @@
 	{
 		PowersCount = await http.PostAsync<int, int>("api/Powers/Count", Session.G);
 		PlayerMoney = await http.PostAsync<Data.Session, int>("api/Player/Money", Session);
-		UpdateProvinces!(await http.PostAsync<int, Data.ProvinceVariables[]>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
+		UpdateProvinces!(await http.PostAsync<int, ImmutableArray<Data.ProvinceUpdate>>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
 		this.StateHasChanged();
 	}
 	protected override Task OnInitializedAsync() => Update();
@@ -52,6 +52,4 @@
 		}
 	}
 </nav>
-<main>
-	<Map Width="1000" Height="1000" Provinces="Provinces" Select="OnClick" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" />
-</main>
+<main><Map Width="1000" Height="1000" Provinces="Provinces" Select="OnClick" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" /></main>

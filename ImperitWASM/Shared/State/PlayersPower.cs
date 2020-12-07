@@ -15,8 +15,8 @@ namespace ImperitWASM.Shared.State
 			return Powers.Select(p => (double)(p.Soldiers + p.Money) / sum).ToImmutableArray();
 		}
 		public int TotalSum => Powers.Sum(p => p.Total);
+		public int TotalMax => Powers.Max(p => p.Total);
 		public int TotalAvg => TotalSum / Length;
-		public int TotalMax => Powers.Max(pp => pp.Total);
 		public ImmutableArray<double> ChangesFrom(PlayersPower previous) => Powers.Zip(previous.Powers, (next, prev) => (double)next.Total / prev.Total - 1.0).ToImmutableArray();
 		public IEnumerable<PlayerFinals> Finals => Powers.Select((p, i) => new PlayerFinals(i, p.Final)).Where(r => r.Count > 0);
 	}

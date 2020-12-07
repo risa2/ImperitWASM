@@ -12,7 +12,7 @@
 	Data.PurchaseInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostAsync<Data.CmdData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.CmdData(Session.P, Land, Session.G));
+		Info = await http.PostAsync<Data.PurchaseData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.PurchaseData(Session.P, Land, Session.G));
 		if (!Info.Possible)
 		{
 			Return();

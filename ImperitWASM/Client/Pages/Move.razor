@@ -10,8 +10,8 @@
 	Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostAsync<Data.CmdData, Data.MoveInfo>("api/Command/MoveInfo", new Data.CmdData(From, To, Session.G));
-		model.Soldiers = Data.Int.Array(Info.Soldiers.Length);
+		Info = await http.PostAsync<Data.MoveData, Data.MoveInfo>("api/Command/MoveInfo", new Data.MoveData(From, To, Session.G));
+		model.Soldiers = Data.Int.Create(Info.Soldiers.Length);
 		if (!Info.Possible)
 		{
 			Return();

@@ -1,6 +1,6 @@
 ﻿@code{
-	[Parameter] public IReadOnlyList<Data.ColoredHuman> Players { get; set; } = Array.Empty<Data.ColoredHuman>();
-	[Parameter] public IReadOnlyList<PlayersPower> Powers { get; set; } = Array.Empty<PlayersPower>();
+	[Parameter] public ImmutableArray<Data.ColoredPlayer> Players { get; set; }
+	[Parameter] public ImmutableArray<PlayersPower> Powers { get; set; }
 	static IEnumerable<string> Parts(IEnumerable<int> y_values, int count, int max_y, int x_offset, int y_offset, int width, int height)
 	{
 		return y_values.Select((y, x) => ((long)x * width / (count - 1) + x_offset) + "," + ((long)height - y * height / max_y + y_offset));
@@ -16,38 +16,38 @@
 	var total_max = Powers.Max(p => p.TotalMax);
 	var ratios = Powers.Select(p => p.GetRatios()).ToImmutableArray();
 	var ratio_sums = new double[ratios.Length];
-	var life = Players.Select((_, i) => Math.Min(Powers.Count, Powers.Count(p => p[i].Alive) + 1)).ToImmutableArray();
+	var life = Players.Select((_, i) => Math.Min(Powers.Length, Powers.Count(p => p[i].Alive) + 1)).ToImmutableArray();
 }
-@foreach (var (player, finals) in Powers[^1].Finals.Select(f => (Players[f.Player], f.Count)))
+@foreach (var ((name, color), finals) in Powers[^1].Finals.Select(f => (Players[f.Player], f.Count)))
 {
-	<p><span style="color:@player.C;">@player.Name</span> @(new string(Sym.Star, finals)) </p>
+	<p><span style="color:@color;">@name</span> @(new string(Sym.Star, finals)) </p>
 }
 <p>Síla:</p>
 <svg viewBox="-10 -10 1220 620" class="diagram">
-	@for (int i = 0; i < Players.Count; ++i)
+	@for (int i = 0; i < Players.Length; ++i)
 	{
-		<polyline points="@Polyline(Powers.Select(p => p[i].Total).Take(life[i]), Powers.Count, total_max, 0, 0, 1200, 600)" fill="none" stroke="@Players[i].C" stroke-width="3"></polyline>
+		<polyline points="@Polyline(Powers.Select(p => p[i].Total).Take(life[i]), Powers.Length, total_max, 0, 0, 1200, 600)" fill="none" stroke="@Players[i].C" stroke-width="3"></polyline>
 	}
-	<polyline points="@Polyline(total_avg, Powers.Count, total_max, 0, 0, 1200, 600)" fill="none" stroke="#FFF" stroke-width="1"></polyline>
+	<polyline points="@Polyline(total_avg, Powers.Length, total_max, 0, 0, 1200, 600)" fill="none" stroke="#FFF" stroke-width="1"></polyline>
 </svg>
-@if (Powers.Count > 6)
+@if (Powers.Length > 6)
 {
 	var changes = Powers.Zip(Powers.Skip(1), (prev, next) => next.ChangesFrom(prev)).ToImmutableArray();
 	<p>Poměrná změna síly:</p>
 	<svg viewBox="-10 -10 1220 620" class="diagram">
-		@for (int p = 0; p < Players.Count; ++p)
+		@for (int p = 0; p < Players.Length; ++p)
 		{
 			@for (int c = 0; c < changes.Length && c < life[p] - 1; ++c)
 			{
-				<circle cx="@(600 * (2 * c + 1) / (Powers.Count - 1))" cy="@(300 - (int)(300 * changes[c][p]))" 
-					fill="transparent" stroke="@Players[p].C" r="@ToString(300.0 / Powers.Count)"></circle>
+				<circle cx="@(600 * (2 * c + 1) / (Powers.Length - 1))" cy="@(300 - (int)(300 * changes[c][p]))" 
+					fill="transparent" stroke="@Players[p].C" r="@ToString(300.0 / Powers.Length)"></circle>
 			}
 		}
 	</svg>
 }
 <p>Počet vojáků a peněz v poměru k ostatním hráčům:</p>
 <svg viewBox="0 0 1200 600" class="diagram">
-	@for (int i = 0; i < Players.Count; ++i)
+	@for (int i = 0; i < Players.Length; ++i)
 	{
 		<polyline points="@(Polyline(ratio_sums.Select(r => (int)(r * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600) + " " +
 							Polyline(ratio_sums.Select((r,j) => (int)((r + ratios[j][i]) * 2000)).Take(Math.Min(life[i] + 1, ratios.Length)), ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i].C"></polyline>

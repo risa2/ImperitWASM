@@ -19,19 +19,19 @@ namespace ImperitWASM.Server.Controllers
 			this.active = active;
 		}
 		[HttpPost("Shapes")]
-		public IEnumerable<DisplayableShape> Shapes([FromBody] int gameId)
+		public IEnumerable<ProvinceAppearance> Shapes([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new DisplayableShape(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && land.IsInhabitable, p.Text));
+			return pap[gameId].Provinces.Select(p => new ProvinceAppearance(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land land && land.IsInhabitable, p.Text));
 		}
 		[HttpPost("Current")]
-		public IEnumerable<ProvinceVariables> Current([FromBody] int gameId)
+		public IEnumerable<ProvinceUpdate> Current([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new ProvinceVariables(p.Text, p.Fill));
+			return pap[gameId].Provinces.Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
 		[HttpPost("Preview")]
-		public IEnumerable<ProvinceVariables> Preview([FromBody] int gameId)
+		public IEnumerable<ProvinceUpdate> Preview([FromBody] int gameId)
 		{
-			return pap[gameId].Act(active[gameId], false).Provinces.Select(p => new ProvinceVariables(p.Text, p.Fill));
+			return pap[gameId].Act(active[gameId], false).Provinces.Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
 		[HttpPost("Instabilities")]
 		public IEnumerable<ProvinceInstability> Instabilities([FromBody] int gameId)

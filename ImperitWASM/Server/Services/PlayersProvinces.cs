@@ -1,8 +1,7 @@
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
-using ImperitWASM.Shared.Motion;
+using ImperitWASM.Shared.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.EntityFrameworkCore;
 
@@ -66,7 +65,7 @@ namespace ImperitWASM.Server.Services
 			original = original.Trim();
 			return ctx.Players.Select(p => p.Name).Where(name => name.StartsWith(original)).ToList().Select(name => name[original.Length..]).Where(suf => suf.All(c => c is >= '0' and <= '9')).DefaultIfEmpty("").Max(n => n ?? "") switch
 			{
-				{ Length: > 0} suf when suf[^1] >= '0' && suf[^1] < (char)('9' - repetition) => original + suf[..^1] + (char)(suf[^1] + 1 + repetition),
+				{ Length: > 0 } suf when suf[^1] >= '0' && suf[^1] < (char)('9' - repetition) => original + suf[..^1] + (char)(suf[^1] + 1 + repetition),
 				var suf => original + suf + (repetition + 1)
 			};
 		}

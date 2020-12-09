@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using ImperitWASM.Shared.Motion;
+using ImperitWASM.Shared.Actions;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load

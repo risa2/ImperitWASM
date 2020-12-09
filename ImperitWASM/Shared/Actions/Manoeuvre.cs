@@ -1,6 +1,6 @@
 using ImperitWASM.Shared.State;
 
-namespace ImperitWASM.Shared.Motion
+namespace ImperitWASM.Shared.Actions
 {
 	public record Manoeuvre(Player Player, Soldiers Soldiers) : IProvinceAction
 	{

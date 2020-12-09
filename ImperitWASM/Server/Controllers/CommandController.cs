@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.Motion.Commands;
+using ImperitWASM.Shared.Commands;
 using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Mvc;
 

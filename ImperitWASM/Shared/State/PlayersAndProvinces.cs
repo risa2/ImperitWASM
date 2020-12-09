@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using ImperitWASM.Shared.Motion;
+using ImperitWASM.Shared.Commands;
 
 namespace ImperitWASM.Shared.State
 {
@@ -16,7 +16,7 @@ namespace ImperitWASM.Shared.State
 		public int IncomeOf(Player player) => Provinces.ControlledBy(player).OfType<Land>().Sum(p => p.Earnings);
 		public bool HasAny(Player player) => Provinces.ControlledBy(player).Any();
 		public bool HasNeighborRuledBy(Province province, Player player) => NeighborsOf(province).Any(prov => prov is Land land && land.IsAllyOf(player));
-		
+
 		public Player? Winner(int finalCount) => Players.FirstOrDefault(p => Provinces.ControlledBy(p).OfType<Land>().Count(l => l.IsFinal) >= finalCount);
 		public int PlayersCount => Players.Length;
 		public int ProvincesCount => Provinces.Count;
@@ -63,6 +63,6 @@ namespace ImperitWASM.Shared.State
 			}
 			return new PlayersAndProvinces(new_players.ToImmutable(), new Provinces(new_provinces.MoveToImmutable(), settings));
 		}
-		
+
 	}
 }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using ImperitWASM.Shared.Motion;
+using ImperitWASM.Shared.Actions;
 
 namespace ImperitWASM.Shared.State
 {

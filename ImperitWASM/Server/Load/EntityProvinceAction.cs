@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ImperitWASM.Shared.Motion;
+using ImperitWASM.Shared.Actions;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Load

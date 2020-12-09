@@ -1,6 +1,6 @@
 using ImperitWASM.Shared.State;
 
-namespace ImperitWASM.Shared.Motion
+namespace ImperitWASM.Shared.Actions
 {
 	public record Loan(int Debt, Settings Settings) : IPlayerAction
 	{

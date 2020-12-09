@@ -1,6 +1,5 @@
 using ImperitWASM.Server.Load;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.State;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

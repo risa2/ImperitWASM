@@ -1,6 +1,6 @@
 using ImperitWASM.Shared.State;
 
-namespace ImperitWASM.Shared.Motion.Commands
+namespace ImperitWASM.Shared.Commands
 {
 	public record Recruit(Player Player, Province Province, Soldiers Soldiers) : ICommand
 	{
@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.Motion.Commands
 		}
 		public Province Perform(Province province)
 		{
-			return province == Province ? province.Add(new Manoeuvre(Player, Soldiers)) : province;
+			return province == Province ? province.Add(new Actions.Manoeuvre(Player, Soldiers)) : province;
 		}
 		public bool Allowed(PlayersAndProvinces pap)
 		{

@@ -1,6 +1,6 @@
 using ImperitWASM.Shared.State;
 
-namespace ImperitWASM.Shared.Motion.Commands
+namespace ImperitWASM.Shared.Commands
 {
 	public record Borrow(Player Player, int Amount, Settings Settings) : ICommand
 	{

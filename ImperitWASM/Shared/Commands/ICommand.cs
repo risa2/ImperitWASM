@@ -1,6 +1,6 @@
 ﻿using ImperitWASM.Shared.State;
 
-namespace ImperitWASM.Shared.Motion
+namespace ImperitWASM.Shared.Commands
 {
 	public interface ICommand
 	{

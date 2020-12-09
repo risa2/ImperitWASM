@@ -81,8 +81,8 @@ namespace ImperitWASM.Shared.State
 						break;
 				}
 			}
-			static byte clamp(int i) => (byte)Math.Clamp(i, 0, 255);
-			return new Color(clamp((int)(R * 255.0)), clamp((int)(G * 255.0)), clamp((int)(B * 255.0)));
+			static byte clamp(double i) => (byte)Math.Clamp((int)i, 0, 255);
+			return new Color(clamp(R * 255), clamp(G * 255), clamp(B * 255));
 		}
 		public static Color Generate(int i, double h_0, double s, double v) => HSV(h_0 + (137.507764050037854 * i), s, v);
 	}

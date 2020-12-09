@@ -45,17 +45,17 @@
 	{
 		<p>Přesun není možný</p>
 	}
-	@if (Info is Data.MoveInfo)
+	@if (Info?.Soldiers is { IsDefault: false })
 	{
 		<EditForm Model="@model" OnValidSubmit="DoMove">
 			<DataAnnotationsValidator /><ValidationSummary />
 			<p>Začátek: @(Info.FromName) @Info.FromSoldiers</p>
 			<p>Cíl: @(Info.ToName) @Info.ToSoldiers</p>
 			<table>
-				@foreach (var (i, type) in Info.Soldiers.Try().Index())
+				@foreach (var (i, type) in Info.Soldiers.Index())
 				{
 					<tr>
-						<td>@type.Name<sup @onclick="() => infobox?.Open(type)">?</sup></td>
+						<td @onclick="() => infobox?.Open(type)">@type.Name<sup>?</sup></td>
 						<td><InputNumber @bind-Value="model.Soldiers[i].Value"/></td>
 					</tr>
 				}

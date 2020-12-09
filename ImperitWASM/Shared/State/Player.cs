@@ -7,7 +7,7 @@ namespace ImperitWASM.Shared.State
 {
 	public abstract record Player(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions, Settings Settings)
 	{
-		protected static readonly ImmutableList<IPlayerAction> DefaultActions = ImmutableList.Create<IPlayerAction>(new Default(), new Instability());
+		protected static readonly ImmutableList<IPlayerAction> DefaultActions = ImmutableList.Create<IPlayerAction>(new EndTurn(), new Instability());
 		public Description Description => new Description(Name, ImmutableArray<string>.Empty);
 		public Player ChangeMoney(int amount) => this with { Money =  amount + Money };
 		protected Player WithActions(ImmutableList<IPlayerAction> new_actions) => this with { Actions = new_actions };
@@ -44,7 +44,7 @@ namespace ImperitWASM.Shared.State
 		}
 		public bool IsLivingHuman => this is Human && Alive;
 		public int Debt => Actions.OfType<Loan>().Sum(a => a.Debt);
-		public PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(p => p is Land), Money, provinces.Sum(p => p.Power), provinces.Count(p => p is Land l && l.IsFinal));
+		public PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(p => p is Land), Money - Debt, provinces.Sum(p => p.Power), provinces.Count(p => p is Land l && l.IsFinal));
 		public virtual bool Equals(Player? obj) => obj is not null && Name == obj.Name;
 		public override int GetHashCode() => Name.GetHashCode();
 	}

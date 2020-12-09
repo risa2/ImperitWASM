@@ -2,7 +2,7 @@ using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Shared.Motion
 {
-	public record Default : IPlayerAction
+	public record EndTurn : IPlayerAction
 	{
 		public (Player, IPlayerAction) Perform(Player player, PlayersAndProvinces pap)
 		{
@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.Motion
 		}
 		public (Province, IPlayerAction?) Perform(Province province, Player active, PlayersAndProvinces pap)
 		{
-			return ((province is Sea Sea && Sea.Occupied && !Sea.HasSoldiers) || !province.CanSoldiersSurvive ? province.Revolt() : province, this);
+			return (province.IsAllyOf(active) && province is { CanSoldiersSurvive: false } or Sea { Occupied: true, HasSoldiers: false } or Land { WillRevolt: true } ? province.Revolt() : province, this);
 		}
 	}
 }

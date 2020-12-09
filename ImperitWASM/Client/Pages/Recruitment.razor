@@ -16,12 +16,11 @@
 		Info = await http.PostAsync<Data.RecruitData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.RecruitData(Land, Session.P, Session.G));
 		model.Soldiers = Data.Int.Create(Info.R.Length);
 	}
-	async Task JustRecruit()
+	async Task DoRecruit()
 	{
 		await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.P, Session.Key, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
 		Switch(Mode.Map);
 	}
-	Task DoRecruit() => Missing <= 0 ? JustRecruit() : Task.Run(() => { });
 }
 <nav>
 	<a @onclick="() => Switch(Mode.Map)">Zrušit</a>
@@ -32,38 +31,36 @@
 	<SoldierTypeInfobox @ref="infobox" />
 	<EditForm Model="model" OnValidSubmit="DoRecruit">
 		<DataAnnotationsValidator /><ValidationSummary />
-		@if (!string.IsNullOrWhiteSpace(Info.S))
+		@if (Info?.R is { IsDefault: false })
 		{
-			<p>@Info.N má @Info.S</p>
-		}
-		else
-		{
-			<p>@Info.N nemá žádné vojáky</p>
-		}
-		<table>
-			@foreach (var (i, (type, price)) in Info.R.Try().Index())
+			@if (Info.S is { Length: > 0 })
 			{
-				<tr>
-					<td>@type.Name @price@Sym.Money<sup @onclick="() => infobox?.Open(type)">?</sup></td>
-					<td><InputNumber @bind-Value="model.Soldiers[i].Value" autofocus /></td>
-				</tr>
+				<p>@Info.N má @Info.S</p>
 			}
-			<tr>
-				<td>
+			else
+			{
+				<p>@Info.N nemá žádné vojáky</p>
+			}
+			<table>
+				@foreach (var (i, (type, price)) in Info.R.Index())
+				{
+					<tr>
+						<td @onclick="() => infobox?.Open(type)">@type.Name @price@Sym.Money<sup>?</sup></td>
+						<td><InputNumber @bind-Value="model.Soldiers[i].Value" /></td>
+					</tr>
+				}
+				<tr>
 					@if (Missing > 0)
 					{
-						<text>Chybí ti @Missing@Sym.Money</text>
+						<td>Chybí ti @Missing@Sym.Money</td>
+						<td><button type="submit">Půjčit si a verbovat</button></td>
 					}
-				</td>
-				@if (Missing > 0)
-				{
-					<td><button @onclick="JustRecruit">Půjčit si a verbovat</button></td>
-				}
-				else
-				{
-					<td><button type="submit">Verbovat</button></td>
-				}
-			</tr>
-		</table>
+					else
+					{
+						<td></td><td><button type="submit">Verbovat</button></td>
+					}
+				</tr>
+			</table>
+		}
 	</EditForm>
 </main>

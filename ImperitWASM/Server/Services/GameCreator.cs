@@ -41,11 +41,7 @@ namespace ImperitWASM.Server.Services
 		{
 			foreach (var g in game.ShouldStart)
 			{
-				Console.WriteLine("Starting " + g.Id);
-				var p_p = pap[g.Id].AddRobots(settings, pap.ObsfuscateName);
-				Console.WriteLine("Saving " + g.Id);
-				pap[g.Id] = p_p;
-				Console.WriteLine("Adding history for " + g.Id);
+				var p_p = pap[g.Id] = pap[g.Id].AddRobots(settings, pap.ObsfuscateName);
 				powers.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p);
 			}
 			return ctx.SaveAsync();

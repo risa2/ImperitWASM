@@ -6,20 +6,24 @@
 	[Parameter] public Action<Mode> Switch { get; set; } = (x => { });
 	[Parameter] public int Land { get; set; }
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	Data.RecruitModel model = new Data.RecruitModel();
+	Data.SoldierList model = new Data.SoldierList();
 	Data.RecruitInfo Info = new Data.RecruitInfo("", "", ImmutableArray<Data.SoldiersItem>.Empty, 0, new Ratio());
 	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
 	int Missing => Price - Info.M;
 	SoldierTypeInfobox? infobox;
+	bool Borrow = false;
 	protected override async Task OnInitializedAsync()
 	{
 		Info = await http.PostAsync<Data.RecruitData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.RecruitData(Land, Session.P, Session.G));
-		model.Soldiers = Data.Int.Create(Info.R.Length);
+		model = new Data.SoldierList(Info.R.Length);
 	}
 	async Task DoRecruit()
 	{
-		await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.P, Session.Key, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
-		Switch(Mode.Map);
+		if (Borrow || Missing <= 0)
+		{
+			await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.P, Session.Key, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
+			Switch(Mode.Map);
+		}
 	}
 }
 <nav>
@@ -52,11 +56,13 @@
 				<tr>
 					@if (Missing > 0)
 					{
+						Borrow = true;
 						<td>Chybí ti @Missing@Sym.Money</td>
 						<td><button type="submit">Půjčit si a verbovat</button></td>
 					}
 					else
 					{
+						Borrow = false;
 						<td></td><td><button type="submit">Verbovat</button></td>
 					}
 				</tr>

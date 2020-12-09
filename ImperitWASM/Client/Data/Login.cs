@@ -4,11 +4,7 @@ namespace ImperitWASM.Client.Data
 	{
 		public string N { get; set; } = "";
 		public string P { get; set; } = "";
-		public Login(string name, string password)
-		{
-			N = name;
-			P = password;
-		}
+		public Login(string name, string password) => (N, P) = (name, password);
 		public Login() { }
 	}
 }

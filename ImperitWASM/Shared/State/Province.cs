@@ -11,6 +11,8 @@ namespace ImperitWASM.Shared.State
 		public abstract ImmutableArray<string> Text { get; }
 		public ImmutableArray<Point> Border => Shape.Border;
 		public Point Center => Shape.Center;
+		public virtual bool ShouldRevolt(Player active) => !CanSoldiersSurvive;
+
 		public Province GiveUpTo(Player player, Soldiers soldiers) => this with { Player = player, Soldiers = soldiers };
 		public Province GiveUpTo(Player p) => GiveUpTo(p, new Soldiers());
 		public Province Revolt() => GiveUpTo(Settings.Savage, DefaultSoldiers);

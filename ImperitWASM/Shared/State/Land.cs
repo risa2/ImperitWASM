@@ -8,7 +8,6 @@ namespace ImperitWASM.Shared.State
 	{
 		public override ImmutableArray<string> Text => ImmutableArray.Create(Name + (IsFinal ? "\u2605" : "") + (HasPort ? "\u2693" : ""), Soldiers.ToString(), Earnings + "\uD83D\uDCB0");
 		public bool IsInhabitable => IsStart && !Occupied;
-		public bool WillRevolt => Instability.RandomBool;
 		public bool CanRevolt => Occupied && Instability.Any;
 		public virtual bool Equals(Land? other) => other is not null && other.Name == Name;
 		public override int GetHashCode() => base.GetHashCode();
@@ -17,5 +16,6 @@ namespace ImperitWASM.Shared.State
 		public override Color Fill => Player.Color.Over(Settings.LandColor);
 		public Ratio Instability => Settings.Instability(Soldiers, DefaultSoldiers);
 		public bool CanRecruit(SoldierType t) => ExtraTypes.Contains(t);
+		public override bool ShouldRevolt(Player active) => base.ShouldRevolt(active) || (IsAllyOf(active) && Instability.RandomBool);
 	}
 }

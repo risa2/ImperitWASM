@@ -81,12 +81,10 @@ namespace ImperitWASM.Shared.State
 		static bool CanAttackSuccesfully(Soldiers attackers, Soldiers defenders, int enemies_to) => CanConquer(attackers, defenders) && CanKeepConqueredProvince(attackers, defenders, enemies_to);
 		bool ShouldAttack(Soldiers attackers, Province to, int enemies) => !to.IsAllyOf(this) && CanAttackSuccesfully(attackers, to.Soldiers, enemies);
 
-		static Soldiers Units(int num) => new Soldiers(new Pedestrian(new Description("", ImmutableArray<string>.Empty), 1, 1, 1, 1), num);
-
 		IEnumerable<(int, Soldiers)> GetAttacks(PlayersAndProvinces pap, Province from)
 		{
 			int enemies = EnemiesPower(pap, from);
-			return pap.NeighborIndices(from).Select(to => (to, from.MaxAttackers(pap, pap.Province(to)).AttackedBy(Units(enemies - (pap.Province(to).IsEnemyOf(this) ? pap.Province(to).AttackPower : 0))))).Where(to => ShouldAttack(to.Item2, pap.Province(to.to), EnemiesPower(pap, pap.Province(to.to))));
+			return pap.NeighborIndices(from).Select(to => (to, from.MaxAttackers(pap, pap.Province(to)).AttackedBy(enemies - (pap.Province(to).IsEnemyOf(this) ? pap.Province(to).AttackPower : 0)))).Where(to => ShouldAttack(to.Item2, pap.Province(to.to), EnemiesPower(pap, pap.Province(to.to))));
 		}
 
 		PlayersAndProvinces Attacks(PlayersAndProvinces pap, ImmutableArray<int> my)
@@ -106,7 +104,7 @@ namespace ImperitWASM.Shared.State
 
 		Soldiers AttackersFrom(PlayersAndProvinces pap, IEnumerable<int> starts, int to)
 		{
-			return starts.Aggregate(new Soldiers(), (s, from) => s.Add(pap.Province(from).MaxAttackers(pap, pap.Province(to)).AttackedBy(Units(EnemiesPower(pap, pap.Province(from)) - pap.Province(to).Soldiers.AttackPower))));
+			return starts.Aggregate(new Soldiers(), (s, from) => s.Add(pap.Province(from).MaxAttackers(pap, pap.Province(to)).AttackedBy(EnemiesPower(pap, pap.Province(from)) - pap.Province(to).Soldiers.AttackPower)));
 		}
 
 		PlayersAndProvinces MultiAttacks(PlayersAndProvinces pap, ImmutableArray<int> my)
@@ -119,7 +117,7 @@ namespace ImperitWASM.Shared.State
 				{
 					foreach (int from in starts)
 					{
-						pap = Move(pap, from, to, pap.Province(from).MaxAttackers(pap, pap.Province(to)).AttackedBy(Units(EnemiesPower(pap, pap.Province(from)) - pap.Province(to).AttackPower)));
+						pap = Move(pap, from, to, pap.Province(from).MaxAttackers(pap, pap.Province(to)).AttackedBy(EnemiesPower(pap, pap.Province(from)) - pap.Province(to).AttackPower));
 					}
 				}
 			}

@@ -6,12 +6,12 @@
 	[Parameter] public int From { get; set; }
 	[Parameter] public int To { get; set; }
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	Data.MoveModel model = new Data.MoveModel();
+	Data.SoldierList model = new Data.SoldierList();
 	Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
 		Info = await http.PostAsync<Data.MoveData, Data.MoveInfo>("api/Command/MoveInfo", new Data.MoveData(From, To, Session.G));
-		model.Soldiers = Data.Int.Create(Info.Soldiers.Length);
+		model = new Data.SoldierList(Info.Soldiers.Length);
 		if (!Info.Possible)
 		{
 			Return();

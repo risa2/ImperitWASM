@@ -10,5 +10,6 @@ namespace ImperitWASM.Shared.State
 		public virtual bool Equals(Sea? other) => other is not null && other.Name == Name;
 		public override int GetHashCode() => base.GetHashCode();
 		public override Color Fill => Player.Color.Mix(Settings.SeaColor);
+		public override bool ShouldRevolt(Player active) => base.ShouldRevolt(active) || (Occupied && !HasSoldiers);
 	}
 }

@@ -67,7 +67,7 @@ namespace ImperitWASM.Server.Services
 			return ctx.Players.Select(p => p.Name).Where(name => name.StartsWith(original)).ToList().Select(name => name[original.Length..]).Where(suf => suf.All(c => c is >= '0' and <= '9')).DefaultIfEmpty("").Max(n => n ?? "") switch
 			{
 				{ Length: > 0} suf when suf[^1] >= '0' && suf[^1] < (char)('9' - repetition) => original + suf[..^1] + (char)(suf[^1] + 1 + repetition),
-				var suf => original + suf + "1"
+				var suf => original + suf + (repetition + 1)
 			};
 		}
 	}

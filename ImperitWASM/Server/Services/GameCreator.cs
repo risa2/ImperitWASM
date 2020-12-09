@@ -2,8 +2,6 @@ using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
-using ImperitWASM.Shared;
-using ImperitWASM.Shared.Motion;
 using ImperitWASM.Shared.State;
 
 namespace ImperitWASM.Server.Services
@@ -43,7 +41,11 @@ namespace ImperitWASM.Server.Services
 		{
 			foreach (var g in game.ShouldStart)
 			{
-				var p_p = pap[g.Id] = pap[g.Id].AddRobots(settings, pap.ObsfuscateName);
+				Console.WriteLine("Starting " + g.Id);
+				var p_p = pap[g.Id].AddRobots(settings, pap.ObsfuscateName);
+				Console.WriteLine("Saving " + g.Id);
+				pap[g.Id] = p_p;
+				Console.WriteLine("Adding history for " + g.Id);
 				powers.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p);
 			}
 			return ctx.SaveAsync();

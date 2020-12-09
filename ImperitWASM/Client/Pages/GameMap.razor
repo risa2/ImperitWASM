@@ -11,13 +11,13 @@
 	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
 	[Parameter] public List<Data.ProvinceAppearance>? Provinces { get; set; }
 	[Parameter] public Action<ImmutableArray<Data.ProvinceUpdate>>? UpdateProvinces { get; set; }
+	int PowersCount = 0, PlayerMoney = 0;
 	async Task<int?> OnClick(int clicked, int? from)
 	{
 		var r = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.P, from, clicked, Session.G));
 		Switch(r.View, r.From, r.To);
 		return r.Select;
 	}
-	int PowersCount = 0, PlayerMoney = 0;
 	public async Task Update()
 	{
 		PowersCount = await http.PostAsync<int, int>("api/Powers/Count", Session.G);

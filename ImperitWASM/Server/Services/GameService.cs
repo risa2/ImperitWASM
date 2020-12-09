@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,7 +15,7 @@ namespace ImperitWASM.Server.Services
 		void Finish(int gameId);
 		void RemoveOld(TimeSpan period);
 		bool Started(int gameId);
-		List<Game> ShouldStart { get; }
+		ImmutableArray<Game> ShouldStart { get; }
 		ImmutableArray<int> StartedGames { get; }
 		ImmutableArray<int> FinishedGames { get; }
 		int? RegistrableGame { get; }
@@ -39,7 +38,7 @@ namespace ImperitWASM.Server.Services
 		public Game? FindNoTracking(int gameId) => ctx.Games.AsNoTracking().SingleOrDefault(game => game.Id == gameId);
 		public void Finish(int gameId) => ctx.Games.UpdateAt(gameId, g => g.Finish());
 		public bool Started(int gameId) => ctx.Games.Find(gameId).Started;
-		public List<Game> ShouldStart => ctx.Games.Include(g => g.EntityPlayers).Where(TimeElapsed(Game.State.Countdown, DateTime.UtcNow - settings.CountdownTime)).ToList();
+		public ImmutableArray<Game> ShouldStart => ctx.Games.Where(TimeElapsed(Game.State.Countdown, DateTime.UtcNow - settings.CountdownTime)).ToImmutableArray();
 		public ImmutableArray<int> StartedGames => ctx.Games.Where(InState(Game.State.Started)).Select(g => g.Id).ToImmutableArray();
 		public ImmutableArray<int> FinishedGames => ctx.Games.Where(InState(Game.State.Finished)).Select(g => g.Id).ToImmutableArray();
 		public int? RegistrableGame => ctx.Games.FirstOrDefault(InState(Game.State.Countdown, Game.State.Created))?.Id;

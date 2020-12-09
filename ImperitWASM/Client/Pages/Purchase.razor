@@ -4,12 +4,12 @@
 	[Parameter] public Action Return { get; set; } = (() => { });
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	[Parameter] public int Land { get; set; }
+	Data.PurchaseInfo? Info = null;
 	async Task DoPurchase()
 	{
 		await http.PostAsync<Data.PurchaseCmd>("api/Command/Purchase", new Data.PurchaseCmd(Session.P, Session.Key, Land, Session.G));
 		Return();
 	}
-	Data.PurchaseInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
 		Info = await http.PostAsync<Data.PurchaseData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.PurchaseData(Session.P, Land, Session.G));

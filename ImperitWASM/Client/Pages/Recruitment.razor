@@ -8,20 +8,20 @@
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	Data.RecruitModel model = new Data.RecruitModel();
 	Data.RecruitInfo Info = new Data.RecruitInfo("", "", ImmutableArray<Data.SoldiersItem>.Empty, 0);
+	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
+	int Missing => Price - Info.M;
+	SoldierTypeInfobox? infobox;
 	protected override async Task OnInitializedAsync()
 	{
 		Info = await http.PostAsync<Data.RecruitData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.RecruitData(Land, Session.P, Session.G));
 		model.Soldiers = Data.Int.Create(Info.R.Length);
 	}
-	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
-	int Missing => Price - Info.M;
 	async Task JustRecruit()
 	{
 		await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.P, Session.Key, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
 		Switch(Mode.Map);
 	}
 	Task DoRecruit() => Missing <= 0 ? JustRecruit() : Task.Run(() => { });
-	SoldierTypeInfobox? infobox;
 }
 <nav>
 	<a @onclick="() => Switch(Mode.Map)">Zrušit</a>

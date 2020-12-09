@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ImperitWASM.Shared.State
 {
-	public record Settings(int CountdownSeconds, Ratio DefaultInstability, int DebtLimit, int DefaultMoney, int FinalLandsCount, Ratio Interest, Color LandColor, Color MountainsColor, int MountainsWidth, ImmutableArray<string> Names, ImmutableArray<ProvinceData> Provinces, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes)
+	public sealed record Settings(int CountdownSeconds, Ratio DefaultInstability, int DebtLimit, int DefaultMoney, int FinalLandsCount, Ratio Interest, Color LandColor, Color MountainsColor, int MountainsWidth, ImmutableArray<string> Names, ImmutableArray<ProvinceData> Provinces, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes)
 	{
 		public Savage Savage => new Savage(this);
 		public TimeSpan CountdownTime => TimeSpan.FromSeconds(CountdownSeconds);
@@ -44,5 +44,6 @@ namespace ImperitWASM.Shared.State
 			}
 			return false;
 		}
+		public sealed override string ToString() => string.Empty;
 	}
 }

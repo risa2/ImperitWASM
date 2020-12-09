@@ -6,8 +6,8 @@
 	[Parameter] public Func<int, int?, Task<int?>>? Select { get; set; }
 	[Parameter] public int FontSize { get; set; }
 	int? selected = null;
-	ImmutableArray<Point>? SelectedPoints => selected is int i ? Provinces?[i].B : null;
 	Country? country;
+	ImmutableArray<Point>? SelectedPoints => selected is int i ? Provinces?[i].B : null;
 	async Task ClickSelect(int? index)
 	{
 		selected = index is int i ? await Select!(i, selected) : null;

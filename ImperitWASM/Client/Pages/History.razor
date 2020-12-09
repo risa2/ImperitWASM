@@ -3,13 +3,10 @@
 @code {
 	[Parameter] public Func<Task>? ReturnAsync { get; set; }
 	ImmutableArray<int> Finished;
-	protected override async Task OnInitializedAsync()
-	{
-		Finished = await http.GetAsync<ImmutableArray<int>>("api/Game/Finished");
-	}
 	Data.Int model = new Data.Int();
 	ImmutableArray<Data.ColoredPlayer> Former;
 	ImmutableArray<PlayersPower> Powers;
+	protected override async Task OnInitializedAsync() => Finished = await http.GetAsync<ImmutableArray<int>>("api/Game/Finished");
 	async Task UpdateHistoryGraphs()
 	{
 		Former = await http.PostAsync<int, ImmutableArray<Data.ColoredPlayer>>("api/Player/Colored", Finished[model.Value]);

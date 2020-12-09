@@ -32,8 +32,8 @@ namespace ImperitWASM.Server.Controllers
 		static Switch ClickedResult(PlayersAndProvinces p_p, Click c) => c.From switch
 		{
 			int start => new Switch(null, start == c.Clicked ? View.Recruit : View.Move, start, c.Clicked),
-			null when p_p.Province(c.Clicked).IsAllyOf(p_p.Player(c.Player)) => new Switch(c.Clicked, View.Map, null, null),
-			null when p_p.Province(c.Clicked) is Land L1 && !L1.Occupied => new Switch(null, View.Purchase, c.Clicked, c.Clicked),
+			_ when p_p.Province(c.Clicked).IsAllyOf(p_p.Player(c.Player)) => new Switch(c.Clicked, View.Map, null, null),
+			_ when p_p.Province(c.Clicked) is Land L1 && !L1.Occupied => new Switch(null, View.Purchase, c.Clicked, c.Clicked),
 			_ => new Switch(null, View.Map, null, null)
 		};
 		[HttpPost("Clicked")]

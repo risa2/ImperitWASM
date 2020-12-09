@@ -81,7 +81,7 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("RecruitInfo")]
-		public RecruitInfo RecruitInfo([FromBody] RecruitData p) => pap.Province(p.G, p.W) is Province province ? new RecruitInfo(province.Name, province.Soldiers.ToString(), settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.P).Money) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0);
+		public RecruitInfo RecruitInfo([FromBody] RecruitData p) => pap.Province(p.G, p.W) is Province province ? new RecruitInfo(province.Name, province.Soldiers.ToString(), settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), pap.Player(p.G, p.P).Money, province is Land L ? L.Instability : new Ratio()) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0, new Ratio());
 		[HttpPost("Recruit")]
 		public async Task Recruit([FromBody] RecruitCmd r)
 		{

@@ -7,7 +7,7 @@
 	[Parameter] public int Land { get; set; }
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	Data.RecruitModel model = new Data.RecruitModel();
-	Data.RecruitInfo Info = new Data.RecruitInfo("", "", ImmutableArray<Data.SoldiersItem>.Empty, 0);
+	Data.RecruitInfo Info = new Data.RecruitInfo("", "", ImmutableArray<Data.SoldiersItem>.Empty, 0, new Ratio());
 	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
 	int Missing => Price - Info.M;
 	SoldierTypeInfobox? infobox;
@@ -35,11 +35,11 @@
 		{
 			@if (Info.S is { Length: > 0 })
 			{
-				<p>@Info.N má @Info.S</p>
+				<p>@Info.N má @Info.S @if (Info.I.Any) { <text>(nespokojenost @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
 			}
 			else
 			{
-				<p>@Info.N nemá žádné vojáky</p>
+				<p>@Info.N nemá žádné vojáky @if (Info.I.Any) { <text>(nespokojenost @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
 			}
 			<table>
 				@foreach (var (i, (type, price)) in Info.R.Index())

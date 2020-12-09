@@ -18,14 +18,13 @@ namespace ImperitWASM.Client.Data
 		public ProvinceAppearance UpdateText() => R || T.IsDefaultOrEmpty ? this : this with { T = T.RemoveAt(0) };
 		public ProvinceAppearance Update(Color f, ImmutableArray<string> t) => this with { F = f, T = t };
 	}
-	public record ProvinceInstability(string Name, Color C, Ratio I);
 	public record ProvinceUpdate(ImmutableArray<string> T, Color F);
 	public record PurchaseCmd(int P, string Key, int Land, int Game);
 	public record PurchaseData(int P, int L, int G);
 	public record PurchaseInfo(bool Possible, string Name, int Price, int Money);
 	public record RecruitCmd(int P, string Key, int Province, ImmutableArray<int> Counts, int Game);
 	public record RecruitData(int W, int P, int G);
-	public record RecruitInfo(string N, string S, ImmutableArray<SoldiersItem> R, int M);
+	public record RecruitInfo(string N, string S, ImmutableArray<SoldiersItem> R, int M, Ratio I);
 	public record RegisteredPlayer(string N, string P, int S, int G);
 	public enum RegistrationErrors { Ok, UsedName, NoName, InvalidStart, NoPassword }
 	public record SoldiersItem(Description D, int P);

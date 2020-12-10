@@ -27,6 +27,9 @@
 			<p><IntSelect @bind-Value="model.Value" Options="Finished" Name="g => g.ToString()"/></p>
 			<button type="submit">Zobrazit</button>
 		</EditForm>
+	}
+	@if (!Former.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty)
+	{
 		<PowerGraphs Players="Former" Powers="Powers"/>
 	}
 </main>

@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.State
 		protected static readonly ImmutableList<IPlayerAction> DefaultActions = ImmutableList.Create<IPlayerAction>(new EndTurn());
 		public Description Description => new Description(Name, ImmutableArray<string>.Empty);
 		public Player ChangeMoney(int amount) => this with { Money = amount + Money };
-		protected Player WithActions(ImmutableList<IPlayerAction> new_actions) => this with { Actions = new_actions };
+		Player WithActions(ImmutableList<IPlayerAction> new_actions) => this with { Actions = new_actions };
 		public Player Die() => this with { Money = 0, Alive = false, Actions = ImmutableList<IPlayerAction>.Empty };
 		public Player Add(params IPlayerAction[] actions) => WithActions(Actions.AddRange(actions));
 		public Player Replace<T>(Predicate<T> cond, T value, Func<T, T, T> interact) where T : IPlayerAction

@@ -42,15 +42,13 @@ namespace ImperitWASM.Server.Services
 		}
 		public async Task<bool> NextTurnAsync(int gameId)
 		{
-			var p_p = pap[gameId] = AllActions(pap[gameId], game.Find(gameId));
+			var g = game.Find(gameId);
+			var p_p = pap[gameId] = AllActions(pap[gameId], g);
+			bool finish = p_p.LivingHumans <= 0 || p_p.Winner(settings.FinalLandsCount) is not null;
 			powers.Add(gameId, p_p);
-			if (p_p.LivingHumans <= 0 || p_p.Winner(settings.FinalLandsCount) is Human)
-			{
-				await newGame.FinishAsync(gameId);
-				return true;
-			}
+			_ = finish ? g.Finish() : g;
 			await ctx.SaveAsync();
-			return false;
+			return finish;
 		}
 	}
 }

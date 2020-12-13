@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Services
 {
@@ -11,16 +12,14 @@ namespace ImperitWASM.Server.Services
 	public class EndOfTurn : IEndOfTurn
 	{
 		readonly IPlayersProvinces pap;
-		readonly IGameCreator newGame;
 		readonly IContextService ctx;
 		readonly IGameService game;
 		readonly IPowers powers;
 		readonly Settings settings;
-		public EndOfTurn(IPlayersProvinces pap, IPowers powers, IGameCreator newGame, Settings settings, IContextService ctx, IGameService game)
+		public EndOfTurn(IPlayersProvinces pap, IPowers powers, Settings settings, IContextService ctx, IGameService game)
 		{
 			this.pap = pap;
 			this.powers = powers;
-			this.newGame = newGame;
 			this.settings = settings;
 			this.ctx = ctx;
 			this.game = game;

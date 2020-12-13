@@ -1,4 +1,4 @@
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Commands
 {
@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.Commands
 		}
 		public Province Perform(Province province)
 		{
-			return province == Province ? province.Add(new Actions.Manoeuvre(Player, Soldiers)) : province;
+			return province == Province ? province.Add(new Manoeuvre(Player, Soldiers)) : province;
 		}
 		public bool Allowed(PlayersAndProvinces pap)
 		{

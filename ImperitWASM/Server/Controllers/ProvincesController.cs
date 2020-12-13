@@ -2,7 +2,7 @@
 using System.Linq;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperitWASM.Server.Controllers

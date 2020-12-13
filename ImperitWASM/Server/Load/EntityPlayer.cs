@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ImperitWASM.Shared.Actions;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Load
 {
@@ -24,8 +24,8 @@ namespace ImperitWASM.Server.Load
 		ImmutableList<IPlayerAction> GetActions(Settings settings) => EntityPlayerActions!.OrderBy(a => a.Type).Select(a => a.Convert(settings)).ToImmutableList();
 		public Player Convert(Settings settings) => Type switch
 		{
-			Kind.Human => new Human(Shared.State.Color.Parse(Color), Name, Money, Alive, GetActions(settings), settings, Shared.State.Password.Parse(Password)),
-			Kind.Robot => new Robot(Shared.State.Color.Parse(Color), Name, Money, Alive, GetActions(settings), settings),
+			Kind.Human => new Human(Shared.Config.Color.Parse(Color), Name, Money, Alive, GetActions(settings), settings, Shared.Data.Password.Parse(Password)),
+			Kind.Robot => new Robot(Shared.Config.Color.Parse(Color), Name, Money, Alive, GetActions(settings), settings),
 			_ => settings.Savage,
 		};
 		public static EntityPlayer From(Player p, int index) => p switch

@@ -127,7 +127,7 @@ Framework ASP.NET Core je využíván na straně serveru ke zpracovávání HTTP
 \subsection{Blazor WebAssembly}
 Blazor WebAssembly je framework, který umožňuje vyvíjet v jazyce C\# aplikace spustitelné v prohlížeči. Kód v jazyce C\# se přeloží do binárního formátu WebAssembly a prohlížeč pomocí krátkého kódu v JavaScriptu výsledný soubor stáhne a spustí. Spuštěný program následně reaguje na akce uživatele, komunikuje se serverem pomocí HTTP a podle potřeby překresluje zobrazovanou webovou stránku.
 
-\section{Architektura}
+\section{Struktura}
 Program se skládá ze tří projektů: Server, Client a Shared. Projekt Shared obsahuje třídy, které druhé dva projekty využívají, a nachází se v něm většina herní logiky. Projekt Server obsahuje kód spouštěný na straně serveru. Projekt Client obsahuje kód překládaný do WebAssembly a spouštěný v prohlížeči klienta.
 
 \begin{tikzpicture}[node distance=2cm]

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Client.Data
 {

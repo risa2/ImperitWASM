@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Cvt
 {

@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using ImperitWASM.Shared;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Config;
 using Newtonsoft.Json;
 
 namespace ImperitWASM.Server.Services

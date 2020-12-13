@@ -1,0 +1,18 @@
+﻿using System.Collections.Immutable;
+using ImperitWASM.Shared.Data;
+
+namespace ImperitWASM.Shared.Config
+{
+	[Newtonsoft.Json.JsonConverter(typeof(Cvt.NewtonsoftSoldierType))]
+	public abstract record SoldierType(Description Description, int AttackPower, int DefensePower, int Weight, int Price)
+	{
+		public string Name => Description.Name;
+		public string Symbol => Description.Symbol;
+		public ImmutableArray<string> Text => Description.Text;
+		public int Power => AttackPower + DefensePower;
+		public abstract bool IsRecruitable(Province province);
+		public abstract int CanSustain(Province province);
+		public abstract int CanMove(PlayersAndProvinces pap, Province from, Province to);
+		public bool CanMoveAlone(PlayersAndProvinces pap, Province from, Province to) => CanMove(pap, from, to) >= Weight;
+	}
+}

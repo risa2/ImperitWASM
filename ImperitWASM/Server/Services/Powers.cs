@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Services
 {

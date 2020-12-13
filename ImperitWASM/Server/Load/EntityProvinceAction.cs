@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ImperitWASM.Shared.Actions;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Load
 {

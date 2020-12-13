@@ -2,7 +2,8 @@ using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Data;
+using ImperitWASM.Shared.Config;
 
 namespace ImperitWASM.Server.Services
 {

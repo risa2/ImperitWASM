@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Load
 {

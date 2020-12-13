@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using ImperitWASM.Server.Load;
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Config;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperitWASM.Server.Services

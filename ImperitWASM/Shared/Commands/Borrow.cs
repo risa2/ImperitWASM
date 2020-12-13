@@ -1,4 +1,5 @@
-using ImperitWASM.Shared.State;
+using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Commands
 {

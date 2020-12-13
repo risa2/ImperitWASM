@@ -2,7 +2,7 @@
 using ImperitWASM.Shared.Data;
 using Newtonsoft.Json;
 
-namespace ImperitWASM.Shared.Cvt
+namespace ImperitWASM.Shared.Conversion
 {
 	public class NewtonsoftRatio : JsonConverter<Ratio>
 	{

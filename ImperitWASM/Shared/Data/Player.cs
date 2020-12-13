@@ -17,6 +17,7 @@ namespace ImperitWASM.Shared.Data
 		{
 			return WithActions(Actions.Replace(cond, interact, value));
 		}
+		public int MaxBorrowable => Settings.Discount(Settings.DebtLimit - Debt);
 		public Player Borrow(int amount)
 		{
 			return ChangeMoney(amount).Replace(a => true, new Loan(amount, Settings), (x, y) => new Loan(x.Debt + y.Debt, Settings));

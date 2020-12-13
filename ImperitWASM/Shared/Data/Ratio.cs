@@ -3,8 +3,8 @@ using System.Globalization;
 
 namespace ImperitWASM.Shared.Data
 {
-	[Newtonsoft.Json.JsonConverter(typeof(Cvt.NewtonsoftRatio))]
-	[System.Text.Json.Serialization.JsonConverter(typeof(Cvt.SystemRatio))]
+	[Newtonsoft.Json.JsonConverter(typeof(Conversion.NewtonsoftRatio))]
+	[System.Text.Json.Serialization.JsonConverter(typeof(Conversion.SystemRatio))]
 	public readonly struct Ratio : IEquatable<Ratio>, IComparable<Ratio>
 	{
 		static readonly Random rng = new Random();
@@ -35,7 +35,7 @@ namespace ImperitWASM.Shared.Data
 		public static bool operator !=(Ratio x, Ratio y) => x.value != y.value;
 		public override bool Equals(object? obj) => obj is Ratio p && Equals(p);
 		public override int GetHashCode() => value.GetHashCode();
-		public long ToUnits(long max) => value * max / int.MaxValue;
+		public long ToUnits(long max = int.MaxValue) => value * max / int.MaxValue;
 		public int ToInt() => value;
 		public string ToString(string fmt, long units, long units2)
 		{

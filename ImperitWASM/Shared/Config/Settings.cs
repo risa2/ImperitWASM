@@ -16,6 +16,9 @@ namespace ImperitWASM.Shared.Config
 		public int StartMoney(int province) => DefaultMoney - (Provinces[province].Earnings!.Value * 2);
 		public static Color ColorOf(int i) => Color.Generate(i, 120.0, 1.0, 1.0);
 
+		public int CalculateDebt(int amount) => amount + amount * Interest;
+		public int Discount(int amount) => (int)(amount * int.MaxValue / (int.MaxValue + Interest.ToUnits()));
+
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
 		public Provinces GetProvinces() => new Provinces(Provinces.Select(p => p.Build(this, Savage)).ToImmutableArray(), this);
 		public string GetName(int i, Func<string, int, string> obf) => obf(Names[i % Names.Length], i / Names.Length);

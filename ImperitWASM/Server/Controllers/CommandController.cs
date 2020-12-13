@@ -75,7 +75,7 @@ namespace ImperitWASM.Server.Controllers
 				{
 					if (Land.Price > Player.Money)
 					{
-						(p_p, _) = p_p.Add(new Borrow(Player, Land.Price - Player.Money, settings));
+						(p_p, _) = p_p.Add(new Borrow(Player, Land.Price - Player.Money));
 					}
 					(pap[purchase.Game], _) = p_p.Add(new Buy(Player, Land, Land.Price));
 				}
@@ -92,7 +92,7 @@ namespace ImperitWASM.Server.Controllers
 				var p_p = pap[r.Game];
 				if (soldiers.Price > p_p.Player(r.P).Money)
 				{
-					(p_p, _) = p_p.Add(new Borrow(p_p.Player(r.P), soldiers.Price - p_p.Player(r.P).Money, settings));
+					(p_p, _) = p_p.Add(new Borrow(p_p.Player(r.P), soldiers.Price - p_p.Player(r.P).Money));
 				}
 				(pap[r.Game], _) = p_p.Add(new Recruit(p_p.Player(r.P), p_p.Province(r.Province), soldiers));
 				await ctx.SaveAsync();

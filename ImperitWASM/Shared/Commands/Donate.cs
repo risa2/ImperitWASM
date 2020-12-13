@@ -7,7 +7,7 @@ namespace ImperitWASM.Shared.Commands
 		public bool Allowed(PlayersAndProvinces pap) => Player.Money >= Amount && Amount > 0;
 		public Player Perform(Player player, PlayersAndProvinces pap)
 		{
-			return player == Player ? player.ChangeMoney(-Amount) : player == Recipient ? player.ChangeMoney(Amount) : player;
+			return player.ChangeMoney(player == Player ? -Amount : player == Recipient ? Amount : 0);
 		}
 	}
 }

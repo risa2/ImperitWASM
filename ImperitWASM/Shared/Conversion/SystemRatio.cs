@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImperitWASM.Shared.Data;
 
-namespace ImperitWASM.Shared.Cvt
+namespace ImperitWASM.Shared.Conversion
 {
 	public class SystemRatio : JsonConverter<Ratio>
 	{

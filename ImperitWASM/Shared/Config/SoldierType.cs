@@ -3,7 +3,7 @@ using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Config
 {
-	[Newtonsoft.Json.JsonConverter(typeof(Cvt.NewtonsoftSoldierType))]
+	[Newtonsoft.Json.JsonConverter(typeof(Conversion.NewtonsoftSoldierType))]
 	public abstract record SoldierType(Description Description, int AttackPower, int DefensePower, int Weight, int Price)
 	{
 		public string Name => Description.Name;

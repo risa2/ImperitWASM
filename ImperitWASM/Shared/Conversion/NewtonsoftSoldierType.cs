@@ -3,7 +3,7 @@ using ImperitWASM.Shared.Config;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ImperitWASM.Shared.Cvt
+namespace ImperitWASM.Shared.Conversion
 {
 	public class NewtonsoftSoldierType : JsonConverter<SoldierType>
 	{

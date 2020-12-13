@@ -6,7 +6,7 @@ namespace ImperitWASM.Shared.Data
 	{
 		public (Player, IPlayerAction?) Perform(Player player, PlayersAndProvinces pap)
 		{
-			int next_debt = Debt + Debt * Settings.Interest;
+			int next_debt = Settings.CalculateDebt(Debt);
 			return next_debt <= player.Money
 				? (player.ChangeMoney(-next_debt), null)
 				: (player.ChangeMoney(-player.Money), new Loan(next_debt - player.Money, Settings));

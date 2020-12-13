@@ -11,11 +11,13 @@
 \usepackage{tikz}
 
 \usetikzlibrary{shapes.geometric, arrows}
-\tikzstyle{block} = [rectangle, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!20]
+\tikzstyle{block} = [rectangle, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=gray!25]
 \tikzstyle{arrow} = [thick,->,>=stealth]
 \addbibresource{ZMP.bib}
 
 \def\max #1{\textrm{max}\left\{#1\right\}}
+\def\CS{C\texttt{\#}}
+\renewcommand{\labelitemii}{$\circ$}
 \makeatletter
 \newcount\my@repeat@count
 \newcommand{\repeatchar}[2]{%
@@ -85,19 +87,19 @@ Tímto bych chtěl poděkovat Mgr. Marku Blahovi za odborné vedení práce.
 \thispagestyle{empty}
 \Large\textbf{Anotace}\normalsize
 
-Práce se zabývá vytvořením internetové počítačové hry zvané Imperit pomocí Blazor WebAssembly z frameworku .NET. Hra je koncipovaná jako tahová strategie, jejímž tématem je dobývání území na herním plánu.
+Práce se zabývá vytvořením internetové počítačové hry zvané Imperit pomocí Blazor WebAssembly z frameworku .NET. Hra je koncipovaná jako tahová strategie, jejímž tématem je dobývání území na herním plánu, s právě jedním vítězem a omezeným náhodným prvkem.
 
 \Large\textbf{Klíčová slova}\normalsize
 
-počítačová hra;tahová strategie;blazor;webassembly;dotnet
+počítačová hra;tahová strategie;blazor;webassembly;dotnet;hra s nulovým součtem;územní expanze
 
 \Large\textbf{Annotation}\normalsize
 
-The thesis is concerned about creation of online browser-based game called Imperit using Blazor WebAssembly from the .NET framework. The game is designed as a turn-based strategy consisting of conquering the territory on the game map.
+The thesis is concerned about creation of online browser-based game called Imperit using Blazor WebAssembly from the .NET framework. The game is designed as a turn-based strategy consisting of conquering the territory on the game map, having exactly one winner and having a limited element of chance.
 
 \Large\textbf{Keywords}\normalsize
 
-computer game;turn-based strategy;blazor;webassembly;dotnet
+computer game;turn-based strategy;blazor;webassembly;dotnet;zero-sum game;territorial expansion
 \newpage
 \thispagestyle{empty}
 \tableofcontents
@@ -111,7 +113,7 @@ Pro vytvoření hry jsem zvolil formát tahové strategie, neboť strategie v re
 \subsection{Provincie}
 Hra se odehrává na plánu, který se skládá z provincií (země, moře a pohoří), jejichž názvy a tvary jsou zvolené podle evropských zemí a moří nebo jejich části. Provincie obsahují vojenské jednotky a jsou ovládány nejvýše jedním hráčem, který v nich může verbovat jednotky. Země se mohou odtrhnout a pravděpodobnost, že se tak v daném kole stane je $P=\max{\displaystyle\frac{P_0\cdot (S_0-S)}{S_0},0}$, kde $P_0$ je výchozí pravděpodobnost odtržení (příbližně 10 \%), $S$ je obranná síla jednotek přítomných v zemi a $S_0$ je obranná síla výchozích jednotek, jež byly v zemi na začátku hry. Provincie je dobyta, je-li napadena vojskem, jehož útočná síla je vyšší, než je obranná síla jednotek v provincii. Přístavy jsou druhem zemí, které umožňují přesun na moře a z moře.
 \subsection{Hráči}
-Hráčů může být $2-16$. Při registraci si zvolí zemi, v níž budou začínat, a na začátku hry dostanou určité množství peněz. Dále získají v každém kole určité množství peněz za každou zemi, kterou ovládají, přičemž toto množství se u různých zemí liší. Za peníze si mohou kupovat země a verbovat ve svých provinciích vojenské jednotky.
+Hráčů může být $2$--$16$. Při registraci si zvolí zemi, v níž budou začínat, a na začátku hry dostanou určité množství peněz. Dále získají v každém kole určité množství peněz za každou zemi, kterou ovládají, přičemž toto množství se u různých zemí liší. Za peníze si mohou kupovat země a verbovat ve svých provinciích vojenské jednotky.
 \subsection{Vojenské jednotky}
 Vojenské jednotky slouží k dobývání provincií. Každá jednotka má určitou cenu, sílu v obraně, sílu v útoku a hmotnost, jež je relevantní v případě, že jednotka nemůže provést určitý přesun samotná a potřebuje například loď k přesunu přes moře. Jednotky schopné přenášet jiné (např. loď, slon) mají též nosnost, jež udává, jaká může být celková hmotnost jednotek, které se s ní přepravují.
 \subsection{Průběh hry}
@@ -120,19 +122,19 @@ Hra probíhá po kolech, během nichž mají všichni hráči postupně svůj ta
 Cílem hry je ovládnout čtyři z pěti cílových provincií, které jsou viditelně označené a jsou rozprostřeny po všech okrajích mapy, takže k dobytí všech je nutné ovládnout podstatnou část mapy, ačkoli hráč může při vhodné strategii vyhrát, aniž by měl největší území.
 
 \section{Použité technologie}
-\subsection{C\#}
-Celý program je napsaný v jazyce C\#, neboť tento jazyk může běžet na straně serveru (viz ASP.NET Core) i klienta (viz Blazor WebAssembly) a obě části mohou využívat společné knihovny a pracovat s týmiž datovými typy. Navíc tento jazyk umožňuje využívat knihoven z frameworku .NET a na rozdíl od jazyků PHP a JavaScript, které se často pro vývoj webových aplikací používají, je staticky typovaný a kompilovaný do bytekódu, což do určité míry kontroluje správnost programu.
+\subsection{\CS{}}
+Celý program je napsaný v jazyce \CS{}, neboť tento jazyk může běžet na straně serveru (viz ASP.NET Core) i klienta (viz Blazor WebAssembly) a obě části mohou využívat společné knihovny a pracovat s týmiž datovými typy. Navíc tento jazyk umožňuje využívat knihoven z frameworku .NET a na rozdíl od jazyků PHP a JavaScript, které se často pro vývoj webových aplikací používají, je staticky typovaný a kompilovaný do bytekódu, což do určité míry kontroluje správnost programu.
 \subsection{ASP.NET Core}
 Framework ASP.NET Core je využíván na straně serveru ke zpracovávání HTTP dotazů a odesílání odpovědí.
 \subsection{Blazor WebAssembly}
-Blazor WebAssembly je framework, který umožňuje vyvíjet v jazyce C\# aplikace spustitelné v prohlížeči. Kód v jazyce C\# se přeloží do binárního formátu WebAssembly a prohlížeč pomocí krátkého kódu v JavaScriptu výsledný soubor stáhne a spustí. Spuštěný program následně reaguje na akce uživatele, komunikuje se serverem pomocí HTTP a podle potřeby překresluje zobrazovanou webovou stránku.
+Blazor WebAssembly je framework, který umožňuje vyvíjet v jazyce  \CS{} aplikace spustitelné v prohlížeči. Kód v jazyce  \CS{} se přeloží do binárního formátu WebAssembly a prohlížeč pomocí krátkého kódu v JavaScriptu výsledný soubor stáhne a spustí. Spuštěný program následně reaguje na akce uživatele, komunikuje se serverem pomocí HTTP a podle potřeby překresluje zobrazovanou webovou stránku.
 
 \section{Struktura}
 Program se skládá ze tří projektů:
 \begin{itemize}
-\item Shared -- Obsahuje třídy, které druhé dva projekty využívají, nachází se v něm většina herní logiky a odpovídá větší části modelu v architektuře MVC\cite{mvc}
-\item Client -- Obsahuje soubory v HTML, CSS a kód v C\#, překládaný do WebAssembly a spouštěný v prohlížeči klienta
-\item Server -- Obsahuje kód spouštěný na straně serveru a zahrnuje práci s databází a webové API, které odesílá odpovědi na dotazy klienta
+\item\textit{Shared} -- Obsahuje třídy, které druhé dva projekty využívají, nachází se v něm většina herní logiky a odpovídá větší části modelu v architektuře MVC\cite{mvc}
+\item\textit{Client} -- Odpovídá pohledu v architektuře MVC a obsahuje soubory v HTML, CSS a kód v  \CS{}, překládaný do WebAssembly a spouštěný v prohlížeči klienta
+\item\textit{Server} -- Zahrnuje kód spouštěný na straně serveru, což znamená zejména práci s databází a webové API, které odesílá odpovědi na dotazy klienta
 \end{itemize}
 \begin{tikzpicture}[node distance=2cm]
 \node (shared) [block] {Shared};
@@ -143,11 +145,21 @@ Program se skládá ze tří projektů:
 \draw [arrow] (server) -- (client);
 \end{tikzpicture}
 \subsection{Shared}
-Projekt obsahuje třídu \textit{ListExtension}, jež obsahuje pomocné funkce pro práci s kolekcemi, a dále čtyři složky (složky v mém programu odpovídají jmenným prostorům jazyka C\#):
+Projekt obsahuje třídu \textit{ListExtension}, jež obsahuje pomocné funkce pro práci s kolekcemi, a dále čtyři složky (složky v mém programu odpovídají jmenným prostorům jazyka  \CS{}):
 \begin{itemize}
 \item\textit{Commands} -- Činnosti, které se hráč rozhodne vykonat (verbování, přesun\ldots)
+\begin{itemize}
+\item\textit{ICommand} -- Rozhraní zahrnující dvě metody, jimiž příkaz změní hráče a provincie, a metodu pro ověření proveditelnosti
+\item\textit{Borrow} (půjčit si) -- Přidá hráči peníze a zároveň mu přidá akci \textit{Loan}, která zajistí úročení a splácení dluhu
+\item\textit{Buy} (koupit) -- Odečte hráči peníze a udělá z něj vládce nové provincie
+\item\textit{Donate} (věnovat) -- Přesune hráči peníze a přičte je jinému
+\item\textit{GiveUp} (vzdát se) -- Připraví hráče o zbývající provincie a ukončí jeho život
+\item\textit{Move} (přesunout) -- Odebere vojáky z počáteční provincie a do cílové provincie přidá akci \textit{Manoeuvre}
+\item\textit{NextTurn} (konec tahu) -- Na konci tahu ověří, zda hráči zůstaly nějaké provincie, a v opačném případě ukončí jeho život
+\item\textit{Recruit} (verbování) -- Odečte hráči peníze odpovídající ceně verbovaných vojáků a do zvolené provincie přidá akci \textit{Manoeuvre}
+\end{itemize}
 \item\textit{Config} -- Nastavení, jež je načteno při spuštění programu a předáváno všem hrám i hráčům
-\item\textit{Cvt} -- Třídy pro načítání nastavení z formátu JSON
+\item\textit{Conversion} -- Třídy pro převod nastavení načítaného z formátu JSON
 \item\textit{Data} -- Informace o jednotlivých hráčích a provinciích, ukládané do databáze
 \end{itemize}
 \subsection{Client}
@@ -155,11 +167,11 @@ Projekt obsahuje třídu \textit{ListExtension}, jež obsahuje pomocné funkce p
 \begin{itemize}
 \item\textit{wwwroot} -- Obsahuje ikonu stránky, CSS soubor a stránku index.html, již uživatel načte jako první a která následně pomocí Javascriptu stáhne a spustí program ve WebAssembly
 \item\textit{Data} -- Datové typy pro posílání dat mezi klientem a serverem nebo pro navázání na formuláře
-\item\textit{Pages} -- Stránky v HTML s kódem v C\#, který zajišťuje jejich aktualizaci a načítání dat z klienta
+\item\textit{Pages} -- Stránky v HTML s kódem v  \CS{}, který zajišťuje jejich aktualizaci a načítání dat z klienta
 \item\textit{Services} -- Třídy využívané kódem v \textit{Pages} pro komunikaci se serverem a načítání souborů cookies
 \end{itemize}
 \subsection{Server}
-Projekt obsahuje soubory pro spuštění programu (Startup.cs, Program.cs), konfiguraci serveru (appsettings.json), třídu \textit{DbExtensions}, jež obsahuje pomocné funkce pro práci s databází, a sedm složek:
+Projekt obsahuje soubory pro spuštění programu (\textit{Startup.cs}, \textit{Program.cs}), soubor konfigurace (\textit{appsettings.json}), třídu \textit{DbExtensions}, jež obsahuje pomocné funkce pro práci s databází, a sedm složek:
 \begin{itemize}
 \item\textit{Controllers} -- Kontrolery, vytvářející odpovědi na HTTP dotazy klienta a zpracovávající jeho požadavky
 \item\textit{Files} -- Soubory nastavení a SQLite databáze

@@ -53,13 +53,13 @@ namespace ImperitWASM.Shared.Data
 		public int LivingHumans => Players.Count(p => p.Alive && p is Human);
 		public PlayersPower PlayersPower(Func<Player, bool> which) => new PlayersPower(Players.Where(which).Select(p => p.Power(Provinces.ControlledBy(p).ToImmutableArray())).ToImmutableArray());
 		public IEnumerable<int> Inhabitable => Provinces.Indices(it => it is Land { IsInhabitable: true });
-		public PlayersAndProvinces AddRobots(Settings settings, Func<string, int, string> mod)
+		public PlayersAndProvinces AddRobots(Settings settings, IEnumerable<string> names)
 		{
 			var new_players = Players.ToBuilder();
 			var new_provinces = Provinces.ToBuilder();
-			foreach (int start in Inhabitable)
+			foreach (var (start, name) in Inhabitable.Zip(names))
 			{
-				new_players.Add(Robot.Create(Settings.ColorOf(new_players.Count), settings.GetName(new_players.Count - Players.Length, mod), settings.StartMoney(start), settings));
+				new_players.Add(Robot.Create(Settings.ColorOf(new_players.Count), name, settings.StartMoney(start), settings));
 				new_provinces[start] = new_provinces[start].GiveUpTo(new_players[^1], new_provinces[start].Soldiers);
 			}
 			return new PlayersAndProvinces(new_players.ToImmutable(), new Provinces(new_provinces.MoveToImmutable(), settings));

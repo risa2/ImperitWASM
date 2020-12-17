@@ -42,7 +42,7 @@ namespace ImperitWASM.Server.Services
 		{
 			foreach (var g in game.ShouldStart)
 			{
-				var p_p = pap[g.Id] = pap[g.Id].AddRobots(settings, pap.ObsfuscateName);
+				var p_p = pap[g.Id] = pap[g.Id].AddRobots(settings, settings.GetNames(pap.ObsfuscateName));
 				powers.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p);
 			}
 			return ctx.SaveAsync();

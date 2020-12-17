@@ -16,7 +16,7 @@ namespace ImperitWASM.Client.Data
 	public record PlayerInfo(int P, bool D, string Name, Color C, bool Alive, int Money, int Income, int Debt);
 	public record ProvinceAppearance(ImmutableArray<Point> B, Point C, Color F, Color S, int W, bool R, ImmutableArray<string> T)
 	{
-		public ProvinceAppearance UpdateText() => R || T.IsDefaultOrEmpty ? this : this with { T = T.RemoveAt(0) };
+		public ProvinceAppearance UpdateText() => R || T.IsDefaultOrEmpty ? this : this with { T = T.SetItem(0, "(" + T[0] + ")") };
 		public ProvinceAppearance Update(Color f, ImmutableArray<string> t) => this with { F = f, T = t };
 	}
 	public record ProvinceUpdate(ImmutableArray<string> T, Color F);

@@ -18,6 +18,7 @@
 \def\max #1{\textrm{max}\left\{#1\right\}}
 \def\CS{C\texttt{\#}}
 \renewcommand{\labelitemii}{$\circ$}
+\renewcommand{\labelitemiii}{$-$}
 \makeatletter
 \newcount\my@repeat@count
 \newcommand{\repeatchar}[2]{%
@@ -116,6 +117,8 @@ Hra se odehrává na plánu, který se skládá z provincií (země, moře a poh
 Hráčů může být $2$--$16$. Při registraci si zvolí zemi, v níž budou začínat, a na začátku hry dostanou určité množství peněz. Dále získají v každém kole určité množství peněz za každou zemi, kterou ovládají, přičemž toto množství se u různých zemí liší. Za peníze si mohou kupovat země a verbovat ve svých provinciích vojenské jednotky.
 \subsection{Vojenské jednotky}
 Vojenské jednotky slouží k dobývání provincií. Každá jednotka má určitou cenu, sílu v obraně, sílu v útoku a hmotnost, jež je relevantní v případě, že jednotka nemůže provést určitý přesun samotná a potřebuje například loď k přesunu přes moře. Jednotky schopné přenášet jiné (např. loď, slon) mají též nosnost, jež udává, jaká může být celková hmotnost jednotek, které se s ní přepravují.
+\subsection{Registrace}
+Při registraci si hráč zvolí jméno a heslo a dostane na výběr z několika provincii, v nichž může začínat.
 \subsection{Průběh hry}
 Hra probíhá po kolech, během nichž mají všichni hráči postupně svůj tah. Hráč není v rámci svého tahu neomezen časem ani počtem akcí, ale verbování a přesuny vojska se provedou až po ukončení tahu.
 \subsection{Cíl hry}
@@ -134,7 +137,7 @@ Program se skládá ze tří projektů:
 \begin{itemize}
 \item\textit{Shared} -- Obsahuje třídy, které druhé dva projekty využívají, nachází se v něm většina herní logiky a odpovídá větší části modelu v architektuře MVC\cite{mvc}
 \item\textit{Client} -- Odpovídá pohledu v architektuře MVC a obsahuje soubory v HTML, CSS a kód v  \CS{}, překládaný do WebAssembly a spouštěný v prohlížeči klienta
-\item\textit{Server} -- Zahrnuje kód spouštěný na straně serveru, což znamená zejména práci s databází a webové API, které odesílá odpovědi na dotazy klienta
+\item\textit{Server} -- Zahrnuje kód spouštěný na straně serveru, což znamená zejména práci s databází a webové API, které odesílá odpovědi na dotazy klienta; v architektuře MVC odpovídá kontroleru a části modelu
 \end{itemize}
 \begin{tikzpicture}[node distance=2cm]
 \node (shared) [block] {Shared};
@@ -144,43 +147,6 @@ Program se skládá ze tří projektů:
 \draw [arrow] (server) -- (shared);
 \draw [arrow] (server) -- (client);
 \end{tikzpicture}
-\subsection{Shared}
-Projekt obsahuje třídu \textit{ListExtension}, jež obsahuje pomocné funkce pro práci s kolekcemi, a dále čtyři složky (složky v mém programu odpovídají jmenným prostorům jazyka  \CS{}):
-\begin{itemize}
-\item\textit{Commands} -- Činnosti, které se hráč rozhodne vykonat (verbování, přesun\ldots)
-\begin{itemize}
-\item\textit{ICommand} -- Rozhraní zahrnující dvě metody, jimiž příkaz změní hráče a provincie, a metodu pro ověření proveditelnosti
-\item\textit{Borrow} (půjčit si) -- Přidá hráči peníze a zároveň mu přidá akci \textit{Loan}, která zajistí úročení a splácení dluhu
-\item\textit{Buy} (koupit) -- Odečte hráči peníze a udělá z něj vládce nové provincie
-\item\textit{Donate} (věnovat) -- Přesune hráči peníze a přičte je jinému
-\item\textit{GiveUp} (vzdát se) -- Připraví hráče o zbývající provincie a ukončí jeho život
-\item\textit{Move} (přesunout) -- Odebere vojáky z počáteční provincie a do cílové provincie přidá akci \textit{Manoeuvre}
-\item\textit{NextTurn} (konec tahu) -- Na konci tahu ověří, zda hráči zůstaly nějaké provincie, a v opačném případě ukončí jeho život
-\item\textit{Recruit} (verbování) -- Odečte hráči peníze odpovídající ceně verbovaných vojáků a do zvolené provincie přidá akci \textit{Manoeuvre}
-\end{itemize}
-\item\textit{Config} -- Nastavení, jež je načteno při spuštění programu a předáváno všem hrám i hráčům
-\item\textit{Conversion} -- Třídy pro převod nastavení načítaného z formátu JSON
-\item\textit{Data} -- Informace o jednotlivých hráčích a provinciích, ukládané do databáze
-\end{itemize}
-\subsection{Client}
-Projekt obsahuje třídu \textit{ListExtension}, jež obsahuje pomocné funkce pro práci s kolekcemi (jedná se o jiné funkce než ve stejnojmenné třídě v projektu Shared), několik souborů vyžadovaných frameworkem Blazor a čtyři složky:
-\begin{itemize}
-\item\textit{wwwroot} -- Obsahuje ikonu stránky, CSS soubor a stránku index.html, již uživatel načte jako první a která následně pomocí Javascriptu stáhne a spustí program ve WebAssembly
-\item\textit{Data} -- Datové typy pro posílání dat mezi klientem a serverem nebo pro navázání na formuláře
-\item\textit{Pages} -- Stránky v HTML s kódem v  \CS{}, který zajišťuje jejich aktualizaci a načítání dat z klienta
-\item\textit{Services} -- Třídy využívané kódem v \textit{Pages} pro komunikaci se serverem a načítání souborů cookies
-\end{itemize}
-\subsection{Server}
-Projekt obsahuje soubory pro spuštění programu (\textit{Startup.cs}, \textit{Program.cs}), soubor konfigurace (\textit{appsettings.json}), třídu \textit{DbExtensions}, jež obsahuje pomocné funkce pro práci s databází, a sedm složek:
-\begin{itemize}
-\item\textit{Controllers} -- Kontrolery, vytvářející odpovědi na HTTP dotazy klienta a zpracovávající jeho požadavky
-\item\textit{Files} -- Soubory nastavení a SQLite databáze
-\item\textit{Load} -- Třídy reprezentující objekty v databázi a třída \textit{Context} pro reprezentaci připojení k databázi
-\item\textit{Migrations} -- Kód zajišťující vytvoření struktury databáze
-\item\textit{Pages} -- Stránka navrácená jako odpověď v případě chyby na straně serveru
-\item\textit{Properties} -- Soubory pro konfiguraci serveru
-\item\textit{Services} -- Služby, zajišťující propojení mezi kontrolery a třídami ze složky \textit{Load}
-\end{itemize}
 \newpage
 \printbibliography[heading=bibintoc, title={Použitá literatura}]
 \end{document}

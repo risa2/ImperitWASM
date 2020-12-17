@@ -21,7 +21,9 @@ namespace ImperitWASM.Shared.Config
 
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
 		public Provinces GetProvinces() => new Provinces(Provinces.Select(p => p.Build(this, Savage)).ToImmutableArray(), this);
-		public string GetName(int i, Func<string, int, string> obf) => obf(Names[i % Names.Length], i / Names.Length);
+
+		string GetName(int i, Func<string, int, string> obf) => obf(Names[i % Names.Length], i / Names.Length);
+		public IEnumerable<string> GetNames(Func<string, int, string> obf) => Enumerable.Range(0, int.MaxValue).Select(i => GetName(i, obf));
 
 		public ImmutableArray<int> NeighborsOf(int vertex) => Provinces[vertex].Neighbors;
 		public int NeighborCount(int vertex) => NeighborsOf(vertex).Length;

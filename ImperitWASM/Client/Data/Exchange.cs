@@ -8,6 +8,7 @@ namespace ImperitWASM.Client.Data
 	public record ColoredPlayer(string N, Color C);
 	public record DonationCmd(int P, string Key, int Recipient, int Amount, int Game);
 	public record GameInfo(bool S = false, int P = 0);
+	public enum GameState { Created, Countdown, Started, Finished, Invalid = -1 }
 	public record MoveCmd(int P, string Key, int From, int To, ImmutableArray<int> Counts, int Game);
 	public record MoveData(int F, int T, int G);
 	public enum MoveErrors { Ok, FewSoldiers, LittleCapacity, NotPlaying, Else }

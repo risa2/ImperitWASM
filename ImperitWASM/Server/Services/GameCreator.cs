@@ -32,7 +32,7 @@ namespace ImperitWASM.Server.Services
 		}
 		public async Task<int> CreateAsync()
 		{
-			var g = pap.Add(new PlayersAndProvinces(ImmutableArray.Create<Player>(settings.Savage), settings.GetProvinces()));
+			var g = pap.Add(settings.GetPlayersAndProvinces());
 			game.RemoveOld(TimeSpan.FromDays(1));
 			await ctx.SaveAsync();
 			return g.Id;
@@ -55,8 +55,7 @@ namespace ImperitWASM.Server.Services
 		public Task RegisterAsync(Game game, string name, Password password, int land)
 		{
 			int count = pap.PlayersCount(game.Id);
-			var player = Human.Create(Settings.ColorOf(count - 1), name, settings.StartMoney(land), settings, password);
-			pap.Add(game.Id, player, count, land);
+			pap.Add(game.Id, settings.CreateHuman(count, name, land, password), count, land);
 			_ = count == 2 ? game.StartCountdown() : game;
 			return ctx.SaveAsync();
 		}

@@ -13,26 +13,26 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class GameController : ControllerBase
 	{
-		readonly IGameService game;
-		readonly IGameCreator newGame;
+		readonly IGameService gs;
+		readonly IGameCreator gameCreator;
 		readonly IPlayersProvinces pap;
-		readonly ISessionService login;
-		readonly IEndOfTurn end;
+		readonly ISessionService session;
+		readonly IEndOfTurn eot;
 		readonly IActive active;
-		public GameController(IGameService game, IGameCreator newGame, IPlayersProvinces pap, ISessionService login, IEndOfTurn end, IActive active)
+		public GameController(IGameService gs, IGameCreator gameCreator, IPlayersProvinces pap, ISessionService session, IEndOfTurn eot, IActive active)
 		{
-			this.game = game;
-			this.newGame = newGame;
+			this.gs = gs;
+			this.gameCreator = gameCreator;
 			this.pap = pap;
-			this.login = login;
-			this.end = end;
+			this.session = session;
+			this.eot = eot;
 			this.active = active;
 		}
 		[HttpPost("Info")]
-		public GameInfo Info([FromBody] int gameId) => game.FindNoTracking(gameId) is Game g ? new GameInfo(g.Started, g.Active) : new GameInfo();
+		public GameInfo Info([FromBody] int gameId) => gs.FindNoTracking(gameId) is Game g ? new GameInfo(g.Started, g.Active) : new GameInfo();
 		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player)
 		{
-			await newGame.RegisterAsync(game.Find(player.G), player.N.Trim(), new Password(player.P.Trim()), player.S);
+			await gameCreator.RegisterAsync(gs.Find(player.G), player.N.Trim(), new Password(player.P.Trim()), player.S);
 			return RegistrationErrors.Ok;
 		}
 		[HttpPost("Register")]
@@ -47,17 +47,17 @@ namespace ImperitWASM.Server.Controllers
 		[HttpGet("RegistrableGame")]
 		public async Task<int> RegistrableGameAsync()
 		{
-			await newGame.StartAllAsync();
-			return game.RegistrableGame is int registrable ? registrable : await newGame.CreateAsync();
+			await gameCreator.StartAllAsync();
+			return gs.RegistrableGame is int registrable ? registrable : await gameCreator.CreateAsync();
 		}
 		[HttpPost("NextColor")]
-		public Color NextColor([FromBody] int gameId) => newGame.NextColor(gameId);
+		public Color NextColor([FromBody] int gameId) => gameCreator.NextColor(gameId);
 		[HttpPost("NextTurn")]
 		public async Task<bool> NextTurnAsync([FromBody] Session loggedIn)
 		{
-			return active[loggedIn.G] == loggedIn.P && login.IsValid(loggedIn.P, loggedIn.G, loggedIn.Key) && await end.NextTurnAsync(loggedIn.G);
+			return active[loggedIn.G] == loggedIn.P && session.IsValid(loggedIn.P, loggedIn.G, loggedIn.Key) && await eot.NextTurnAsync(loggedIn.G);
 		}
 		[HttpGet("Finished")]
-		public ImmutableArray<int> Finished() => game.FinishedGames;
+		public ImmutableArray<int> Finished() => gs.FinishedGames;
 	}
 }

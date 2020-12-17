@@ -1,0 +1,30 @@
+﻿@inject ImperitClient http;
+
+@code{
+		[Parameter] public Data.Session Session { get; set; } = new Data.Session();
+		[Parameter] public Data.GameState State { get; set; }
+		[Parameter] public Func<Task>? LogoutAsync { get; set; }
+		System.Timers.Timer Timer = new System.Timers.Timer(3000);
+		Data.GameState GameState;
+		string Text => GameState switch
+		{
+			Data.GameState.Created => "Zatím jsi jediný zaregistrovaný hráč, počkej prosím na další",
+			Data.GameState.Countdown => "Hra začne už za několik minut",
+			Data.GameState.Finished => "Hra již skončila, můžeš se zaregistrovat do další",
+			_ => ""
+		};
+	protected override void OnInitialized()
+	{
+		GameState = State;
+		Timer.Elapsed += async (e, v) =>
+		{
+			GameState = await http.PostAsync<Data.Session, Data.GameState>("api/Player/Correct", Session);
+			Timer.Enabled = GameState != Data.GameState.Started;
+			this.StateHasChanged();
+		};
+		Timer.Start();
+	}
+}
+
+<NavMenu Options="Odhlášení;Hra" Selected="1" OnClickAsync="i => i == 0 ? LogoutAsync!() : Task.Run(() => { })"/>
+<main>@Text</main>

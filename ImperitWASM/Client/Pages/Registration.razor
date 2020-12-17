@@ -1,7 +1,10 @@
 @inject ImperitClient http;
 
+@using Mode = StartSwitch.Mode; 
+
 @code{
-	[Parameter] public Func<Task>? ReturnAsync { get; set; }
+	[Parameter] public Action<Mode> Set { get; set; } = _ => { };
+	[Parameter] public Func<Data.Login, Task<bool>>? LoginAsync { get; set; }
 	string Username { get; set; } = "";
 	string Password { get; set; } = "";
 	int? Selected = null, GameId = null;
@@ -13,7 +16,7 @@
 		Error = await http.PostAsync<Data.RegisteredPlayer, Data.RegistrationErrors>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, Selected ?? 0, GameId ?? 0));
 		if (Error == Data.RegistrationErrors.Ok)
 		{
-			await ReturnAsync!();
+			await LoginAsync!(new Data.Login(Username, Password));
 		}
 		this.StateHasChanged();
 	}
@@ -37,7 +40,7 @@
 {
 	if (i == 0)
 	{
-		await ReturnAsync!();
+		Set(Mode.Login);
 	}
 	else if (i == 2)
 	{

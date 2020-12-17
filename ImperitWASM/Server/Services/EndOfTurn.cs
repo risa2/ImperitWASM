@@ -13,16 +13,16 @@ namespace ImperitWASM.Server.Services
 	{
 		readonly IPlayersProvinces pap;
 		readonly IContextService ctx;
-		readonly IGameService game;
+		readonly IGameService gs;
 		readonly IPowers powers;
 		readonly Settings settings;
-		public EndOfTurn(IPlayersProvinces pap, IPowers powers, Settings settings, IContextService ctx, IGameService game)
+		public EndOfTurn(IPlayersProvinces pap, IPowers powers, Settings settings, IContextService ctx, IGameService gs)
 		{
 			this.pap = pap;
 			this.powers = powers;
 			this.settings = settings;
 			this.ctx = ctx;
-			this.game = game;
+			this.gs = gs;
 		}
 		static PlayersAndProvinces Actions(PlayersAndProvinces p_p, Game g)
 		{
@@ -41,7 +41,7 @@ namespace ImperitWASM.Server.Services
 		}
 		public async Task<bool> NextTurnAsync(int gameId)
 		{
-			var g = game.Find(gameId);
+			var g = gs.Find(gameId);
 			var p_p = pap[gameId] = AllActions(pap[gameId], g);
 			bool finish = p_p.LivingHumans <= 0 || p_p.Winner(settings.FinalLandsCount) is not null;
 			powers.Add(gameId, p_p);

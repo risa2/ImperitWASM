@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace ImperitWASM.Server
 {
@@ -26,7 +25,7 @@ namespace ImperitWASM.Server
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			_ = (env.IsDevelopment() ? app.UseDeveloperExceptionPage() : app.UseExceptionHandler("/Error").UseHsts()).UseHttpsRedirection().UseBlazorFrameworkFiles().UseStaticFiles().UseRouting().UseEndpoints(endpoints =>
+			_ = app.UseExceptionHandler("/Error").UseHsts().UseHttpsRedirection().UseBlazorFrameworkFiles().UseStaticFiles().UseRouting().UseEndpoints(endpoints =>
 			{
 				_ = endpoints.MapRazorPages();
 				_ = endpoints.MapControllers();

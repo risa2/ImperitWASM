@@ -16,12 +16,15 @@ namespace ImperitWASM.Server.Services
 		static readonly Random rng = new Random();
 		readonly IContextService ctx;
 		public SessionService(IContextService ctx) => this.ctx = ctx;
+		static string GenerateToken(int len)
+		{
+			byte[]? buf = new byte[len];
+			rng.NextBytes(buf);
+			return Convert.ToBase64String(buf).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+		}
 		public async Task<string> AddAsync(int player, int gameId)
 		{
-			byte[]? buf = new byte[64];
-			rng.NextBytes(buf);
-			string? key = Convert.ToBase64String(buf).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-			var s = ctx.Sessions.Add(new EntitySession { GameId = gameId, PlayerIndex = player, SessionKey = key });
+			var s = ctx.Sessions.Add(new EntitySession { GameId = gameId, PlayerIndex = player, SessionKey = GenerateToken(64) });
 			await ctx.SaveAsync();
 			return s.Entity.SessionKey;
 		}

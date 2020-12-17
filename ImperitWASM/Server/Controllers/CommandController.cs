@@ -15,31 +15,31 @@ namespace ImperitWASM.Server.Controllers
 	public class CommandController : ControllerBase
 	{
 		readonly IPlayersProvinces pap;
-		readonly ISessionService login;
+		readonly ISessionService session;
 		readonly Settings settings;
 		readonly IContextService ctx;
-		readonly IEndOfTurn end;
+		readonly IEndOfTurn eot;
 		readonly IActive active;
-		public CommandController(IPlayersProvinces pap, ISessionService login, Settings settings, IEndOfTurn end, IActive active, IContextService ctx)
+		public CommandController(IPlayersProvinces pap, ISessionService session, Settings settings, IEndOfTurn eot, IActive active, IContextService ctx)
 		{
 			this.pap = pap;
-			this.login = login;
+			this.session = session;
 			this.settings = settings;
-			this.end = end;
+			this.eot = eot;
 			this.active = active;
 			this.ctx = ctx;
 		}
 
-		bool Validate(int playerId, int gameId, string loginId) => login.IsValid(playerId, gameId, loginId) && playerId == active[gameId];
+		bool Validate(int playerId, int gameId, string loginId) => session.IsValid(playerId, gameId, loginId) && playerId == active[gameId];
 		[HttpPost("GiveUp")]
 		public async Task GiveUp([FromBody] Session player)
 		{
-			if (login.IsValid(player.P, player.G, player.Key))
+			if (session.IsValid(player.P, player.G, player.Key))
 			{
 				_ = await pap.AddAsync(player.G, new GiveUp(pap.Player(player.G, player.P)));
 				if (active[player.G] == player.P)
 				{
-					_ = await end.NextTurnAsync(player.G);
+					_ = await eot.NextTurnAsync(player.G);
 				}
 			}
 		}
@@ -59,7 +59,7 @@ namespace ImperitWASM.Server.Controllers
 			{
 				true => MoveErrors.Ok,
 				_ when !from.Has(move.Soldiers) => MoveErrors.FewSoldiers,
-				_ when move.HasEnoughCapacity(p_p) => MoveErrors.LittleCapacity,
+				_ when !move.HasEnoughCapacity(p_p) => MoveErrors.LittleCapacity,
 				_ => MoveErrors.Else
 			};
 		}
@@ -99,6 +99,6 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("Donate")]
-		public async Task<bool> Donate([FromBody] DonationCmd donation) => login.IsValid(donation.P, donation.Game, donation.Key) && await pap.AddAsync(donation.Game, new Donate(pap.Player(donation.Game, donation.P), pap.Player(donation.Game, donation.Recipient), donation.Amount));
+		public async Task<bool> Donate([FromBody] DonationCmd donation) => session.IsValid(donation.P, donation.Game, donation.Key) && await pap.AddAsync(donation.Game, new Donate(pap.Player(donation.Game, donation.P), pap.Player(donation.Game, donation.Recipient), donation.Amount));
 	}
 }

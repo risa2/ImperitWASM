@@ -21,6 +21,7 @@ namespace ImperitWASM.Server.Load
 		public ICollection<EntityPlayerPower>? EntityPlayerPowers { get; set; }
 		public bool Started => Current == State.Started;
 		public static Game Create => new Game { Current = State.Created, LastChange = DateTime.UtcNow };
+		public Client.Data.GameState GetState() => (Client.Data.GameState)(int)Current;
 		public Game StartCountdown()
 		{
 			LastChange = DateTime.UtcNow;

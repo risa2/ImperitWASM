@@ -1,7 +1,9 @@
 ﻿@inject ImperitClient http;
 
+@using Mode = StartSwitch.Mode;
+
 @code {
-	[Parameter] public Func<Task>? ReturnAsync { get; set; }
+	[Parameter] public Action<Mode> Set { get; set; } = _ => { };
 	ImmutableArray<int> Finished;
 	Data.Int model = new Data.Int();
 	ImmutableArray<Data.ColoredPlayer> Former;
@@ -13,7 +15,7 @@
 		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Finished[model.Value]);
 	}
 }
-<NavMenu Options="Zpět;Historie" Selected="1" OnClickAsync="i => i == 0 ? ReturnAsync!() : Task.Run(() => { })"/>
+<NavMenu Options="Zpět;Historie" Selected="1" OnClick="i => { if (i == 0) { Set(Mode.Login); } }"/>
 <main>
 	@if (Finished.IsDefaultOrEmpty)
 	{

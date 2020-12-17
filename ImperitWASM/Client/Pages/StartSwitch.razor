@@ -4,15 +4,10 @@
 	[Parameter] public Func<Data.Login, Task<bool>>? LoginAsync { get; set; }
 	public enum Mode { Login, Registration, History }
 	Mode mode = Mode.Login;
-	void Set(Mode new_mode)
+	void Set(Mode mode)
 	{
-		mode = new_mode;
+		this.mode = mode;
 		this.StateHasChanged();
-	}
-	async Task ReturnAsync()
-	{
-		await this.OnInitializedAsync();
-		Set(Mode.Login);
 	}
 }
 @if (mode == Mode.Login)
@@ -21,9 +16,9 @@
 }
 else if (mode == Mode.Registration)
 {
-	<Registration ReturnAsync="ReturnAsync"/>
+	<Registration Set="Set" LoginAsync="LoginAsync!"/>
 }
 else
 {
-	<History ReturnAsync="ReturnAsync"/>
+	<History Set="Set"/>
 }

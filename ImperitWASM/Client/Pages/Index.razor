@@ -5,34 +5,46 @@
 
 @code{
 	Data.Session Session = new Data.Session();
+	Data.GameState State = Data.GameState.Invalid;
+	async Task UpdateState()
+	{
+		if (Session.IsSet())
+		{
+			State = await http.PostAsync<Data.Session, Data.GameState>("api/Player/Correct", Session);
+			Session = State == Data.GameState.Invalid ? new Data.Session() : Session;
+		}
+	}
 	async Task<bool> LoginAsync(Data.Login login)
 	{
 		Session = await http.PostAsync<Data.Login, Data.Session>("api/Player/Login", login);
 		await cookies.SetAsync(Session);
+		await UpdateState();
 		this.StateHasChanged();
 		return Session.IsSet();
 	}
 	async Task LogoutAsync()
 	{
-		if (Session.IsSet())
-		{
-			await http.PostAsync<Data.Session>("api/Player/Logout", Session);
-			await cookies.RemoveAsync();
-			Session = new Data.Session();
-			this.StateHasChanged();
-		}
+		await http.PostAsync<Data.Session>("api/Player/Logout", Session);
+		await cookies.RemoveAsync();
+		Session = new Data.Session();
+		State = Data.GameState.Invalid;
+		this.StateHasChanged();
 	}
 	protected override async Task OnInitializedAsync()
 	{
 		Session = await cookies.GetAsync();
-		Session = Session.IsSet() && await http.PostAsync<Data.Session, bool>("api/Player/Correct", Session) ? Session : new Data.Session();
+		await UpdateState();
 	}
 }
-@if (Session.IsSet())
+@if (!Session.IsSet() || State == Data.GameState.Invalid)
+{
+	<StartSwitch LoginAsync="LoginAsync"/>
+}
+else if (State == Data.GameState.Started)
 {
 	<GameSwitch LogoutAsync="LogoutAsync" Session="Session"/>
 }
 else
 {
-	<StartSwitch LoginAsync="LoginAsync"/>
+	<WaitingRoom LogoutAsync="LogoutAsync" Session="Session" State="State"/>
 }

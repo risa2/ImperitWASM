@@ -15,16 +15,18 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class PlayerController : ControllerBase
 	{
-		readonly ISessionService login;
+		readonly ISessionService session;
 		readonly IPlayersProvinces pap;
 		readonly IContextService ctx;
-		readonly IGameCreator newGame;
-		public PlayerController(IPlayersProvinces pap, ISessionService login, IContextService ctx, IGameCreator newGame)
+		readonly IGameCreator gameCreator;
+		readonly IGameService gs;
+		public PlayerController(IPlayersProvinces pap, ISessionService session, IContextService ctx, IGameCreator gameCreator, IGameService gs)
 		{
 			this.pap = pap;
-			this.login = login;
+			this.session = session;
 			this.ctx = ctx;
-			this.newGame = newGame;
+			this.gameCreator = gameCreator;
+			this.gs = gs;
 		}
 		[HttpPost("Colored")]
 		public IEnumerable<ColoredPlayer> Colored([FromBody] int gameId) => ctx.Players.Where(p => p.Type != EntityPlayer.Kind.Savage && p.GameId == gameId).OrderBy(p => p.Index).Select(p => new ColoredPlayer(p.Name, Color.Parse(p.Color)));
@@ -33,7 +35,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Infos")]
 		public IEnumerable<PlayerInfo> Infos([FromBody] Session ses)
 		{
-			if (!login.IsValid(ses.P, ses.G, ses.Key))
+			if (!session.IsValid(ses.P, ses.G, ses.Key))
 			{
 				return Enumerable.Empty<PlayerInfo>();
 			}
@@ -41,16 +43,16 @@ namespace ImperitWASM.Server.Controllers
 			return p_p.Players.Select((p, i) => new PlayerInfo(i, p is not Savage, p.Name, p.Color, p.Alive, p.Money, p_p.IncomeOf(p), p.Debt));
 		}
 		[HttpPost("Correct")]
-		public bool Correct([FromBody] Session user) => login.IsValid(user.P, user.G, user.Key);
+		public GameState Correct([FromBody] Session user) => session.IsValid(user.P, user.G, user.Key) ? gs.FindNoTracking(user.G)?.GetState() ?? GameState.Invalid : GameState.Invalid;
 		[HttpPost("Login")]
 		public async Task<Session> Login([FromBody] Login trial)
 		{
-			await newGame.StartAllAsync();
-			return ctx.Players.Include(p => p.Game).SingleOrDefault(p => p.Type == EntityPlayer.Kind.Human && p.Name == trial.N && p.Game!.Current == Game.State.Started) is EntityPlayer p && Password.Parse(p.Password).IsCorrect(trial.P) ? new Session(p.Index, p.GameId, await login.AddAsync(p.Index, p.GameId)) : new Session();
+			await gameCreator.StartAllAsync();
+			return ctx.Players.SingleOrDefault(p => p.Type == EntityPlayer.Kind.Human && p.Name == trial.N) is EntityPlayer p && Password.Parse(p.Password).IsCorrect(trial.P) ? new Session(p.Index, p.GameId, await session.AddAsync(p.Index, p.GameId)) : new Session();
 		}
 		[HttpPost("Color")]
 		public Color GetColor([FromBody] PlayerId id) => Color.Parse(ctx.Players.AsNoTracking().SingleOrDefault(p => p.GameId == id.G && p.Index == id.P)?.Color ?? "#00000000");
 		[HttpPost("Logout")]
-		public Task Logout([FromBody] Session user) => login.RemoveAsync(user.P, user.G, user.Key);
+		public Task Logout([FromBody] Session user) => session.RemoveAsync(user.P, user.G, user.Key);
 	}
 }

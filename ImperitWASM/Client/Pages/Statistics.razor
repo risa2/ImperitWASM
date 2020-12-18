@@ -1,0 +1,68 @@
+@inject ImperitClient http;
+
+@using Mode = Data.View;
+
+@code{
+	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
+	[Parameter] public Func<Task>? LogoutAsync { get; set; }
+	[Parameter] public Action<Mode, int?, int?, (int, int, string)?> Switch { get; set; } = ((a, x, y, z) => { });
+	ImmutableArray<Data.PlayerInfo> Players;
+	ImmutableArray<Data.ColoredPlayer> ColoredPlayers;
+	ImmutableArray<PlayersPower> Powers;
+	int Active = 0;
+
+	void Donate(int player)
+	{
+		Switch(Mode.Donation, null, null, (Players.Try(Session.P)?.M ?? 0, player, Players.Try(player)?.N ?? ""));
+	}
+	async Task DoGiveUp()
+	{
+		await http.PostAsync<Data.Session>("api/Command/GiveUp", Session);
+		await LogoutAsync!();
+	}
+	protected override async Task OnInitializedAsync()
+	{
+		Active = await http.PostAsync<int, int>("api/Game/Active", Session.G);
+		Players = await http.PostAsync<Data.Session, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", Session);
+		this.StateHasChanged();
+		ColoredPlayers = await http.PostAsync<int, ImmutableArray<Data.ColoredPlayer>>("api/Player/Colored", Session.G);
+		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Session.G);
+	}
+}
+<nav>
+	<a @onclick="() => Switch(Mode.Map, null, null, null)">Zpět</a>
+	<a class="this">@Players.Try(Session.P)?.M@Sym.Money</a>
+</nav>
+<main>
+	@if (!Players.IsDefault)
+	{
+		<p>Přihlášen: <span style="color:@Players[Session.P].C;">@Players[Session.P].N</span></p>
+		<p>Na tahu je: <span style="color:@Players[Active].C;">@Players[Active].N</span></p>
+		<table class="players">
+			@foreach (var player in Players.Where(p => p.D))
+			{
+				<tr>
+					<td style="color:@player.C;">@player.N</td>
+					@if (player.A)
+					{
+						<td>@player.M@Sym.Money</td>
+						<td>(+@player.I@Sym.Money)</td>
+						@if (player.P == Session.P)
+						{
+							<td class="link-like" @onclick="DoGiveUp">Vzdát se</td>
+						}
+						else
+						{
+							<td class="link-like" @onclick="() => Donate(player.P)">Věnovat</td>
+						}
+					}
+					else
+					{
+						<td colspan="3">není</td>
+					}
+				</tr>
+			}
+		</table>
+		<Graphs Players="ColoredPlayers" Powers="Powers"/>
+	}
+</main>

@@ -88,13 +88,9 @@ else if (Current == Mode.Move && From is int from && To is int to)
 {
 	<Move Session="Session" From="from" To="to" Return="() => Switch()"/>
 }
-else if (Current == Mode.Players)
+else if (Current == Mode.Statistics)
 {
-	<Players Session="Session" Switch="Switch" LogoutAsync="DoLogoutAsync"/>
-}
-else if (Current == Mode.Powers)
-{
-	<Powers Return="() => Switch()" Session="Session"/>
+	<Statistics Session="Session" Switch="Switch" LogoutAsync="DoLogoutAsync"/>
 }
 else if (Current == Mode.Purchase && From is int from2)
 {

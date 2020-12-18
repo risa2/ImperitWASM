@@ -40,7 +40,7 @@ namespace ImperitWASM.Server.Controllers
 				return Enumerable.Empty<PlayerInfo>();
 			}
 			var p_p = pap[ses.G];
-			return p_p.Players.Select((p, i) => new PlayerInfo(i, p is not Savage, p.Name, p.Color, p.Alive, p.Money, p_p.IncomeOf(p), p.Debt));
+			return p_p.Players.Select((p, i) => new PlayerInfo(i, p is not Savage, p.Name, p.Color, p.Alive, p.Money - p.Debt, p_p.IncomeOf(p)));
 		}
 		[HttpPost("Correct")]
 		public GameState Correct([FromBody] Session user) => session.IsValid(user.P, user.G, user.Key) ? gs.FindNoTracking(user.G)?.GetState() ?? GameState.Invalid : GameState.Invalid;

@@ -112,17 +112,25 @@ Pro vytvoření hry jsem zvolil formát tahové strategie, neboť strategie v re
 
 \section{Popis hry}
 \subsection{Provincie}
-Hra se odehrává na plánu, který se skládá z provincií (země, moře a pohoří), jejichž názvy a tvary jsou zvolené podle evropských zemí a moří nebo jejich části. Provincie obsahují vojenské jednotky a jsou ovládány nejvýše jedním hráčem, který v nich může verbovat jednotky. Země se mohou odtrhnout a pravděpodobnost, že se tak v daném kole stane je $P=\max{\displaystyle\frac{P_0\cdot (S_0-S)}{S_0},0}$, kde $P_0$ je výchozí pravděpodobnost odtržení (příbližně 10 \%), $S$ je obranná síla jednotek přítomných v zemi a $S_0$ je obranná síla výchozích jednotek, jež byly v zemi na začátku hry. Provincie je dobyta, je-li napadena vojskem, jehož útočná síla je vyšší, než je obranná síla jednotek v provincii. Přístavy jsou druhem zemí, které umožňují přesun na moře a z moře.
+Hra se odehrává na plánu, který se skládá z provincií (země, moře a pohoří), jejichž názvy a tvary jsou zvolené podle evropských zemí a moří nebo jejich části. Provincie obsahují vojenské jednotky a jsou ovládány nejvýše jedním hráčem, který v nich může verbovat jednotky. Země se mohou odtrhnout a pravděpodobnost, že se tak v daném kole stane je $P=\max{\displaystyle\frac{P_0\cdot (S_0-S)}{S_0},0}$, kde $P_0$ je výchozí pravděpodobnost odtržení (příbližně 10 \%), $S$ je obranná síla jednotek přítomných v zemi a $S_0$ je obranná síla výchozích jednotek, jež byly v zemi na začátku hry. Provincie je dobyta, je-li napadena vojskem, jehož útočná síla je vyšší, než je obranná síla jednotek v provincii. V zemích označených kotvou jsou přístavy, které umožňují přesun na moře a z moře.
 \subsection{Hráči}
 Hráčů může být $2$--$16$. Při registraci si zvolí zemi, v níž budou začínat, a na začátku hry dostanou určité množství peněz. Dále získají v každém kole určité množství peněz za každou zemi, kterou ovládají, přičemž toto množství se u různých zemí liší. Za peníze si mohou kupovat země a verbovat ve svých provinciích vojenské jednotky.
 \subsection{Vojenské jednotky}
 Vojenské jednotky slouží k dobývání provincií. Každá jednotka má určitou cenu, sílu v obraně, sílu v útoku a hmotnost, jež je relevantní v případě, že jednotka nemůže provést určitý přesun samotná a potřebuje například loď k přesunu přes moře. Jednotky schopné přenášet jiné (např. loď, slon) mají též nosnost, jež udává, jaká může být celková hmotnost jednotek, které se s ní přepravují.
 \subsection{Začátek}
-Při registraci si hráč zvolí jméno a heslo a dostane na výběr z několika provincii, v nichž může začínat. Po registraci se může přihlásit, ale poté musí počkat, až začne jeho hra. Hra začne čtyři minuty po registraci druhého hráče, aby žádný hráč nemusel dlouho čekat a zároveň měl lidského protihráče.
+Při registraci si hráč zvolí jméno a heslo a zobrazí se mu mapa, na níž si může vybrat zemi, v níž bude začínat. Nemůže však vybrat zemi, jejíž název je v závorkách. Po registraci musí počkat, až začne jeho hra. Hra začne čtyři minuty po registraci druhého hráče, aby žádný hráč nemusel dlouho čekat, ale aby každý měl nějakého lidského protihráče.
 \subsection{Průběh hry}
-Hra probíhá po kolech, během nichž mají všichni hráči postupně svůj tah. Hráč není v rámci svého tahu neomezen časem ani počtem akcí, ale verbování a přesuny vojska se provedou až po ukončení tahu.
+Tahy hráčů se střídají v tom pořadí, v němž se tito hráči zaregistrovali. Během tahu je možné provést neomezené množství akcí bez časového limitu. Mezi akce se řadí verbování, přesun armády, koupě provincie, věnování peněz jinému hráči a kapitulace. Verbování a přesun se dokončí až po konci hráčova tahu, ostatní akce proběhnou okamžitě.
 \subsection{Cíl hry}
-Cílem hry je ovládnout čtyři z pěti cílových provincií, které jsou viditelně označené a jsou rozprostřeny po všech okrajích mapy, takže k dobytí všech je nutné ovládnout podstatnou část mapy, ačkoli hráč může při vhodné strategii vyhrát, aniž by měl největší území.
+Cílem hry je ovládnout čtyři z pěti cílových provincií, které jsou rozprostřeny po všech okrajích mapy, takže k dobytí všech je nutné ovládnout podstatnou část mapy. Zvolí-li však hráč vhodnou strategii, může vyhrát, aniž by měl největší území.
+\subsection{Ovládání}
+Hráč vidí ve výchozím pohledu mapu provincií a na okraji má navigační menu, v němž může přepínat mezi stránkami.
+\subsubsection{Mapa}
+Na této stránce hráč vidí mapu všech provincií. Pohoří se zobrazují jen jako šedá čára mezi zeměmi. Pokud jim žádný z hráčů nevládne, jsou moře tyrkysová a země černošedé; pokud v nich však někdo vládne, mají barvu onoho hráče. Dále se u nich zobrazuje jejich název a počet vojenských jednotek v nich, u zemí se navíc zobrazuje jejich výnos za jedno kolo. Země, které mají přístav, mají u svého názvu kotvu, a země, které hráč potřebuje k vítězství, u svého názvu mají hvězdičku.
+
+\includegraphics[width=\textwidth]{ProvinceMap.png}
+
+Klikne-li hráč dvakrát na svou provincii, může v ní verbovat jednotky; klikne-li na ni jednou a poté klikne na druhou provincii, může přesunout jednotky z první provincie do druhé; klikne-li na cizí zemi, jež sousedí s jeho zemí, může tuto zemi koupit. Při verbování (resp. přesunu) se ukáže nabídka, v níž může hráč vybrat, kolik jednotek kterého druhu chce verbovat (resp. přesunout). Pokud se hráč rozhodne verbovat více jednotek, než si může za své peníze koupit, nebo si koupit zemi, která stojí více peněz, než kolik daný hráč má, zobrazí se mu možnost si chybějící částku půjčit.
 
 \section{Použité technologie}
 \subsection{\CS{}}

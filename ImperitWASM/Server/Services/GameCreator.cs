@@ -12,7 +12,6 @@ namespace ImperitWASM.Server.Services
 		Color NextColor(int gameId);
 		Task<int> CreateAsync();
 		Task StartAllAsync();
-		Task FinishAsync(int gameId);
 		Task RegisterAsync(Game game, string name, Password password, int land);
 	}
 	public class GameCreator : IGameCreator
@@ -45,11 +44,6 @@ namespace ImperitWASM.Server.Services
 				var p_p = pap[g.Id] = pap[g.Id].AddRobots(settings, settings.GetNames(pap.ObsfuscateName));
 				powers.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p);
 			}
-			return ctx.SaveAsync();
-		}
-		public Task FinishAsync(int gameId)
-		{
-			game.Finish(gameId);
 			return ctx.SaveAsync();
 		}
 		public Task RegisterAsync(Game game, string name, Password password, int land)

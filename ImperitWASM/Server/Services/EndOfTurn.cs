@@ -43,7 +43,7 @@ namespace ImperitWASM.Server.Services
 		{
 			var g = gs.Find(gameId);
 			var p_p = pap[gameId] = AllActions(pap[gameId], g);
-			bool finish = p_p.LivingHumans <= 0 || p_p.Winner(settings.FinalLandsCount) is not null;
+			bool finish = p_p.LivingHumans <= 0 || p_p.Winner(settings.FinalLandsCount) is Human;
 			powers.Add(gameId, p_p);
 			_ = finish ? g.Finish() : g;
 			await ctx.SaveAsync();

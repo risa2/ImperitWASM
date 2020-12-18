@@ -13,7 +13,5 @@ namespace ImperitWASM.Server.Controllers
 		public PowersController(IPowers powers) => this.powers = powers;
 		[HttpPost("List")]
 		public IEnumerable<PlayersPower> List([FromBody] int gameId) => powers.Get(gameId);
-		[HttpPost("Count")]
-		public int Count([FromBody] int gameId) => powers.Count(gameId);
 	}
 }

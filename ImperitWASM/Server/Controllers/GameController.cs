@@ -28,6 +28,8 @@ namespace ImperitWASM.Server.Controllers
 			this.eot = eot;
 			this.active = active;
 		}
+		[HttpPost("Active")]
+		public int Active([FromBody] int gameId) => gs.FindNoTracking(gameId)?.Active ?? 0;
 		[HttpPost("Info")]
 		public GameInfo Info([FromBody] int gameId) => gs.FindNoTracking(gameId) is Game g ? new GameInfo(g.Started, g.Active) : new GameInfo();
 		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player)
@@ -48,7 +50,7 @@ namespace ImperitWASM.Server.Controllers
 		public async Task<int> RegistrableGameAsync()
 		{
 			await gameCreator.StartAllAsync();
-			return gs.RegistrableGame is int registrable ? registrable : await gameCreator.CreateAsync();
+			return gs.RegistrableGame ?? await gameCreator.CreateAsync();
 		}
 		[HttpPost("NextColor")]
 		public Color NextColor([FromBody] int gameId) => gameCreator.NextColor(gameId);

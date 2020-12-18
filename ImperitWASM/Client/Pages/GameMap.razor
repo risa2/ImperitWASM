@@ -11,7 +11,7 @@
 	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
 	[Parameter] public List<Data.ProvinceAppearance>? Provinces { get; set; }
 	[Parameter] public Action<ImmutableArray<Data.ProvinceUpdate>>? UpdateProvinces { get; set; }
-	int PowersCount = 0, PlayerMoney = 0;
+	int PlayerMoney = 0;
 	async Task<int?> OnClick(int clicked, int? from)
 	{
 		var r = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.P, from, clicked, Session.G));
@@ -20,7 +20,6 @@
 	}
 	public async Task Update()
 	{
-		PowersCount = await http.PostAsync<int, int>("api/Powers/Count", Session.G);
 		PlayerMoney = await http.PostAsync<Data.Session, int>("api/Player/Money", Session);
 		UpdateProvinces!(await http.PostAsync<int, ImmutableArray<Data.ProvinceUpdate>>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
 		this.StateHasChanged();
@@ -44,12 +43,8 @@
 			<a @onclick="LogoutAsync.Must()">Odhlášení</a>
 		}
 		<a class="this">Imperit</a>
-		<a @onclick="() => Switch(Mode.Players, null, null)">@(PlayerMoney)@Sym.Money</a>
+		<a @onclick="() => Switch(Mode.Statistics, null, null)">@(PlayerMoney)@Sym.Money</a>
 		<a @onclick="() => Switch(Mode.Preview, null, null)">Náhled</a>
-		@if (PowersCount > 2)
-		{
-			<a @onclick="() => Switch(Mode.Powers, null, null)">Výsledky</a>
-		}
 	}
 </nav>
 <main><Map Width="1000" Height="1000" Provinces="Provinces" Select="OnClick" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" /></main>

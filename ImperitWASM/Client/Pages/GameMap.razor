@@ -12,11 +12,18 @@
 	[Parameter] public List<Data.ProvinceAppearance>? Provinces { get; set; }
 	[Parameter] public Action<ImmutableArray<Data.ProvinceUpdate>>? UpdateProvinces { get; set; }
 	int PlayerMoney = 0;
-	async Task<int?> OnClick(int clicked, int? from)
+	int? Selected = null;
+	Map? map;
+	async Task OnClickAsync(int i)
 	{
-		var r = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.P, from, clicked, Session.G));
-		Switch(r.View, r.From, r.To);
-		return r.Select;
+		var s = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.P, Selected, i, Session.G));
+		Switch(s.View, s.From, s.To);
+		map?.Select(Selected = s.Select);
+		await Task.Delay(5000);
+		if (Selected == s.Select)
+		{
+			map?.Select(Selected = null);
+		}
 	}
 	public async Task Update()
 	{
@@ -47,4 +54,4 @@
 		<a @onclick="() => Switch(Mode.Preview, null, null)">Náhled</a>
 	}
 </nav>
-<main><Map Width="1000" Height="1000" Provinces="Provinces" Select="OnClick" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" /></main>
+<main><Map @ref="map" Width="1000" Height="1000" Provinces="Provinces" OnClickAsync="OnClickAsync" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" TextColor="p => p.GetColor()" /></main>

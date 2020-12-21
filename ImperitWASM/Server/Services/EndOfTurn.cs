@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
+using ImperitWASM.Shared.Commands;
 using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
 
@@ -24,28 +25,19 @@ namespace ImperitWASM.Server.Services
 			this.ctx = ctx;
 			this.gs = gs;
 		}
-		static PlayersAndProvinces Actions(PlayersAndProvinces p_p, Game g)
+		static bool FinishGame(Game g, bool finish, int active)
 		{
-			p_p = p_p.Act(g.Active);
-			g.Active = p_p.Next(g.Active);
-			return p_p;
-		}
-		static PlayersAndProvinces AllActions(PlayersAndProvinces p_p, Game g)
-		{
-			p_p = Actions(p_p, g);
-			while (p_p.Player(g.Active) is Robot robot && p_p.LivingHumans > 0)
-			{
-				p_p = Actions(robot.Think(p_p), g);
-			}
-			return p_p;
+			(finish ? g.Finish() : g).Active = active;
+			return finish;
 		}
 		public async Task<bool> NextTurnAsync(int gameId)
 		{
 			var g = gs.Find(gameId);
-			var p_p = pap[gameId] = AllActions(pap[gameId], g);
-			bool finish = p_p.LivingHumans <= 0 || p_p.Winner(settings.FinalLandsCount) is Human;
+			var (p_p, active) = pap[gameId].EndOfTurn(g.Active);
+			pap[gameId] = p_p;
+
+			bool finish = FinishGame(g, !p_p.AnyHuman || p_p.Winner(settings.FinalLandsCount) is Human, active);
 			powers.Add(gameId, p_p);
-			_ = finish ? g.Finish() : g;
 			await ctx.SaveAsync();
 			return finish;
 		}

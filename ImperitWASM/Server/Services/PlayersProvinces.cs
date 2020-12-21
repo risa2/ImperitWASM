@@ -43,7 +43,7 @@ namespace ImperitWASM.Server.Services
 		}
 		public async Task<bool> AddAsync(int gameId, ICommand cmd)
 		{
-			var (new_pap, success) = this[gameId].Add(cmd);
+			var (new_pap, success) = this[gameId].TryAdd(cmd);
 			this[gameId] = new_pap;
 			await ctx.SaveAsync();
 			return success;

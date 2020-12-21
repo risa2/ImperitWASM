@@ -11,9 +11,12 @@
 	ImmutableArray<PlayersPower> Powers;
 	int Active = 0;
 
-	void Donate(int player)
+	void Clicked(int player)
 	{
-		Switch(Mode.Donation, null, null, (Players.Try(Session.P)?.M ?? 0, player, Players.Try(player)?.N ?? ""));
+		if (player != Session.P && Players[Session.P].M > 0)
+		{
+			Switch(Mode.Donation, null, null, (Players.Try(Session.P)?.M ?? 0, player, Players.Try(player)?.N ?? ""));
+		}
 	}
 	async Task DoGiveUp()
 	{
@@ -36,25 +39,22 @@
 <main>
 	@if (!Players.IsDefault)
 	{
-		<p>Přihlášen: <span style="color:@Players[Session.P].C;">@Players[Session.P].N</span></p>
 		<p>Na tahu je: <span style="color:@Players[Active].C;">@Players[Active].N</span></p>
 		<table class="players">
 			@foreach (var player in Players.Where(p => p.D))
 			{
 				<tr>
-					<td style="color:@player.C;">@player.N</td>
+					<td style="color:@player.C;" @onclick="() => Clicked(player.P)">@player.N</td>
 					@if (player.A)
 					{
 						<td>@player.M@Sym.Money</td>
 						<td>(+@player.I@Sym.Money)</td>
-						@if (player.P == Session.P)
-						{
-							<td class="link-like" @onclick="DoGiveUp">Vzdát se</td>
-						}
-						else
-						{
-							<td class="link-like" @onclick="() => Donate(player.P)">Věnovat</td>
-						}
+						<td>
+							@if (player.Debt > 0)
+							{
+								<text>-@player.Debt@Sym.Money</text>
+							}
+						</td>
 					}
 					else
 					{
@@ -63,6 +63,7 @@
 				</tr>
 			}
 		</table>
+		<p class="link-like" @onclick="DoGiveUp">Vzdát se</p>
 		<Graphs Players="ColoredPlayers" Powers="Powers"/>
 	}
 </main>

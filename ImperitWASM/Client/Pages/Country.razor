@@ -5,7 +5,7 @@
 	[Parameter] public Color Fill { get; set; } = new Color();
 	[Parameter] public Color Stroke { get; set; } = new Color();
 	[Parameter] public int StrokeWidth { get; set; } = 0;
-	[Parameter] public Func<Task>? OnClick { get; set; }
+	[Parameter] public Func<Task>? OnClickAsync { get; set; }
 	string Path => string.Join(" ", Points?.Select(point => Width * point.X + "," + Height * point.Y) ?? Enumerable.Empty<string>());
 	public void Select(ImmutableArray<Point>? points, Color fill)
 	{
@@ -14,7 +14,7 @@
 		this.StateHasChanged();
 	}
 }
-@if (!(Points is null))
+@if (Points is not null)
 {
-	<polyline points="@Path" fill="@Fill" stroke="@Stroke" stroke-width="@StrokeWidth" @onclick="OnClick!"></polyline>
+	<polyline points="@Path" fill="@Fill" stroke="@Stroke" stroke-width="@StrokeWidth" @onclick="OnClickAsync!"></polyline>
 }

@@ -2,14 +2,15 @@
 	[Parameter] public int Width { get; set; }
 	[Parameter] public int Height { get; set; }
 	[Parameter] public int FontSize { get; set; }
-	[Parameter] public Func<Task>? OnClick { get; set; }
+	[Parameter] public Func<Task>? OnClickAsync { get; set; }
 	[Parameter] public Point Center { get; set; } = new Point(0.0, 0.0);
 	[Parameter] public ImmutableArray<string> Text { get; set; }
+	[Parameter] public Color Color { get; set; } = new Color(255, 255, 255);
 	double X => Center.X * Width;
 	double Y => Center.Y * Height;
 }
 
-<text x="@X" y="@(Y - (FontSize * 2))" @onclick="OnClick!" class="center" fill="#fff" dominant-baseline="middle" text-anchor="middle">
+<text x="@X" y="@(Y - (FontSize * 2))" @onclick="OnClickAsync!" class="center" fill="@Color.ToString()" dominant-baseline="middle" text-anchor="middle">
 	@foreach (var line in Text)
 	{
 		<tspan x="@X" dy="@FontSize">@line</tspan>

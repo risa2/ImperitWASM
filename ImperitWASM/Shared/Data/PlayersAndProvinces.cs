@@ -39,7 +39,7 @@ namespace ImperitWASM.Shared.Data
 			}
 			return new PlayersAndProvinces(new_players.MoveToImmutable(), Provinces.With(new_provinces.MoveToImmutable()));
 		}
-		public (PlayersAndProvinces, bool) Add(ICommand cmd)
+		public (PlayersAndProvinces, bool) TryAdd(ICommand cmd)
 		{
 			if (cmd.Allowed(this))
 			{
@@ -49,8 +49,8 @@ namespace ImperitWASM.Shared.Data
 			}
 			return (this, false);
 		}
-		public PlayersAndProvinces JustAdd(ICommand cmd) => Add(cmd).Item1;
-		public int LivingHumans => Players.Count(p => p.Alive && p is Human);
+		public PlayersAndProvinces Add(ICommand cmd) => TryAdd(cmd).Item1;
+		public bool AnyHuman => Players.Any(p => p is Human { Alive: true });
 		public PlayersPower PlayersPower(Func<Player, bool> which) => new PlayersPower(Players.Where(which).Select(p => p.Power(Provinces.ControlledBy(p).ToImmutableArray())).ToImmutableArray());
 		public IEnumerable<int> Inhabitable => Provinces.Indices(it => it is Land { IsInhabitable: true });
 		public PlayersAndProvinces AddRobots(Settings settings, IEnumerable<string> names)
@@ -64,6 +64,19 @@ namespace ImperitWASM.Shared.Data
 			}
 			return new PlayersAndProvinces(new_players.ToImmutable(), new Provinces(new_provinces.MoveToImmutable(), settings));
 		}
-
+		(PlayersAndProvinces, int) NextTurn(int active)
+		{
+			var result = Act(active).Add(new NextTurn());
+			return (result, result.Next(active));
+		}
+		public (PlayersAndProvinces, int) EndOfTurn(int active)
+		{
+			var (pap, i) = NextTurn(active);
+			while (pap.Player(i) is Robot robot && pap.AnyHuman)
+			{
+				(pap, i) = robot.Think(pap).NextTurn(i);
+			}
+			return (pap, i);
+		}
 	}
 }

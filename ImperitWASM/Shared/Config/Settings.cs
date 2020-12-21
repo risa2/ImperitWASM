@@ -21,7 +21,7 @@ namespace ImperitWASM.Shared.Config
 		public PlayersAndProvinces GetPlayersAndProvinces() => new PlayersAndProvinces(ImmutableArray.Create<Player>(Savage), GetProvinces());
 
 		public int CalculateDebt(int amount) => amount + amount * Interest;
-		public int Discount(int amount) => (int)(amount * int.MaxValue / (int.MaxValue + Interest.ToUnits()));
+		public int Discount(int amount) => (int)((long)amount * int.MaxValue / (int.MaxValue + Interest.ToInt()));
 
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
 		string GetName(int i, Func<string, int, string> obf) => obf(Names[i % Names.Length], i / Names.Length);

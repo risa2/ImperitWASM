@@ -16,7 +16,9 @@ namespace ImperitWASM.Shared.Config
 		public Color Mix(Color color) => new Color(Mix(R, color.R, A, color.A), Mix(G, color.G, A, color.A), Mix(B, color.B, A, color.A), Supl(A, color.A));
 		public Color Over(Color color) => new Color(Mix(R, color.R, 255, 255 - A), Mix(G, color.G, 255, 255 - A), Mix(B, color.B, 255, 255 - A), Supl(A, color.A));
 
+		public byte Light() => (byte)((R + G + B) / 3);
 		public Color WithAlpha(byte alpha) => this with { A = alpha };
+
 		public static Color HSV(double H, double S, double V)
 		{
 			while (H < 0) { H += 360; }

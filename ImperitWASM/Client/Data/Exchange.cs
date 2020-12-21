@@ -14,10 +14,11 @@ namespace ImperitWASM.Client.Data
 	public enum MoveErrors { Ok, FewSoldiers, LittleCapacity, NotPlaying, Else }
 	public sealed record MoveInfo(bool Possible, bool CanAttack, bool CanReinforce, string FromName, string ToName, string FromSoldiers, string ToSoldiers, ImmutableArray<Description> Soldiers);
 	public sealed record PlayerId(int P, int G);
-	public sealed record PlayerInfo(int P, bool D, string N, Color C, bool A, int M, int I);
+	public sealed record PlayerInfo(int P, bool D, string N, Color C, bool A, int M, int Debt, int I);
 	public sealed record ProvinceAppearance(ImmutableArray<Point> B, Point C, Color F, Color S, int W, bool R, ImmutableArray<string> T)
 	{
-		public ProvinceAppearance UpdateText() => R || T.IsDefaultOrEmpty ? this : this with { T = T.SetItem(0, "(" + T[0] + ")") };
+		public Color GetColor() => F.Light() > 180 ? new Color(0, 0, 0) : new Color(255, 255, 255);
+		public Color GetRegistrationColor() => R ? GetColor() : new Color(80, 80, 80);
 		public ProvinceAppearance Update(Color f, ImmutableArray<string> t) => this with { F = f, T = t };
 	}
 	public sealed record ProvinceUpdate(ImmutableArray<string> T, Color F);

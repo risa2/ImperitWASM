@@ -66,19 +66,17 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("PurchaseInfo")]
 		public PurchaseInfo PurchaseInfo([FromBody] PurchaseData purchase) => pap.GameExists(purchase.G) && pap[purchase.G] is PlayersAndProvinces p_p && p_p.Province(purchase.L) is Land land && p_p.Player(purchase.P) is Player player ? new PurchaseInfo(new Buy(player, land, 0).Allowed(p_p), land.Name, land.Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
 		[HttpPost("Purchase")]
-		public void Purchase([FromBody] PurchaseCmd purchase)
+		public async Task Purchase([FromBody] PurchaseCmd purchase)
 		{
 			if (Validate(purchase.P, purchase.Game, purchase.Key))
 			{
 				var p_p = pap[purchase.Game];
 				if (p_p.Province(purchase.Land) is Land Land && p_p.Player(purchase.P) is Player Player)
 				{
-					if (Land.Price > Player.Money)
-					{
-						(p_p, _) = p_p.Add(new Borrow(Player, Land.Price - Player.Money));
-					}
-					(pap[purchase.Game], _) = p_p.Add(new Buy(Player, Land, Land.Price));
+					p_p = Land.Price > Player.Money ? p_p.Add(new Borrow(Player, Land.Price - Player.Money)) : p_p;
+					pap[purchase.Game] = p_p.Add(new Buy(Player, Land, Land.Price));
 				}
+				await ctx.SaveAsync();
 			}
 		}
 		[HttpPost("RecruitInfo")]
@@ -88,13 +86,15 @@ namespace ImperitWASM.Server.Controllers
 		{
 			if (Validate(r.P, r.Game, r.Key))
 			{
-				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(settings.SoldierTypes[i], count)));
 				var p_p = pap[r.Game];
+				var types = settings.RecruitableTypes(p_p.Province(r.Province)).ToImmutableArray();
+				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(types[i], count)));
+
 				if (soldiers.Price > p_p.Player(r.P).Money)
 				{
-					(p_p, _) = p_p.Add(new Borrow(p_p.Player(r.P), soldiers.Price - p_p.Player(r.P).Money));
+					p_p = p_p.Add(new Borrow(p_p.Player(r.P), soldiers.Price - p_p.Player(r.P).Money));
 				}
-				(pap[r.Game], _) = p_p.Add(new Recruit(p_p.Player(r.P), p_p.Province(r.Province), soldiers));
+				pap[r.Game] = p_p.Add(new Recruit(p_p.Player(r.P), p_p.Province(r.Province), soldiers));
 				await ctx.SaveAsync();
 			}
 		}

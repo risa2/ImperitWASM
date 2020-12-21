@@ -23,12 +23,12 @@ namespace ImperitWASM.Shared.Data
 		PlayersAndProvinces Recruit(PlayersAndProvinces pap, ref int spent, int province, Soldiers soldiers)
 		{
 			spent += soldiers.Price;
-			return pap.JustAdd(new Recruit(this, pap.Province(province), soldiers));
+			return pap.Add(new Recruit(this, pap.Province(province), soldiers));
 		}
 
 		PlayersAndProvinces Move(PlayersAndProvinces pap, int from, int to, Soldiers soldiers)
 		{
-			return pap.JustAdd(new Move(this, pap.Province(from), pap.Province(to), soldiers));
+			return pap.Add(new Move(this, pap.Province(from), pap.Province(to), soldiers));
 		}
 
 		SoldierType? BestDefender(Province p, int money)

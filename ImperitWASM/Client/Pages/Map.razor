@@ -3,14 +3,15 @@
 	[Parameter] public int Height { get; set; }
 	[Parameter] public IReadOnlyList<Data.ProvinceAppearance>? Provinces { get; set; }
 	[Parameter] public Color SelectedColor { get; set; } = new Color();
-	[Parameter] public Func<int, int?, Task<int?>>? Select { get; set; }
+	[Parameter] public Func<Data.ProvinceAppearance, Color> TextColor { get; set; } = _ => new Color(255, 255, 255);
+	[Parameter] public Func<int, Task>? OnClickAsync { get; set; }
 	[Parameter] public int FontSize { get; set; }
 	int? selected = null;
 	Country? country;
 	ImmutableArray<Point>? SelectedPoints => selected is int i ? Provinces?[i].B : null;
-	async Task ClickSelect(int? index)
+	public void Select(int? i)
 	{
-		selected = index is int i ? await Select!(i, selected) : null;
+		selected = i;
 		country?.Select(SelectedPoints, SelectedColor);
 	}
 }
@@ -19,12 +20,12 @@
 	{
 		@foreach (var (i, province) in Provinces.Index())
 		{
-			<Country Points="province.B" Fill="province.F" Stroke="province.S" StrokeWidth="province.W" Width="Width" Height="Height" OnClick="async() => await ClickSelect(i)" />
+			<Country Points="province.B" Fill="province.F" Stroke="province.S" StrokeWidth="province.W" Width="Width" Height="Height" OnClickAsync="() => OnClickAsync!(i)" />
 		}
-		<Country @ref="country" Points="SelectedPoints" Fill="SelectedColor" Width="Width" Height="Height" OnClick="async() => await ClickSelect(selected)" />
+		<Country @ref="country" Points="SelectedPoints" Fill="SelectedColor" Width="Width" Height="Height" OnClickAsync="() => OnClickAsync!(selected!.Value)" />
 		@foreach (var (i, province) in Provinces.Index())
 		{
-			<Caption Text="@province.T" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClick="async() => await ClickSelect(i)" />
+			<Caption Text="@province.T" Color="TextColor(province)" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClickAsync="() => OnClickAsync!(i)" />
 		}
 	}
 </svg>

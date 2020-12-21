@@ -11,6 +11,7 @@
 	ImmutableArray<Data.ProvinceAppearance> Provinces;
 	Color NextColor = new Color();
 	Data.RegistrationErrors Error = Data.RegistrationErrors.Ok;
+	Map? map;
 	async Task OnSubmit()
 	{
 		Error = await http.PostAsync<Data.RegisteredPlayer, Data.RegistrationErrors>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, Selected ?? 0, GameId ?? 0));
@@ -24,16 +25,15 @@
 	{
 		GameId = await http.GetAsync<int>("api/Game/RegistrableGame");
 		NextColor = await http.PostAsync<int, Color>("api/Game/NextColor", GameId.Value);
-		Provinces = (await http.PostAsync<int, ImmutableArray<Data.ProvinceAppearance>>("api/Provinces/Shapes", GameId.Value)).Select(s => s.UpdateText()).ToImmutableArray();
+		Provinces = await http.PostAsync<int, ImmutableArray<Data.ProvinceAppearance>>("api/Provinces/Shapes", GameId.Value);
 	}
 #pragma warning disable 1998
-	async Task<int?> Select(int i, int? from)
+	async Task OnClickAsync(int i)
 	{
 		if (Provinces![i].R)
 		{
-			Selected = i;
+			map?.Select(Selected = i);
 		}
-		return Selected;
 	}
 }
 <NavMenu Options="Zpět;Registrace;Potvrdit" Selected="1" OnClickAsync="async i =>
@@ -69,6 +69,6 @@
 	<p>Vyber si zemi, kde budeš začínat:</p>
 	@if (!Provinces.IsDefaultOrEmpty)
 	{
-		<Map Width="1000" Height="1000" Provinces="Provinces" SelectedColor="NextColor" Select="Select" FontSize="9" />
+		<Map @ref="map" Width="1000" Height="1000" Provinces="Provinces" SelectedColor="NextColor" OnClickAsync="OnClickAsync" FontSize="9" TextColor="p => p.GetRegistrationColor()" />
 	}
 </main>

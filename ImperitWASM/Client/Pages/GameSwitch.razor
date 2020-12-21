@@ -20,10 +20,7 @@
 	}
 	void Switch(Mode mode = Mode.Map, int? from = null, int? to = null, (int, int, string)? player = null)
 	{
-		Current = mode;
-		From = from;
-		To = to;
-		Player = player;
+		(Current, From, To, Player) = (mode, from, to, player);
 		this.StateHasChanged();
 	}
 	async Task NextTurnAsync()
@@ -34,16 +31,20 @@
 		}
 		else
 		{
-			Info = await http.PostAsync<int, Data.GameInfo>("api/Game/Info", Session.G);
-			Map?.Update();
+			await CheckSession();
 		}
 	}
 	async Task CheckSession()
 	{
-		Info = await http.PostAsync<int, Data.GameInfo>("api/Game/Info", Session.G);
-		if (!Info.S)
+		var info = await http.PostAsync<int, Data.GameInfo>("api/Game/Info", Session.G);
+		if (!info.S)
 		{
 			await DoLogoutAsync();
+		}
+		else if (info.P != Info.P)
+		{
+			Info = info;
+			Map?.Update(Info.P == Session.P);
 		}
 	}
 	protected override async Task OnInitializedAsync()
@@ -74,7 +75,7 @@
 
 @if (Current == Mode.Map)
 {
-	<GameMap UpdateProvinces="UpdateProvinces" @ref="Map" Provinces="Provinces" IsActive="Info.P == Session.P" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" Session="Session" LogoutAsync="DoLogoutAsync" NextTurnAsync="NextTurnAsync"/>
+	<GameMap @ref="Map" UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.P == Session.P" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" Session="Session" LogoutAsync="DoLogoutAsync" NextTurnAsync="NextTurnAsync"/>
 }
 else if (Current == Mode.Preview)
 {

@@ -10,7 +10,7 @@
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
 	[Parameter] public List<Data.ProvinceAppearance>? Provinces { get; set; }
-	[Parameter] public Action<ImmutableArray<Data.ProvinceUpdate>>? UpdateProvinces { get; set; }
+	[Parameter] public Action<ImmutableArray<Data.ProvinceUpdate>> UpdateProvinces { get; set; } = x => { };
 	int PlayerMoney = 0;
 	int? Selected = null;
 	Map? map;
@@ -25,13 +25,14 @@
 			map?.Select(Selected = null);
 		}
 	}
-	public async Task Update()
+	public async Task Update(bool isActive)
 	{
 		PlayerMoney = await http.PostAsync<Data.Session, int>("api/Player/Money", Session);
-		UpdateProvinces!(await http.PostAsync<int, ImmutableArray<Data.ProvinceUpdate>>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
+		UpdateProvinces(await http.PostAsync<int, ImmutableArray<Data.ProvinceUpdate>>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
+		IsActive = isActive;
 		this.StateHasChanged();
 	}
-	protected override Task OnInitializedAsync() => Update();
+	protected override Task OnInitializedAsync() => Update(IsActive);
 }
 <nav>
 	@if (Preview)

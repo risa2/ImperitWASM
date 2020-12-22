@@ -50,8 +50,8 @@
 		{
 			<a @onclick="LogoutAsync.Must()">Odhlášení</a>
 		}
-		<a class="this">Imperit</a>
-		<a @onclick="() => Switch(Mode.Statistics, null, null)">@(PlayerMoney)@Sym.Money</a>
+		<a class="this">@(PlayerMoney)@Sym.Money</a>
+		<a @onclick="() => Switch(Mode.Statistics, null, null)">Hráči</a>
 		<a @onclick="() => Switch(Mode.Preview, null, null)">Náhled</a>
 	}
 </nav>

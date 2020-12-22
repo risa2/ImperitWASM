@@ -39,11 +39,11 @@
 		{
 			@if (Info.S is { Length: > 0 })
 			{
-				<p>@Info.N má @Info.S @if (Info.I.Any) { <text>(nespokojenost @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
+				<p>@Info.N má @Info.S @if (Info.I.Any) { <text>(pravděpodobnost odtržení @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
 			}
 			else
 			{
-				<p>@Info.N nemá žádné vojáky @if (Info.I.Any) { <text>(nespokojenost @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
+				<p>@Info.N nemá žádné vojáky @if (Info.I.Any) { <text>(pravděpodobnost odtržení @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
 			}
 			<table>
 				@foreach (var (i, (type, price)) in Info.R.Index())

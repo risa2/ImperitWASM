@@ -179,5 +179,4 @@ ASALocalRun/
 .mfractor/
 .localhistory/
 healthchecksdb
-*.pdf
 *.synctex.gz

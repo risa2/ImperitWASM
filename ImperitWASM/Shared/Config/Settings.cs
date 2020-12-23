@@ -17,6 +17,7 @@ namespace ImperitWASM.Shared.Config
 		public static Color ColorOf(int i) => Color.Generate(i, 120.0, 1.0, 1.0);
 
 		public Human CreateHuman(int i, string name, int land, Password password) => Human.Create(ColorOf(i - 1), name, StartMoney(land), this, password);
+		public Robot CreateRobot(int i, string name, int land) => Robot.Create(ColorOf(i - 1), name, StartMoney(land), this);
 		public Provinces GetProvinces() => new Provinces(Provinces.Select(p => p.Build(this, Savage)).ToImmutableArray(), this);
 		public PlayersAndProvinces GetPlayersAndProvinces() => new PlayersAndProvinces(ImmutableArray.Create<Player>(Savage), GetProvinces());
 

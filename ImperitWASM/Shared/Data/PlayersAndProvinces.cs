@@ -59,7 +59,7 @@ namespace ImperitWASM.Shared.Data
 			var new_provinces = Provinces.ToBuilder();
 			foreach (var (start, name) in Inhabitable.Zip(names))
 			{
-				new_players.Add(Robot.Create(Settings.ColorOf(new_players.Count), name, settings.StartMoney(start), settings));
+				new_players.Add(settings.CreateRobot(new_players.Count, name, start));
 				new_provinces[start] = new_provinces[start].GiveUpTo(new_players[^1], new_provinces[start].Soldiers);
 			}
 			return new PlayersAndProvinces(new_players.ToImmutable(), new Provinces(new_provinces.MoveToImmutable(), settings));

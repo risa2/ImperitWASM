@@ -111,7 +111,9 @@ Pro vytvoření hry jsem zvolil formát tahové strategie, neboť strategie v re
 
 \section{Popis hry}
 \subsection{Provincie}
-Hra se odehrává na mapě, která se skládá z jednotlivých provincií (země, moře a pohoří), jejichž názvy a tvary jsou zvolené podle evropských států, krajů, moří a pohoří. Pohoří nemají žádnou armádu, není možné je ovládat ani v nich mít jednotky. V mořích a zemích může být vojsko a můžou být ovládány některým z hráčů, jenž v nich následně může verbovat další vojenské jednotky. Pokud hráč do provincie pošle vojsko, jehož útočná síla je vyšší, než je obranná síla jednotek v provincii, dobude ji a poté ji ovládá, dokud se provincie neodtrhne nebo není dobyta jiným hráčem. Moře se odtrhne, pokud v něm hráč nemá žádné jednotky. Země se může hráči odtrhnout vždy po jeho tahu s pravděpodobností $P=\max{\displaystyle\frac{P_0\cdot (S_0-S)}{S_0},0}$, přičemž $P_0$ je výchozí pravděpodobnost odtržení (příbližně 10 \%), $S$ je obranná síla jednotek přítomných v zemi a $S_0$ je obranná síla výchozích jednotek, jež byly v zemi na začátku hry.
+Hra se odehrává na mapě, která se skládá z jednotlivých provincií (země, moře a pohoří), jejichž názvy a tvary jsou zvolené podle evropských států, krajů, moří a pohoří. Pohoří nemají žádnou armádu, není možné je ovládat ani v nich mít jednotky. V mořích a zemích může být vojsko a můžou být ovládány některým z hráčů, jenž v nich následně může verbovat další vojenské jednotky. Pokud hráč do provincie pošle vojsko, jehož útočná síla je vyšší, než je obranná síla jednotek v provincii, dobude ji a poté ji ovládá, dokud se provincie neodtrhne nebo není dobyta jiným hráčem.
+
+Moře se odtrhne, pokud v něm hráč nemá žádné jednotky. Země se může hráči odtrhnout vždy po jeho tahu, přičemž pravděpodobnost odtržení je pro zemi bez armády 10 \% a klesá s růstem obranné síly jednotek tak, že země, jejíž armáda má stejnou obrannou sílu jako na začátku hry se nemůže odtrhnout.
 \subsection{Hráči}
 Hráčů může být $2$--$16$ a pokud jich je méně než $16$, hrají místo zbývajících hráčů automatické algoritmy. Na začátku má každý hráč jednu zemi a určité množství peněz. Po svém tahu získá každý hráč peníze za každou zemi, kterou ovládá, přičemž toto množství se u různých zemí liší. Za peníze si mohou kupovat země a verbovat ve svých zemích vojenské jednotky.
 \subsection{Vojenské jednotky}
@@ -139,9 +141,12 @@ Na okraji obrazovky (levý okraj na širokých obrazovkách, horní na úzkých)
 \subsubsection{Mapa}
 Na této stránce hráč vidí mapu všech provincií. Pohoří se zobrazují jen jako šedá čára mezi zeměmi. Pokud jim žádný z hráčů nevládne, jsou moře tyrkysová a země černošedé; pokud v nich však někdo vládne, mají barvu onoho hráče. Dále se u nich zobrazuje jejich název a počet vojenských jednotek v nich, u zemí se navíc zobrazuje jejich výnos za jedno kolo. Země, které mají přístav, mají u svého názvu kotvu, a země, které hráč potřebuje k vítězství, u svého názvu mají hvězdičku.
 
-Klikne-li hráč dvakrát na svou provincii, může v ní verbovat jednotky; klikne-li na ni jednou a poté klikne na druhou provincii, může přesunout jednotky z první provincie do druhé; klikne-li na cizí zemi, jež sousedí s jeho zemí, může tuto zemi koupit. Při verbování (resp. přesunu) se ukáže nabídka, v níž může hráč vybrat, kolik jednotek kterého druhu chce verbovat (resp. přesunout). Pokud se hráč rozhodne verbovat více jednotek, než si může za své peníze koupit, nebo si koupit zemi, která stojí více peněz, než kolik daný hráč má, zobrazí se mu možnost si chybějící částku půjčit. Pokud se země může odtrhnout, zobrazí se v nabídce verbování pravděpodobnost, že k tomu dojde.
 
 \includegraphics[width=\textwidth]{ProvinceMap.png}
+
+Klikne-li hráč dvakrát na svou provincii, může v ní verbovat jednotky; klikne-li na ni jednou a poté klikne na druhou provincii, může přesunout jednotky z první provincie do druhé; klikne-li na cizí zemi, jež sousedí s jeho zemí, může tuto zemi koupit. Při verbování (resp. přesunu) se ukáže nabídka, v níž může hráč vybrat, kolik jednotek kterého druhu chce verbovat (resp. přesunout). Pokud se hráč rozhodne verbovat více jednotek, než si může za své peníze koupit, nebo si koupit zemi, která stojí více peněz, než kolik daný hráč má, zobrazí se mu možnost si chybějící částku půjčit. Pokud se země může odtrhnout, zobrazí se v nabídce verbování pravděpodobnost, že k tomu dojde.
+
+\includegraphics[width=\textwidth]{Recruit.png}
 
 Navigační menu na této stránce má čtyři položky. První z nich je konec tahu, nebo odhlášení, podle toho, zda je přihlášený hráč na tahu. Druhá položka pouze informuje o tom, kolik peněz má přihlášený hráč. Třetí položka přepíná na stránku \textit{Hráči} a poslední možnost ukazuje náhled mapy po provedení akcí hráče na tahu.
 \subsubsection{Hráči}

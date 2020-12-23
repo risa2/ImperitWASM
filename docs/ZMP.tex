@@ -110,14 +110,21 @@ Rozhodl jsem se vytvořit hru o dobývání území navrženou tak, aby byla kon
 Pro vytvoření hry jsem zvolil formát tahové strategie, neboť strategie v reálném čase buď vyvíjí tlak na hráče z důvodu nedostatku času, nebo ve snaze vyhnout se tomuto problému vede ke zdlouhavému čekání na dokončení některých akcí \cite{turnreal1}. V obou případech realtimová strategie vede k orientaci na postřeh a trpělivost spíše než na vymýšlení strategie\cite{turnreal2}. Kromě toho \uv{připoutává} hráče k jejich obrazovkám, což sice může být mnohdy žádoucí, ale můj záměr takový nebyl.
 
 \section{Popis hry}
+Hru může hrát 2--16 hráčů. Hra se odehrává na mapě, která se skládá z provincií, jejichž názvy a tvary přibližně odpovídají evropským státům, krajům, mořím a horám. Cílem hry je získat alespoň tři z cílových zemí (Anhaltsko, Katalánsko, Kosovo a Královec). K dobytí všech je sice nutné ovládnout podstatnou část mapy, ale při vhodně zvolené strategii může hráč vyhrát, i když bude mít menší území než ostatní hráči.
+\subsection{Registrace}
+Při registraci si hráč zvolí jméno a heslo a zobrazí se mu mapa, na níž si kliknutím vybere zemi, kde bude začínat. Nemůže si vybrat zemi, jejíž název je napsán šedě. Po registraci hráč musí počkat, než začne jeho hra, což se stane čtyři minuty po registraci druhého hráče.
+\subsection{Průběh hry}
+Tahy hráčů se střídají v tom pořadí, v němž se tito hráči zaregistrovali. Během tahu může hráč provádět libovolné množství akcí bez časového omezení, dokud se sám nerozhodne svůj tah ukončit. Některé akce se však dokončí až po ukončení tahu.
 \subsection{Provincie}
-Hra se odehrává na mapě, která se skládá z jednotlivých provincií (země, moře a pohoří), jejichž názvy a tvary jsou zvolené podle evropských států, krajů, moří a pohoří. Pohoří nemají žádnou armádu, není možné je ovládat ani v nich mít jednotky. V mořích a zemích může být vojsko a můžou být ovládány některým z hráčů, jenž v nich následně může verbovat další vojenské jednotky. Pokud hráč do provincie pošle vojsko, jehož útočná síla je vyšší, než je obranná síla jednotek v provincii, dobude ji a poté ji ovládá, dokud se provincie neodtrhne nebo není dobyta jiným hráčem.
+Jsou tři typy provincií: země, moře a pohoří. Země a moře můžou patřit nějakému hráči, který v nich může mít svou armádu. Pohoří nikomu nepatří a armáda v nich být nemůže. Hráč dobude provincii, pokud do ní pošle armádu, jejíž útočná síla je vyšší než obranná síla tamních jednotek, a ovládá ji, dokud mu ji stejným způsobem nedobude jiný hráč, nebo dokud se tato provincie sama neodtrhne.
 
-Moře se odtrhne, pokud v něm hráč nemá žádné jednotky. Země se může hráči odtrhnout vždy po jeho tahu, přičemž pravděpodobnost odtržení je pro zemi bez armády 10 \% a klesá s růstem obranné síly jednotek tak, že země, jejíž armáda má stejnou obrannou sílu jako na začátku hry se nemůže odtrhnout.
-\subsection{Hráči}
-Hráčů může být $2$--$16$ a pokud jich je méně než $16$, hrají místo zbývajících hráčů automatické algoritmy. Na začátku má každý hráč jednu zemi a určité množství peněz. Po svém tahu získá každý hráč peníze za každou zemi, kterou ovládá, přičemž toto množství se u různých zemí liší. Za peníze si mohou kupovat země a verbovat ve svých zemích vojenské jednotky.
+Moře se odtrhne, pokud v něm hráč nemá žádné jednotky. Země se může hráči odtrhnout vždy po jeho tahu, přičemž pravděpodobnost odtržení je pro zemi bez armády 10 \% a klesá s růstem obranné síly armády v zemi tak, aby se země nemohla odtrhnout, když má její armáda obrannou sílu stejnou nebo vyšší než na začátku hry.
+\subsection{Peníze}
+Hráč získá po svém tahu daňový výnos z každé země, jež mu patří. Tento výnos se může lišit u různých zemí. Obvykle mají vyšší výnos země, které mají na začátku hry více vojáků. Za peníze je možné kupovat další země nebo vojenské jednotky, s nimiž lze dobývat provincie a bránit provincie už dobyté.
+
+Pokud hráč dluží nějaké peníze, jsou mu po získání daňového výnosu zabaveny peníze ke splacení dluhu. Pokud všechny jeho peníze ke splacení dluhu nestačí, je zbývající dluh navýšen o úrok 10 \% a zůstává hráči do dalšího kola.
 \subsection{Vojenské jednotky}
-V tabulce jsou uvedeny typy vojenských jednotek, které se ve hře dají koupit. Je zde uvedena jejich cena, síla v boji, vzdálenost, na jakou se mohou samy přesunout a v jakém prostředí. Dále se uvádí hmotnost pro případ, že jednotka není schopná se sama přesunout a potřebuje být přepravena pomocí jiné jednotky. U jednotky, která naopak může přepravit jiné se potom uvádí nosnost.
+V tabulce jsou uvedeny typy vojenských jednotek, které se ve hře dají koupit. Je zde uvedena jejich cena, síla v boji, vzdálenost, na jakou se mohou samy přesunout a v jakém prostředí. Pokud se jednotka dokáže přesunout a navíc má nějakou nosnost, může přepravit jiné jednotky, které to nedokáží. Celková nosnost jednotek, které přepravu provádějí, musí být stejná nebo vyšší než je celková hmotnost přepravovaných jednotek.
 
 \begin{tabular}{l r r r r r l}
 Název		& Cena	& Síla	& Vzdálenost	&Nosnost& Hmotnost	& Prostředí\\ \hline
@@ -130,12 +137,6 @@ Veslice		& 130	& 130	& 1			& 120	& 500		& země s přístavem/moře\\
 
 Slon může pohoří přecházet, ale nemůže v nich zůstat, je u něj uvedena před lomítkem síla v útoku z lomítkem v obraně. Slona a fénickou loď lze koupit jen v Kartágu, veslici (celým názvem \uv{germánská bojová veslice}) jen v zemích s přístavem u Bodensee.
 
-\subsection{Začátek}
-Při registraci si hráč zvolí jméno a heslo a zobrazí se mu mapa, na níž si může vybrat zemi, v níž bude začínat. Tato mapa vypadá stejně jako mapa popisovaná v sekci 2.7.1, ale názvy provincií, v nichž není možné začínat, jsou napsány šedě. Po registraci hráč musí počkat, než začne jeho hra, což se stane čtyři minuty po registraci druhého hráče.
-\subsection{Průběh hry}
-Tahy hráčů se střídají v tom pořadí, v němž se tito hráči zaregistrovali. Během tahu je možné provést neomezené množství akcí bez časového limitu. Mezi akce se řadí verbování, přesun armády, koupě provincie, věnování peněz jinému hráči a kapitulace. Verbování a přesun se dokončí až po konci hráčova tahu, ostatní akce proběhnou okamžitě.
-\subsection{Cíl hry}
-Cílem hry je ovládnout tři ze čtyř cílových provincií, které jsou rozprostřeny po okrajích mapy. K dobytí všech je tedy sice nutné ovládnout podstatnou část mapy, ale při vhodně zvolené strategii může hráč vyhrát, i když bude mít menší území než ostatní hráči.
 \subsection{Ovládání}
 Na okraji obrazovky (levý okraj na širokých obrazovkách, horní na úzkých) je navigační menu, v němž může hráč přepínat mezi stránkami. Při přihlášení se jako výchozí stránka zobrazuje mapa provincií.
 \subsubsection{Mapa}
@@ -144,7 +145,9 @@ Na této stránce hráč vidí mapu všech provincií. Pohoří se zobrazují je
 
 \includegraphics[width=\textwidth]{ProvinceMap.png}
 
-Klikne-li hráč dvakrát na svou provincii, může v ní verbovat jednotky; klikne-li na ni jednou a poté klikne na druhou provincii, může přesunout jednotky z první provincie do druhé; klikne-li na cizí zemi, jež sousedí s jeho zemí, může tuto zemi koupit. Při verbování (resp. přesunu) se ukáže nabídka, v níž může hráč vybrat, kolik jednotek kterého druhu chce verbovat (resp. přesunout). Pokud se hráč rozhodne verbovat více jednotek, než si může za své peníze koupit, nebo si koupit zemi, která stojí více peněz, než kolik daný hráč má, zobrazí se mu možnost si chybějící částku půjčit. Pokud se země může odtrhnout, zobrazí se v nabídce verbování pravděpodobnost, že k tomu dojde.
+Klikne-li hráč dvakrát na svou provincii, může v ní verbovat jednotky; klikne-li na ni jednou a poté klikne na druhou provincii, může přesunout jednotky z první provincie do druhé; klikne-li na cizí zemi, jež sousedí s jeho zemí, může tuto zemi koupit.
+
+Při verbování a přesunu se ukáže nabídka, v níž může hráč vybrat, kolik jednotek kterého druhu chce verbovat (resp. přesunout). Pokud se hráč rozhodne verbovat více jednotek, než si může za své peníze koupit, nebo si koupit zemi, která stojí více peněz, než kolik daný hráč má, umožní mu hra si chybějící částku půjčít. Pokud se země může odtrhnout, zobrazí se v této nabídce pravděpodobnost, že k tomu dojde.
 
 \includegraphics[width=\textwidth]{Recruit.png}
 
@@ -156,9 +159,9 @@ Na této stránce se zobrazuje seznam všech hráčů, jejich peníze, příjmy,
 
 Pokud hra trvá dostatečně dlouho, zobrazí se pod možností vzdát se tři grafy. První z nich popisuje vývoj celkových sil hráčů (počítají se jako součet ceny všech vojáků, peněz, pětinásobku příjmů a stonásobku počtu cílových zemí, které daný hráč vlastní). Na druhém grafu se zobrazuje poměrná změna této síly. Na třetím se zobrazuje poměr vojenských sil hráčů (počítají se jako součet ceny všech vojáků a peněz) vůči sobě.
 
-\includegraphics[width=\textwidth]{PowersGraph.png}
+Na obrázku níže je ukázka prvního grafu ze hry, kterou vyhrál hráč, jenž má podle grafu až třetí největší sílu a jehož území zdaleka nebylo největší. Je tedy vidět, že při běžné hře k tomu může dojít.
 
-Toto je ukázka prvního grafu ze hry, již vyhrál hráč, který má na grafu až třetí největší sílu a neovládal zdaleka největší území.
+\includegraphics[width=\textwidth]{PowersGraph.png}
 
 \section{Použité technologie}
 \subsection{\CS{}}

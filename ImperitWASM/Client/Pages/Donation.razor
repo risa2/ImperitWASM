@@ -2,14 +2,12 @@
 
 @code{
 	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	[Parameter] public int Recipient { get; set; }
-	[Parameter] public int PlayerMoney { get; set; }
-	[Parameter] public string RecipientName { get; set; } = "";
+	[Parameter] public Data.PlayerInfo? Recipient { get; set; }
 	[Parameter] public Action Return { get; set; } = (() => { });
 	Data.Int model = new Data.Int();
 	async Task DoDonate()
 	{
-		if (await http.PostAsync<Data.DonationCmd, bool>("api/Command/Donate", new Data.DonationCmd(Session.P, Session.Key, Recipient, model.Value, Session.G)))
+		if (await http.PostAsync<Data.DonationCmd, bool>("api/Command/Donate", new Data.DonationCmd(Session.P, Session.Key, Recipient!.P, model.Value, Session.G)))
 		{
 			Return();
 		}
@@ -20,9 +18,9 @@
 	<a class="this">Věnování</a>
 </nav>
 <main>
-	@if (model.Value > PlayerMoney)
+	@if (model.Value > Recipient!.M)
 	{
-		<p>Máš jen @PlayerMoney@Sym.Money</p>
+		<p>Máš jen @Recipient.M@Sym.Money</p>
 	}
 	<EditForm Model="@model" OnValidSubmit="DoDonate">
 		<DataAnnotationsValidator/><ValidationSummary/>
@@ -30,7 +28,7 @@
 			Darovaná částka:<br/>
 			<InputNumber @bind-Value="model.Value" min="1" autofocus/><br/>
 		</label>
-		<label>Příjemce:<br/><input type="text" value="@RecipientName" disabled="disabled"/><br/></label>
+		<label>Příjemce:<br/><input type="text" value="@Recipient.N" disabled="disabled"/><br/></label>
 		<button type="submit">Věnovat</button>
 	</EditForm>
 </main>

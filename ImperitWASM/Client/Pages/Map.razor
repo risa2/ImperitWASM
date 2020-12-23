@@ -23,6 +23,7 @@
 			<Country Points="province.B" Fill="province.F" Stroke="province.S" StrokeWidth="province.W" Width="Width" Height="Height" OnClickAsync="() => OnClickAsync!(i)" />
 		}
 		<Country @ref="country" Points="SelectedPoints" Fill="SelectedColor" Width="Width" Height="Height" OnClickAsync="() => OnClickAsync!(selected!.Value)" />
+		<BorderLines Borders="Provinces.Select(p => p.B as IEnumerable<Point>)" Width="Width" Height="Height" LineWidth="0.8"/>
 		@foreach (var (i, province) in Provinces.Index())
 		{
 			<Caption Text="@province.T" Color="TextColor(province)" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClickAsync="() => OnClickAsync!(i)" />

@@ -1,0 +1,16 @@
+﻿@code{
+	record Pair(int X, int Y);
+	[Parameter] public IEnumerable<IEnumerable<Point>> Borders { get; set; } = Array.Empty<IEnumerable<Point>>();
+	[Parameter] public Color Color { get; set; } = new Color(0, 0, 0);
+	[Parameter] public double LineWidth { get; set; } = 1.0;
+	[Parameter] public int Width { get; set; }
+	[Parameter] public int Height { get; set; }
+	Pair Adjust(Point pt) => new Pair((int)(pt.X * Width), (int)(pt.Y * Height));
+	static (Pair, Pair) Order(Pair a, Pair b) => a.X > b.X || (a.X == b.X && a.Y > a.Y) ? (a, b) : (b, a);
+	(Pair, Pair) MakeLine(Point a, Point b) => Order(Adjust(a), Adjust(b));
+}
+
+@foreach (var (begin, end) in Borders.SelectMany(border => border.Pairs(MakeLine)).Distinct())
+{
+	<line x1="@begin.X" y1="@begin.Y" x2="@end.X" y2="@end.Y" stroke="@Color.ToString()" stroke-width="@LineWidth"></line>
+}

@@ -7,7 +7,7 @@
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	Mode Current;
 	int? From = null, To = null;
-	(int, int, string)? Player = null;
+	Data.PlayerInfo? Player = null;
 	Color PlayerColor = new Color();
 	Data.GameInfo Info = new Data.GameInfo();
 	List<Data.ProvinceAppearance>? Provinces = null;
@@ -18,7 +18,7 @@
 		timer.Stop();
 		return LogoutAsync!();
 	}
-	void Switch(Mode mode = Mode.Map, int? from = null, int? to = null, (int, int, string)? player = null)
+	void Switch(Mode mode = Mode.Map, int? from = null, int? to = null, Data.PlayerInfo? player = null)
 	{
 		(Current, From, To, Player) = (mode, from, to, player);
 		this.StateHasChanged();
@@ -81,9 +81,9 @@ else if (Current == Mode.Preview)
 {
 	<GameMap UpdateProvinces="UpdateProvinces" Provinces="Provinces" IsActive="Info.P == Session.P" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" Session="Session" LogoutAsync="DoLogoutAsync" NextTurnAsync="NextTurnAsync"/>
 }
-else if (Current == Mode.Donation && Player is var (Money, Recipient, Name))
+else if (Current == Mode.Donation && Player is not null)
 {
-	<Donation Session="Session" Recipient="Recipient" RecipientName="@Name" Return="() => Switch()" PlayerMoney="Money"/>
+	<Donation Session="Session" Recipient="Player" Return="() => Switch()"/>
 }
 else if (Current == Mode.Move && From is int from && To is int to)
 {

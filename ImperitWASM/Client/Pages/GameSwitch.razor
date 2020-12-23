@@ -21,7 +21,7 @@
 	void Switch(Mode mode = Mode.Map, int? from = null, int? to = null, Data.PlayerInfo? player = null)
 	{
 		(Current, From, To, Player) = (mode, from, to, player);
-		this.StateHasChanged();
+		StateHasChanged();
 	}
 	async Task NextTurnAsync()
 	{

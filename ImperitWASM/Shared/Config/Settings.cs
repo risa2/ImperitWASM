@@ -6,7 +6,7 @@ using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Config
 {
-	public sealed record Settings(int CountdownSeconds, Ratio DefaultInstability, int DebtLimit, int DefaultMoney, int FinalLandsCount, Ratio Interest, Color LandColor, Color MountainsColor, int MountainsWidth, ImmutableArray<string> Names, ImmutableArray<ProvinceData> Provinces, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes)
+	public sealed record Settings(int CountdownSeconds, Ratio DefaultInstability, int DebtLimit, int DefaultMoney, int FinalLandsCount, Ratio Interest, Color LandColor, int PlayerCount, Color MountainsColor, int MountainsWidth, ImmutableArray<string> Names, ImmutableArray<ProvinceData> Provinces, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes)
 	{
 		public Savage Savage => new Savage(this);
 		public TimeSpan CountdownTime => TimeSpan.FromSeconds(CountdownSeconds);
@@ -26,7 +26,7 @@ namespace ImperitWASM.Shared.Config
 
 		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
 		string GetName(int i, Func<string, int, string> obf) => obf(Names[i % Names.Length], i / Names.Length);
-		public IEnumerable<string> GetNames(Func<string, int, string> obf) => Enumerable.Range(0, int.MaxValue).Select(i => GetName(i, obf));
+		public IEnumerable<string> GetNames(Func<string, int, string> obf) => Enumerable.Range(0, PlayerCount).Select(i => GetName(i, obf));
 
 		public ImmutableArray<int> NeighborsOf(int vertex) => Provinces[vertex].Neighbors;
 		public int NeighborCount(int vertex) => NeighborsOf(vertex).Length;

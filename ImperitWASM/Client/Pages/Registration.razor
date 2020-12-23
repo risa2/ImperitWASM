@@ -19,7 +19,7 @@
 		{
 			await LoginAsync!(new Data.Login(Username, Password));
 		}
-		this.StateHasChanged();
+		StateHasChanged();
 	}
 	protected override async Task OnInitializedAsync()
 	{

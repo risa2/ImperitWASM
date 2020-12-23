@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Data;
 using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared;
 
 namespace ImperitWASM.Server.Services
 {
@@ -37,13 +38,14 @@ namespace ImperitWASM.Server.Services
 			return g.Id;
 		}
 		public Color NextColor(int gameId) => Settings.ColorOf(pap.PlayersCount(gameId) - 1);
+		void Start(Game g)
+		{
+			var p_p = pap[g.Id] = pap[g.Id].AddRobots(settings, settings.GetNames(pap.ObsfuscateName));
+			powers.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p);
+		}
 		public Task StartAllAsync()
 		{
-			foreach (var g in game.ShouldStart)
-			{
-				var p_p = pap[g.Id] = pap[g.Id].AddRobots(settings, settings.GetNames(pap.ObsfuscateName));
-				powers.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p);
-			}
+			game.ShouldStart.Each(Start);
 			return ctx.SaveAsync();
 		}
 		public Task RegisterAsync(Game game, string name, Password password, int land)
@@ -51,6 +53,10 @@ namespace ImperitWASM.Server.Services
 			int count = pap.PlayersCount(game.Id);
 			pap.Add(game.Id, settings.CreateHuman(count, name, land, password), count, land);
 			_ = count == 2 ? game.StartCountdown() : game;
+			if (count + 1 >= settings.PlayerCount)
+			{
+				Start(game);
+			}
 			return ctx.SaveAsync();
 		}
 	}

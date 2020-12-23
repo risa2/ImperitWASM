@@ -19,7 +19,7 @@
 		Session = await http.PostAsync<Data.Login, Data.Session>("api/Player/Login", login);
 		await cookies.SetAsync(Session);
 		await UpdateState();
-		this.StateHasChanged();
+		StateHasChanged();
 		return Session.IsSet();
 	}
 	async Task LogoutAsync()
@@ -28,7 +28,12 @@
 		await cookies.RemoveAsync();
 		Session = new Data.Session();
 		State = Data.GameState.Invalid;
-		this.StateHasChanged();
+		StateHasChanged();
+	}
+	void Start()
+	{
+		State = Data.GameState.Started;
+		StateHasChanged();
 	}
 	protected override async Task OnInitializedAsync()
 	{
@@ -46,5 +51,5 @@ else if (State == Data.GameState.Started)
 }
 else
 {
-	<WaitingRoom LogoutAsync="LogoutAsync" Session="Session" State="State" Start="StateHasChanged"/>
+	<WaitingRoom LogoutAsync="LogoutAsync" Session="Session" State="State" Start="Start"/>
 }

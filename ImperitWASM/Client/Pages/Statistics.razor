@@ -27,7 +27,7 @@
 	{
 		Active = await http.PostAsync<int, int>("api/Game/Active", Session.G);
 		Players = await http.PostAsync<Data.Session, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", Session);
-		this.StateHasChanged();
+		StateHasChanged();
 		ColoredPlayers = await http.PostAsync<int, ImmutableArray<Data.ColoredPlayer>>("api/Player/Colored", Session.G);
 		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Session.G);
 	}

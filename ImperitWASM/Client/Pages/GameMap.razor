@@ -30,7 +30,7 @@
 		PlayerMoney = await http.PostAsync<Data.Session, int>("api/Player/Money", Session);
 		UpdateProvinces(await http.PostAsync<int, ImmutableArray<Data.ProvinceUpdate>>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
 		IsActive = isActive;
-		this.StateHasChanged();
+		StateHasChanged();
 	}
 	protected override Task OnInitializedAsync() => Update(IsActive);
 }

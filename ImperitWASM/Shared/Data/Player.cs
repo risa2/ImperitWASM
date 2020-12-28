@@ -9,7 +9,11 @@ namespace ImperitWASM.Shared.Data
 	{
 		protected static readonly ImmutableList<IPlayerAction> DefaultActions = ImmutableList.Create<IPlayerAction>(new EndTurn());
 		public Description Description => new Description(Name, ImmutableArray<string>.Empty);
+		public int MaxBorrowable => Settings.Discount(Settings.DebtLimit - Debt);
+		public int MaxUsableMoney => Money + MaxBorrowable;
 		public Player ChangeMoney(int amount) => this with { Money = amount + Money };
+		public Player Earn(PlayersAndProvinces pap) => ChangeMoney(pap.IncomeOf(this));
+		
 		Player WithActions(ImmutableList<IPlayerAction> new_actions) => this with { Actions = new_actions };
 		public Player Die() => this with { Money = 0, Alive = false, Actions = ImmutableList<IPlayerAction>.Empty };
 		public Player Add(params IPlayerAction[] actions) => WithActions(Actions.AddRange(actions));
@@ -17,7 +21,6 @@ namespace ImperitWASM.Shared.Data
 		{
 			return WithActions(Actions.Replace(cond, interact, value));
 		}
-		public int MaxBorrowable => Settings.Discount(Settings.DebtLimit - Debt);
 		public Player Borrow(int amount)
 		{
 			return ChangeMoney(amount).Replace(a => true, new Loan(amount, Settings), (x, y) => new Loan(x.Debt + y.Debt, Settings));

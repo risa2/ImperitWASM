@@ -118,11 +118,11 @@ Tahy hráčů se střídají v tom pořadí, v němž se tito hráči zaregistro
 \subsection{Provincie}
 Jsou tři typy provincií: země, moře a pohoří. Země a moře můžou patřit nějakému hráči, který v nich může mít svou armádu. Pohoří nikomu nepatří a armáda v nich být nemůže. Hráč dobude provincii, pokud do ní pošle armádu, jejíž útočná síla je vyšší než obranná síla tamních jednotek, a ovládá ji, dokud mu ji stejným způsobem nedobude jiný hráč, nebo dokud se tato provincie sama neodtrhne.
 
-Moře se odtrhne, pokud v něm hráč nemá žádné jednotky. Země se může hráči odtrhnout vždy po jeho tahu, přičemž pravděpodobnost odtržení je pro zemi bez armády 10 \% a klesá s růstem obranné síly armády v zemi tak, aby se země nemohla odtrhnout, když má její armáda obrannou sílu stejnou nebo vyšší než na začátku hry.
+Země se může hráči odtrhnout vždy po jeho tahu. Pravděpodobnost odtržení země bez armády je 10 \% a s růstem obranné síly armády klesá tak, že když má armáda obrannou sílu stejnou nebo vyšší než armáda v zemi na začátku hry, země se již nemůže odtrhnout.
 \subsection{Peníze}
-Hráč získá po svém tahu daňový výnos z každé země, jež mu patří. Tento výnos se může lišit u různých zemí. Obvykle mají vyšší výnos země, které mají na začátku hry více vojáků. Za peníze je možné kupovat další země nebo vojenské jednotky, s nimiž lze dobývat provincie a bránit provincie už dobyté.
+Hráč získává po svém tahu daňový výnos ze svých zemí a tento výnos se u různých zemí liší. Jestli chce hráč získat výnos ze všech svých zemí, musí jeho provincie tvořit souvislé území. Pokud je území hráče rozdělené na více částí, mezi nimiž jsou provincie, které jsou neobydlené nebo jsou pod kontrolou jiného hráče, získá hráč pouze výnos z části s nejvyším výnosem. Existuje tedy značná motivace udržovat své území souvislé.
 
-Pokud hráč dluží nějaké peníze, jsou mu po získání daňového výnosu zabaveny peníze ke splacení dluhu. Pokud všechny jeho peníze ke splacení dluhu nestačí, je zbývající dluh navýšen o úrok 10 \% a zůstává hráči do dalšího kola.
+Za peníze je možné kupovat další země nebo vojenské jednotky, s nimiž lze dobývat provincie a bránit provincie už dobyté. Cena země je součtem ceny jejích vojenských jednotek, dvojnásobku jejího výnosu a obranné síly jejích vojenských jednotek. Pokud hráč dluží nějaké peníze, jsou mu po získání daňového výnosu zabaveny peníze ke splacení dluhu. Pokud všechny jeho peníze ke splacení dluhu nestačí, je zbývající dluh navýšen o úrok 25 \% a zůstává hráči do dalšího kola. Dluh nesmí přesáhnout 400, pokud k tomu dojde, provede se exekuce, hráč ztratí několik svých zemí a jeho dluh bude snížen o cenu těchto zemí.
 \subsection{Vojenské jednotky}
 V tabulce jsou uvedeny typy vojenských jednotek, které se ve hře dají koupit. Je zde uvedena jejich cena, síla v boji, vzdálenost, na jakou se mohou samy přesunout a v jakém prostředí. Pokud se jednotka dokáže přesunout a navíc má nějakou nosnost, může přepravit jiné jednotky, které to nedokáží. Celková nosnost jednotek, které přepravu provádějí, musí být stejná nebo vyšší než je celková hmotnost přepravovaných jednotek.
 
@@ -140,7 +140,7 @@ Slon může pohoří přecházet, ale nemůže v nich zůstat, je u něj uvedena
 \subsection{Ovládání}
 Na okraji obrazovky (levý okraj na širokých obrazovkách, horní na úzkých) je navigační menu, v němž může hráč přepínat mezi stránkami. Při přihlášení se jako výchozí stránka zobrazuje mapa provincií.
 \subsubsection{Mapa}
-Na této stránce hráč vidí mapu všech provincií. Pohoří se zobrazují jen jako šedá čára mezi zeměmi. Pokud jim žádný z hráčů nevládne, jsou moře tyrkysová a země černošedé; pokud v nich však někdo vládne, mají barvu onoho hráče. Dále se u nich zobrazuje jejich název a počet vojenských jednotek v nich, u zemí se navíc zobrazuje jejich výnos za jedno kolo. Země, které mají přístav, mají u svého názvu kotvu, a země, které hráč potřebuje k vítězství, u svého názvu mají hvězdičku.
+Na této stránce hráč vidí mapu všech provincií. Pohoří se zobrazují jen jako šedá čára mezi zeměmi. Pokud jim žádný z hráčů nevládne, jsou moře tyrkysová a země černošedé; pokud v nich však někdo vládne, mají barvu onoho hráče. Dále se u moří a zemí zobrazuje jejich název a počet vojenských jednotek, u zemí se navíc zobrazuje jejich výnos za jedno kolo. Země, které mají přístav, mají u svého názvu kotvu, a země, které hráč potřebuje k vítězství, u svého názvu mají hvězdičku.
 
 
 \includegraphics[width=\textwidth]{ProvinceMap.png}

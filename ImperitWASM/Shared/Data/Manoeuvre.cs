@@ -4,7 +4,7 @@ namespace ImperitWASM.Shared.Data
 	{
 		public (Province, IProvinceAction?) Perform(Province province, PlayersAndProvinces pap)
 		{
-			return (province.IsAllyOf(Player) ? province.ReinforcedBy(Soldiers) : province.AttackedBy(Player, Soldiers), null);
+			return (province.IsAllyOf(Player) ? province.Reinforce(Soldiers) : province.AttackedBy(Player, Soldiers), null);
 		}
 	}
 }

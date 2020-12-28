@@ -44,7 +44,7 @@ namespace ImperitWASM.Server.Controllers
 			}
 		}
 		[HttpPost("MoveInfo")]
-		public MoveInfo MoveInfo([FromBody] MoveData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.F) is Province from && p_p.Province(move.T) is Province to ? new MoveInfo(from.CanAnyMove(p_p, to), !from.IsAllyOf(to), to.Occupied, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.Soldiers.Select(reg => reg.Type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
+		public MoveInfo MoveInfo([FromBody] MoveData move) => pap.GameExists(move.G) && pap[move.G] is PlayersAndProvinces p_p && p_p.Province(move.F) is Province from && p_p.Province(move.T) is Province to ? new MoveInfo(from.CanAnyMove(p_p, to), !from.IsAllyOf(to), to.Inhabited, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.Soldiers.Select(reg => reg.Type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
 		[HttpPost("Move")]
 		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
 		{
@@ -64,7 +64,7 @@ namespace ImperitWASM.Server.Controllers
 			};
 		}
 		[HttpPost("PurchaseInfo")]
-		public PurchaseInfo PurchaseInfo([FromBody] PurchaseData purchase) => pap.GameExists(purchase.G) && pap[purchase.G] is PlayersAndProvinces p_p && p_p.Province(purchase.L) is Land land && p_p.Player(purchase.P) is Player player ? new PurchaseInfo(new Buy(player, land, 0).Allowed(p_p), land.Name, land.Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
+		public PurchaseInfo PurchaseInfo([FromBody] PurchaseData purchase) => pap.GameExists(purchase.G) && pap[purchase.G] is PlayersAndProvinces p_p && p_p.Province(purchase.L) is Land land && p_p.Player(purchase.P) is Player player ? new PurchaseInfo(new Buy(player, land).AllowedWithLoan(p_p), land.Name, land.Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
 		[HttpPost("Purchase")]
 		public async Task Purchase([FromBody] PurchaseCmd purchase)
 		{
@@ -74,7 +74,7 @@ namespace ImperitWASM.Server.Controllers
 				if (p_p.Province(purchase.Land) is Land Land && p_p.Player(purchase.P) is Player Player)
 				{
 					p_p = Land.Price > Player.Money ? p_p.Add(new Borrow(Player, Land.Price - Player.Money)) : p_p;
-					pap[purchase.Game] = p_p.Add(new Buy(Player, Land, Land.Price));
+					pap[purchase.Game] = p_p.Add(new Buy(Player, Land));
 				}
 				await ctx.SaveAsync();
 			}

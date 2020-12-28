@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Immutable;
 using System.Threading.Tasks;
 using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Data;
@@ -32,7 +31,7 @@ namespace ImperitWASM.Server.Services
 		}
 		public async Task<int> CreateAsync()
 		{
-			var g = pap.Add(settings.GetPlayersAndProvinces());
+			var g = pap.Add(settings.PlayersAndProvinces);
 			game.RemoveOld(TimeSpan.FromDays(1));
 			await ctx.SaveAsync();
 			return g.Id;

@@ -11,13 +11,15 @@ namespace ImperitWASM.Shared.Data
 		public abstract ImmutableArray<string> Text { get; }
 		public ImmutableArray<Point> Border => Shape.Border;
 		public Point Center => Shape.Center;
-		public virtual bool ShouldRevolt(Player active) => !CanSoldiersSurvive;
 
-		public Province GiveUpTo(Player player, Soldiers soldiers) => this with { Player = player, Soldiers = soldiers };
-		public Province GiveUpTo(Player p) => GiveUpTo(p, new Soldiers());
-		public Province Revolt() => GiveUpTo(Settings.Savage, DefaultSoldiers);
-
+		public Province ConqueredBy(Player player) => this with { Player = player };
+		public Province WithSoldiers(Soldiers soldiers) => this with { Soldiers = soldiers };
 		Province WithActions(ImmutableList<IProvinceAction> new_actions) => this with { Actions = new_actions };
+
+		public Province Revolt() => ConqueredBy(Settings.Savage).WithSoldiers(DefaultSoldiers);
+		public virtual bool WillRevolt(Player active) => !CanSoldiersSurvive;
+		public Province RevoltIfNecessary(Player active) => WillRevolt(active) ? Revolt() : this;
+
 		public Province Add(params IProvinceAction[] actions) => WithActions(Actions.AddRange(actions));
 		public Province Replace(Func<IProvinceAction, IProvinceAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
 
@@ -51,13 +53,13 @@ namespace ImperitWASM.Shared.Data
 		public int Power => Soldiers.Power;
 		public int DefaultDefensePower => DefaultSoldiers.DefensePower;
 
-		public Province Subtract(Soldiers army) => GiveUpTo(Player, Soldiers.Subtract(army));
-		public Province AttackedBy(Player p, Soldiers s) => GiveUpTo(s.AttackPower > Soldiers.DefensePower ? p : Player, Soldiers.AttackedBy(s));
-		public Province ReinforcedBy(Soldiers another) => GiveUpTo(Player, Soldiers.Add(another));
-		public bool Occupied => Player is not Savage;
+		public Province Subtract(Soldiers army) => WithSoldiers(Soldiers.Subtract(army));
+		public Province Reinforce(Soldiers another) => WithSoldiers(Soldiers.Add(another));
+		public Province AttackedBy(Player p, Soldiers s) => ConqueredBy(s.AttackPower > Soldiers.DefensePower ? p : Player).WithSoldiers(Soldiers.AttackedBy(s));
+		public bool Inhabited => Player is not Savage;
 		public bool IsAllyOf(Player p) => p == Player;
 		public bool IsAllyOf(Province prov) => prov.Player == Player;
-		public bool IsEnemyOf(Player p) => Occupied && p != Player;
+		public bool IsEnemyOf(Player p) => Inhabited && p != Player;
 
 		public bool Has(Soldiers soldiers) => Soldiers.Contains(soldiers);
 		public bool HasSoldiers => Soldiers.Any;

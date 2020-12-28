@@ -43,7 +43,7 @@ namespace ImperitWASM.Server.Controllers
 			null or { Length: 0 } => RegistrationErrors.NoName,
 			string name when !pap.IsNameFree(name) => RegistrationErrors.UsedName,
 			_ when string.IsNullOrWhiteSpace(player.P) => RegistrationErrors.NoPassword,
-			_ when pap.Province(player.G, player.S) is Land { IsInhabitable: true } => await DoRegistrationAsync(player),
+			_ when pap.Province(player.G, player.S) is Land { Inhabitable: true } => await DoRegistrationAsync(player),
 			_ => RegistrationErrors.InvalidStart
 		};
 		[HttpGet("RegistrableGame")]

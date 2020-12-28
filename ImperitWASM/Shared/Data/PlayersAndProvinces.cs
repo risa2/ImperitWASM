@@ -13,8 +13,12 @@ namespace ImperitWASM.Shared.Data
 		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty) => Provinces.Passable(from, to, distance, difficulty);
 		public int NeighborCount(Province prov) => Provinces.NeighborCount(prov);
 		public IEnumerable<Province> NeighborsOf(Province prov) => Provinces.NeighborsOf(prov);
-		public IEnumerable<int> NeighborIndices(Province prov) => Provinces.NeighborIndices(prov);
-		public int IncomeOf(Player player) => Provinces.ControlledBy(player).OfType<Land>().Sum(p => p.Earnings);
+		public ImmutableArray<int> NeighborIndices(Province prov) => Provinces.NeighborIndices(prov);
+		public int IncomeOf(Player player)
+		{
+			var divisions = Provinces.Split(p => p.IsAllyOf(player), (from, to) => to.IsAllyOf(player));
+			return divisions.DefaultIfEmpty().Max(prov => prov?.OfType<Land>()?.Sum(p => p.Earnings) ?? 0);
+		}
 		public bool HasAny(Player player) => Provinces.ControlledBy(player).Any();
 		public bool HasNeighborRuledBy(Province province, Player player) => NeighborsOf(province).Any(prov => prov is Land land && land.IsAllyOf(player));
 
@@ -52,7 +56,7 @@ namespace ImperitWASM.Shared.Data
 		public PlayersAndProvinces Add(ICommand cmd) => TryAdd(cmd).Item1;
 		public bool AnyHuman => Players.Any(p => p is Human { Alive: true });
 		public PlayersPower PlayersPower(Func<Player, bool> which) => new PlayersPower(Players.Where(which).Select(p => p.Power(Provinces.ControlledBy(p).ToImmutableArray())).ToImmutableArray());
-		public IEnumerable<int> Inhabitable => Provinces.Indices(it => it is Land { IsInhabitable: true });
+		public IEnumerable<int> Inhabitable => Provinces.Indices(it => it is Land { Inhabitable: true });
 		public PlayersAndProvinces AddRobots(Settings settings, IEnumerable<string> names)
 		{
 			var new_players = Players.ToBuilder();
@@ -60,7 +64,7 @@ namespace ImperitWASM.Shared.Data
 			foreach (var (start, name) in Inhabitable.Zip(names))
 			{
 				new_players.Add(settings.CreateRobot(new_players.Count, name, start));
-				new_provinces[start] = new_provinces[start].GiveUpTo(new_players[^1], new_provinces[start].Soldiers);
+				new_provinces[start] = new_provinces[start].ConqueredBy(new_players[^1]);
 			}
 			return new PlayersAndProvinces(new_players.ToImmutable(), new Provinces(new_provinces.MoveToImmutable(), settings));
 		}

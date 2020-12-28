@@ -17,11 +17,11 @@ namespace ImperitWASM.Shared
 			var result = ImmutableList.CreateBuilder<A>();
 			foreach (var item in e)
 			{
-				var (p, a) = fn(init, item);
-				init = p;
-				if (a is A)
+				var (next_init, added) = fn(init, item);
+				init = next_init;
+				if (added is not null)
 				{
-					result.Add(a);
+					result.Add(added);
 				}
 			}
 			return (result.ToImmutable(), init);

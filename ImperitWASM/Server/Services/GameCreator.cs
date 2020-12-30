@@ -17,14 +17,12 @@ namespace ImperitWASM.Server.Services
 	public class GameCreator : IGameCreator
 	{
 		readonly IPlayersProvinces pap;
-		readonly IPowers powers;
 		readonly IGameService game;
 		readonly Settings settings;
 		readonly IContextService ctx;
-		public GameCreator(IPlayersProvinces pap, IPowers powers, IGameService game, Settings settings, IContextService ctx)
+		public GameCreator(IPlayersProvinces pap, IGameService game, Settings settings, IContextService ctx)
 		{
 			this.pap = pap;
-			this.powers = powers;
 			this.game = game;
 			this.settings = settings;
 			this.ctx = ctx;
@@ -40,7 +38,7 @@ namespace ImperitWASM.Server.Services
 		void Start(Game g)
 		{
 			var p_p = pap[g.Id] = pap[g.Id].AddRobots(settings, settings.GetNames(pap.ObsfuscateName));
-			powers.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p);
+			ctx.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p.PlayersPower);
 		}
 		public Task StartAllAsync()
 		{

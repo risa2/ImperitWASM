@@ -20,6 +20,7 @@ namespace ImperitWASM.Shared.Data
 		public virtual bool WillRevolt(Player active) => !CanSoldiersSurvive;
 		public Province RevoltIfNecessary(Player active) => WillRevolt(active) ? Revolt() : this;
 
+		public virtual bool Inhabitable => false;
 		public Province Add(params IProvinceAction[] actions) => WithActions(Actions.AddRange(actions));
 		public Province Replace(Func<IProvinceAction, IProvinceAction> replacer) => WithActions(Actions.Select(replacer).ToImmutableList());
 

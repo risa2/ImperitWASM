@@ -55,8 +55,8 @@ namespace ImperitWASM.Shared.Data
 		}
 		public PlayersAndProvinces Add(ICommand cmd) => TryAdd(cmd).Item1;
 		public bool AnyHuman => Players.Any(p => p is Human { Alive: true });
-		public PlayersPower PlayersPower(Func<Player, bool> which) => new PlayersPower(Players.Where(which).Select(p => p.Power(Provinces.ControlledBy(p).ToImmutableArray())).ToImmutableArray());
-		public IEnumerable<int> Inhabitable => Provinces.Indices(it => it is Land { Inhabitable: true });
+		public PlayersPower PlayersPower => new PlayersPower(Players.Where(p => p is not Savage).Select(p => p.Power(Provinces.ControlledBy(p).ToImmutableArray())).ToImmutableArray());
+		public IEnumerable<int> Inhabitable => Provinces.Indices(it => it.Inhabitable);
 		public PlayersAndProvinces AddRobots(Settings settings, IEnumerable<string> names)
 		{
 			var new_players = Players.ToBuilder();

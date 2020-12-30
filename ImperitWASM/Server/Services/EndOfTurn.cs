@@ -15,12 +15,10 @@ namespace ImperitWASM.Server.Services
 		readonly IPlayersProvinces pap;
 		readonly IContextService ctx;
 		readonly IGameService gs;
-		readonly IPowers powers;
 		readonly Settings settings;
-		public EndOfTurn(IPlayersProvinces pap, IPowers powers, Settings settings, IContextService ctx, IGameService gs)
+		public EndOfTurn(IPlayersProvinces pap, Settings settings, IContextService ctx, IGameService gs)
 		{
 			this.pap = pap;
-			this.powers = powers;
 			this.settings = settings;
 			this.ctx = ctx;
 			this.gs = gs;
@@ -37,7 +35,7 @@ namespace ImperitWASM.Server.Services
 			pap[gameId] = p_p;
 
 			bool finish = FinishGame(g, !p_p.AnyHuman || p_p.Winner(settings.FinalLandsCount) is Human, active);
-			powers.Add(gameId, p_p);
+			ctx.Add(gameId, p_p.PlayersPower);
 			await ctx.SaveAsync();
 			return finish;
 		}

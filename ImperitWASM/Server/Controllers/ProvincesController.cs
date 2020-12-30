@@ -21,7 +21,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Shapes")]
 		public IEnumerable<ProvinceAppearance> Shapes([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new ProvinceAppearance(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p is Land { Inhabitable: true }, p.Text));
+			return pap[gameId].Provinces.Select(p => new ProvinceAppearance(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p.Inhabitable, p.Text));
 		}
 		[HttpPost("Current")]
 		public IEnumerable<ProvinceUpdate> Current([FromBody] int gameId)

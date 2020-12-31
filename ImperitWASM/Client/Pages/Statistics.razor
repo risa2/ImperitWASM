@@ -39,18 +39,18 @@
 	{
 		<p>Na tahu je: <span style="color:@Players[Active].C;">@Players[Active].N</span></p>
 		<table class="players">
-			@foreach (int i in Players.Indices(p => p.D))
+			@foreach (var player in Players.Where(p => p.D))
 			{
-				<tr @onclick="() => Clicked(i)">
-					<td style="color:@Players[i].C;">@Players[i].N@Sym.Stars(Powers[^1][i].Final)</td>
-					@if (Players[i].A)
+				<tr @onclick="() => Clicked(player.P)">
+					<td style="color:@player.C;">@player.N@Sym.Stars(Powers[^1][player.P].Final)</td>
+					@if (player.A)
 					{
-						<td>@Players[i].M@Sym.Money</td>
-						<td>(+@Players[i].I@Sym.Money)</td>
+						<td>@player.M@Sym.Money</td>
+						<td>(+@player.I@Sym.Money)</td>
 						<td>
-							@if (Players[i].Debt > 0)
+							@if (player.Debt > 0)
 							{
-								<text>-@Players[i].Debt@Sym.Money</text>
+								<text>-@player.Debt@Sym.Money</text>
 							}
 						</td>
 					}
@@ -62,6 +62,6 @@
 			}
 		</table><br/>
 		<button @onclick="DoGiveUp">Vzdát se</button>
-		<Graphs Players="Players" Powers="Powers"/>
+		<Graphs Players="Players.Select(p => p.C).ToImmutableArray()" Powers="Powers"/>
 	}
 </main>

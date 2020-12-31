@@ -37,6 +37,8 @@ namespace ImperitWASM.Server.Controllers
 		public GameInfo Info([FromBody] int gameId) => gs.FindNoTracking(gameId) is Game g ? new GameInfo(g.GetState(), g.Active) : new GameInfo();
 		[HttpPost("StartTime")]
 		public DateTime? StartTime([FromBody] int gameId) => gs.FindNoTracking(gameId)?.GetStartTime(settings.CountdownTime);
+		[HttpPost("Winner")]
+		public Winner? Winner([FromBody] int gameId) => pap[gameId].Winner(settings.FinalLandsCount) is Human H ? new Winner(H.Name, H.Color) : null;
 		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player)
 		{
 			await gameCreator.RegisterAsync(gs.Find(player.G), player.N.Trim(), new Password(player.P.Trim()), player.S);

@@ -28,8 +28,8 @@ namespace ImperitWASM.Server.Controllers
 			this.gameCreator = gameCreator;
 			this.gs = gs;
 		}
-		[HttpPost("Colored")]
-		public IEnumerable<ColoredPlayer> Colored([FromBody] int gameId) => ctx.Players.Where(p => p.GameId == gameId).OrderBy(p => p.Index).Select(p => new ColoredPlayer(p.Name, Color.Parse(p.Color)));
+		[HttpPost("Colors")]
+		public IEnumerable<Color> Colors([FromBody] int gameId) => ctx.Players.Where(p => p.GameId == gameId).OrderBy(p => p.Index).Select(p => Color.Parse(p.Color));
 		[HttpPost("Money")]
 		public int Money([FromBody] Session ses) => ctx.Players.SingleOrDefault(p => p.GameId == ses.G && p.Index == ses.P)?.Money ?? 0;
 		[HttpPost("Infos")]
@@ -40,7 +40,7 @@ namespace ImperitWASM.Server.Controllers
 				return Enumerable.Empty<PlayerInfo>();
 			}
 			var p_p = pap[ses.G];
-			return p_p.Players.Select(p => new PlayerInfo(p is not Savage, p.Name, p.Color, p.Alive, p.Money, p.Debt, p_p.IncomeOf(p)));
+			return p_p.Players.Select((p, i) => new PlayerInfo(i, p is not Savage, p.Name, p.Color, p.Alive, p.Money, p.Debt, p_p.IncomeOf(p)));
 		}
 		[HttpPost("Correct")]
 		public GameState Correct([FromBody] Session user) => session.IsValid(user.P, user.G, user.Key) ? gs.FindNoTracking(user.G)?.GetState() ?? GameState.Invalid : GameState.Invalid;

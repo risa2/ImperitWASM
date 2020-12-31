@@ -6,13 +6,15 @@
 	[Parameter] public Action<Mode> Set { get; set; } = _ => { };
 	ImmutableArray<int> Finished;
 	Data.Int model = new Data.Int();
-	ImmutableArray<Data.ColoredPlayer> Former;
+	ImmutableArray<Color> Colors;
 	ImmutableArray<PlayersPower> Powers;
+	Data.Winner? Winner = null;
 	protected override async Task OnInitializedAsync() => Finished = await http.GetAsync<ImmutableArray<int>>("api/Game/Finished");
 	async Task UpdateHistoryGraphs()
 	{
-		Former = await http.PostAsync<int, ImmutableArray<Data.ColoredPlayer>>("api/Player/Colored", Finished[model.Value]);
+		Colors = await http.PostAsync<int, ImmutableArray<Color>>("api/Player/Colors", Finished[model.Value]);
 		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Finished[model.Value]);
+		Winner = await http.PostAsync<int, Data.Winner?>("api/Game/Winner", Finished[model.Value]);
 	}
 }
 <NavMenu Options="Zpět;Historie" Selected="1" OnClick="i => { if (i == 0) { Set(Mode.Login); } }"/>
@@ -30,9 +32,9 @@
 			<button type="submit">Zobrazit</button>
 		</EditForm>
 	}
-	@if (!Former.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty && Former[Powers[^1].MaxFinalsPlayer] is { } winner)
+	@if (!Colors.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty && Winner is not null)
 	{
-		<p>Vítěz: <span style="color:@winner.C;">@winner.N</span></p>
-		<Graphs Players="Former" Powers="Powers"/>
+		<p>Vítěz: <span style="color:@Winner.C;">@Winner.N</span></p>
+		<Graphs Players="Colors" Powers="Powers"/>
 	}
 </main>

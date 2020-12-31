@@ -5,7 +5,6 @@ using ImperitWASM.Shared.Data;
 namespace ImperitWASM.Client.Data
 {
 	public sealed record Click(int Player, int? From, int Clicked, int Game);
-	public record ColoredPlayer(string N, Color C);
 	public sealed record DonationCmd(int P, string Key, int Recipient, int Amount, int Game);
 	public sealed record GameInfo(GameState S = GameState.Invalid, int P = 0);
 	public enum GameState { Created, Countdown, Started, Finished, Invalid = -1 }
@@ -14,7 +13,7 @@ namespace ImperitWASM.Client.Data
 	public enum MoveErrors { Ok, FewSoldiers, LittleCapacity, NotPlaying, Else }
 	public sealed record MoveInfo(bool Possible, bool CanAttack, bool CanReinforce, string FromName, string ToName, string FromSoldiers, string ToSoldiers, ImmutableArray<Description> Soldiers);
 	public sealed record PlayerId(int P, int G);
-	public sealed record PlayerInfo(bool D, string N, Color C, bool A, int M, int Debt, int I) : ColoredPlayer(N, C);
+	public sealed record PlayerInfo(int P, bool D, string N, Color C, bool A, int M, int Debt, int I);
 	public sealed record ProvinceAppearance(ImmutableArray<Point> B, Point C, Color F, Color S, int W, bool R, ImmutableArray<string> T)
 	{
 		public Color GetColor() => F.Light() > 180 ? new Color(0, 0, 0) : new Color(255, 255, 255);
@@ -37,4 +36,5 @@ namespace ImperitWASM.Client.Data
 	}
 	public sealed record Switch(int? Select, View View, int? From, int? To);
 	public enum View { Map, Donation, Move, Preview, Purchase, Recruit, Statistics }
+	public sealed record Winner(string N, Color C);
 }

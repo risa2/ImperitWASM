@@ -1,7 +1,5 @@
-﻿@typeparam TPlayer;
-
-@code{
-	[Parameter] public ImmutableArray<TPlayer> Players { get; set; }
+﻿@code{
+	[Parameter] public ImmutableArray<Color> Players { get; set; }
 	[Parameter] public ImmutableArray<PlayersPower> Powers { get; set; }
 	static IEnumerable<string> Parts(IEnumerable<int> y_values, int count, int max_y, int x_offset, int y_offset, int width, int height)
 	{
@@ -26,7 +24,7 @@
 	<svg viewBox="-10 -10 1220 620" class="diagram">
 		@for (int i = 0; i < Players.Length; ++i)
 		{
-			<polyline points="@Polyline(Powers.Select(p => p[i].Total).Take(Lives[i]), Powers.Length, TotalMax, 0, 0, 1200, 600)" fill="none" stroke="@Players[i].C" stroke-width="3"></polyline>
+			<polyline points="@Polyline(Powers.Select(p => p[i].Total).Take(Lives[i]), Powers.Length, TotalMax, 0, 0, 1200, 600)" fill="none" stroke="@Players[i]" stroke-width="3"></polyline>
 		}
 		<polyline points="@Polyline(TotalAvg, Powers.Length, TotalMax, 0, 0, 1200, 600)" fill="none" stroke="#FFF" stroke-width="1"></polyline>
 	</svg>
@@ -37,7 +35,7 @@
 			@for (int c = 0; c < Changes.Length && c < Lives[p] - 1; ++c)
 			{
 				<circle cx="@(600 * (2 * c + 1) / (Powers.Length - 1))" cy="@(300 - (int)(300 * Changes[c][p]))" 
-					fill="transparent" stroke="@Players[p].C" r="@ToString(300.0 / Powers.Length)"></circle>
+					fill="transparent" stroke="@Players[p]" r="@ToString(300.0 / Powers.Length)"></circle>
 			}
 		}
 	</svg>
@@ -46,7 +44,7 @@
 		@for (int i = 0; i < Players.Length; ++i)
 		{
 			<polyline points="@(Polyline(RatioSums.Select(r => (int)(r * 2000)).Take(Math.Min(Lives[i] + 1, Ratios.Length)), Ratios.Length, 2000, 0, 0, 1200, 600) + " " +
-								Polyline(RatioSums.Select((r,j) => (int)((r + Ratios[j][i]) * 2000)).Take(Math.Min(Lives[i] + 1, Ratios.Length)), Ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i].C"></polyline>
+								Polyline(RatioSums.Select((r,j) => (int)((r + Ratios[j][i]) * 2000)).Take(Math.Min(Lives[i] + 1, Ratios.Length)), Ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i]"></polyline>
 			RatioSums.Each((_, j) => RatioSums[j] += Ratios[j][i]);
 		}
 	</svg>

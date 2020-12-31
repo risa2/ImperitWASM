@@ -7,7 +7,6 @@
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Action<Mode, int?, int?, Data.PlayerInfo?> Switch { get; set; } = ((a, x, y, z) => { });
 	ImmutableArray<Data.PlayerInfo> Players;
-	ImmutableArray<Data.ColoredPlayer> ColoredPlayers;
 	ImmutableArray<PlayersPower> Powers;
 	int Active = 0;
 
@@ -28,7 +27,6 @@
 		Active = await http.PostAsync<int, int>("api/Game/Active", Session.G);
 		Players = await http.PostAsync<Data.Session, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", Session);
 		StateHasChanged();
-		ColoredPlayers = await http.PostAsync<int, ImmutableArray<Data.ColoredPlayer>>("api/Player/Colored", Session.G);
 		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Session.G);
 	}
 }
@@ -37,22 +35,22 @@
 	<a class="this">@Players.Try(Session.P)?.M@Sym.Money</a>
 </nav>
 <main>
-	@if (!Players.IsDefault)
+	@if (!Players.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty)
 	{
 		<p>Na tahu je: <span style="color:@Players[Active].C;">@Players[Active].N</span></p>
 		<table class="players">
-			@foreach (var player in Players.Where(p => p.D))
+			@foreach (int i in Players.Indices(p => p.D))
 			{
-				<tr>
-					<td style="color:@player.C;" @onclick="() => Clicked(player.P)">@player.N</td>
-					@if (player.A)
+				<tr @onclick="() => Clicked(i)">
+					<td style="color:@Players[i].C;">@Players[i].N@Sym.Stars(Powers[^1][i].Final)</td>
+					@if (Players[i].A)
 					{
-						<td>@player.M@Sym.Money</td>
-						<td>(+@player.I@Sym.Money)</td>
+						<td>@Players[i].M@Sym.Money</td>
+						<td>(+@Players[i].I@Sym.Money)</td>
 						<td>
-							@if (player.Debt > 0)
+							@if (Players[i].Debt > 0)
 							{
-								<text>-@player.Debt@Sym.Money</text>
+								<text>-@Players[i].Debt@Sym.Money</text>
 							}
 						</td>
 					}
@@ -62,8 +60,8 @@
 					}
 				</tr>
 			}
-		</table>
-		<p class="link-like" @onclick="DoGiveUp">Vzdát se</p>
-		<Graphs Players="ColoredPlayers" Powers="Powers"/>
+		</table><br/>
+		<button @onclick="DoGiveUp">Vzdát se</button>
+		<Graphs Players="Players" Powers="Powers"/>
 	}
 </main>

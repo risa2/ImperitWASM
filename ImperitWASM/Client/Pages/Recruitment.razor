@@ -49,7 +49,7 @@
 				@foreach (var (i, (type, price)) in Info.R.Index())
 				{
 					<tr>
-						<td @onclick="() => infobox?.Open(type)">@type.Name @price@Sym.Money<sup>?</sup></td>
+						<td class="dotted" @onclick="() => infobox?.Open(type)">@type.Name @price@Sym.Money</td>
 						<td><InputNumber @bind-Value="model.Soldiers[i].Value" /></td>
 					</tr>
 				}

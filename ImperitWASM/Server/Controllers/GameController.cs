@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Load;
@@ -19,7 +20,8 @@ namespace ImperitWASM.Server.Controllers
 		readonly ISessionService session;
 		readonly IEndOfTurn eot;
 		readonly IActive active;
-		public GameController(IGameService gs, IGameCreator gameCreator, IPlayersProvinces pap, ISessionService session, IEndOfTurn eot, IActive active)
+		readonly Settings settings;
+		public GameController(IGameService gs, IGameCreator gameCreator, IPlayersProvinces pap, ISessionService session, IEndOfTurn eot, IActive active, Settings settings)
 		{
 			this.gs = gs;
 			this.gameCreator = gameCreator;
@@ -27,11 +29,14 @@ namespace ImperitWASM.Server.Controllers
 			this.session = session;
 			this.eot = eot;
 			this.active = active;
+			this.settings = settings;
 		}
 		[HttpPost("Active")]
 		public int Active([FromBody] int gameId) => gs.FindNoTracking(gameId)?.Active ?? 0;
 		[HttpPost("Info")]
-		public GameInfo Info([FromBody] int gameId) => gs.FindNoTracking(gameId) is Game g ? new GameInfo(g.Started, g.Active) : new GameInfo();
+		public GameInfo Info([FromBody] int gameId) => gs.FindNoTracking(gameId) is Game g ? new GameInfo(g.GetState(), g.Active) : new GameInfo();
+		[HttpPost("StartTime")]
+		public DateTime? StartTime([FromBody] int gameId) => gs.FindNoTracking(gameId)?.GetStartTime(settings.CountdownTime);
 		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player)
 		{
 			await gameCreator.RegisterAsync(gs.Find(player.G), player.N.Trim(), new Password(player.P.Trim()), player.S);

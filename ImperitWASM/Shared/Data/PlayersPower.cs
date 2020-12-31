@@ -19,5 +19,6 @@ namespace ImperitWASM.Shared.Data
 		public int TotalAvg => TotalSum / Length;
 		public ImmutableArray<double> ChangesFrom(PlayersPower previous) => Powers.Zip(previous.Powers, (next, prev) => (double)next.Total / prev.Total - 1.0).ToImmutableArray();
 		public IEnumerable<PlayerFinals> Finals => Powers.Select((p, i) => new PlayerFinals(i, p.Final)).Where(r => r.Count > 0);
+		public int MaxFinalsPlayer => Powers.Select((p, i) => (p, i)).OrderByDescending(x => x.p.Final).First().i;
 	}
 }

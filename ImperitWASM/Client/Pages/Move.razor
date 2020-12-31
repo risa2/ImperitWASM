@@ -55,7 +55,7 @@
 				@foreach (var (i, type) in Info.Soldiers.Index())
 				{
 					<tr>
-						<td @onclick="() => infobox?.Open(type)">@type.Name<sup>?</sup></td>
+						<td class="dotted" @onclick="() => infobox?.Open(type)">@type.Name</td>
 						<td><InputNumber @bind-Value="model.Soldiers[i].Value"/></td>
 					</tr>
 				}

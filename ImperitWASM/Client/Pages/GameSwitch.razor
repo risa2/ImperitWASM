@@ -37,7 +37,7 @@
 	async Task CheckSession()
 	{
 		var info = await http.PostAsync<int, Data.GameInfo>("api/Game/Info", Session.G);
-		if (!info.S)
+		if (info.S != Data.GameState.Started)
 		{
 			await DoLogoutAsync();
 		}

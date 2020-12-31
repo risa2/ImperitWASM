@@ -42,7 +42,7 @@
 	}
 }
 
-a, a:hover, a:visited, a:active, .link-like {
+a, a:hover, a:visited, a:active {
 	color: #ff6;
 	text-decoration: none;
 	cursor: pointer;
@@ -79,7 +79,9 @@ table.players td:not(:first-child) {
 td:first-child {
 	text-align: left;
 }
-
+.dotted {
+	text-decoration: dotted underline;
+}
 input, button, select, option {
 	border: 0;
 	outline: none;

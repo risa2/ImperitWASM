@@ -30,8 +30,9 @@
 			<button type="submit">Zobrazit</button>
 		</EditForm>
 	}
-	@if (!Former.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty)
+	@if (!Former.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty && Former[Powers[^1].MaxFinalsPlayer] is { } winner)
 	{
+		<p>Vítěz: <span style="color:@winner.C;">@winner.N</span></p>
 		<Graphs Players="Former" Powers="Powers"/>
 	}
 </main>

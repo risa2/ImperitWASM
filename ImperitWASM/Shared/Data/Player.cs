@@ -51,7 +51,7 @@ namespace ImperitWASM.Shared.Data
 		}
 		public bool IsLivingHuman => this is Human && Alive;
 		public int Debt => Actions.OfType<Loan>().Sum(a => a.Debt);
-		public PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.Count(p => p is Land { IsFinal: true }), provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(p => p is Land), Money - Debt, provinces.Sum(p => p.Power));
+		public virtual PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.Count(p => p is Land { IsFinal: true }), provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(p => p is Land), Money - Debt, provinces.Sum(p => p.Power));
 		public virtual bool Equals(Player? obj) => obj is not null && Name == obj.Name;
 		public override int GetHashCode() => Name.GetHashCode();
 	}

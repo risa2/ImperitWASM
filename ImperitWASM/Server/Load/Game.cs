@@ -22,6 +22,7 @@ namespace ImperitWASM.Server.Load
 		public bool Started => Current == State.Started;
 		public static Game Create => new Game { Current = State.Created, LastChange = DateTime.UtcNow };
 		public Client.Data.GameState GetState() => (Client.Data.GameState)(int)Current;
+		public DateTime? GetStartTime(TimeSpan delay) => Current == State.Countdown ? LastChange + delay : null;
 		public Game StartCountdown()
 		{
 			LastChange = DateTime.UtcNow;

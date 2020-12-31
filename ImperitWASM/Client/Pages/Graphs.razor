@@ -1,5 +1,7 @@
-﻿@code{
-	[Parameter] public ImmutableArray<Data.ColoredPlayer> Players { get; set; }
+﻿@typeparam TPlayer;
+
+@code{
+	[Parameter] public ImmutableArray<TPlayer> Players { get; set; }
 	[Parameter] public ImmutableArray<PlayersPower> Powers { get; set; }
 	static IEnumerable<string> Parts(IEnumerable<int> y_values, int count, int max_y, int x_offset, int y_offset, int width, int height)
 	{
@@ -20,10 +22,6 @@
 	var Lives = Players.Select((_, i) => Math.Min(Powers.Length, Powers.Count(p => p[i].Alive) + 1)).ToImmutableArray();
 	var Changes = Powers.Zip(Powers.Skip(1), (prev, next) => next.ChangesFrom(prev)).ToImmutableArray();
 
-	@foreach (var ((name, color), finals) in Powers[^1].Finals.Select(f => (Players[f.Player], f.Count)))
-	{
-		<p><span style="color:@color;">@name</span> @(new string(Sym.Star, finals)) </p>
-	}
 	<p>Síla:</p>
 	<svg viewBox="-10 -10 1220 620" class="diagram">
 		@for (int i = 0; i < Players.Length; ++i)

@@ -6,27 +6,28 @@
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Action Start { get; set; } = () => { };
 	System.Timers.Timer Timer = new System.Timers.Timer(3000);
-	Data.GameState GameState;
-	string Text => GameState switch
+	string Text { get; set; } = "";
+	async void UpdateAsync(object? _1 = null, object? _2 = null)
 	{
-		Data.GameState.Created => "Zatím jsi jediný zaregistrovaný hráč, počkej prosím na další",
-		Data.GameState.Countdown => "Hra začne už za několik minut",
-		Data.GameState.Finished => "Hra již skončila, můžeš se zaregistrovat do další",
-		_ => ""
-	};
+		var state = await http.PostAsync<Data.Session, Data.GameState>("api/Player/Correct", Session);
+		if (state == Data.GameState.Started)
+		{
+			Timer.Stop();
+			Start();
+		}
+		Text = state switch
+		{
+			Data.GameState.Created => "Zatím jsi jediný zaregistrovaný hráč, počkej prosím na další",
+			Data.GameState.Countdown => "Hra začne v " + (await http.PostAsync<int, DateTime?>("api/Game/StartTime", Session.G))!.Value.ToString("HH:mm:ss"),
+			Data.GameState.Finished => "Hra již skončila, můžeš se zaregistrovat do další",
+			_ => ""
+		};
+		StateHasChanged();
+	}
 	protected override void OnInitialized()
 	{
-		GameState = State;
-		Timer.Elapsed += async (e, v) =>
-		{
-			GameState = await http.PostAsync<Data.Session, Data.GameState>("api/Player/Correct", Session);
-			if (GameState == Data.GameState.Started)
-			{
-				Timer.Stop();
-				Start();
-			}
-			StateHasChanged();
-		};
+		UpdateAsync();
+		Timer.Elapsed += UpdateAsync;
 		Timer.Start();
 	}
 }

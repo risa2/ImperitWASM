@@ -1,0 +1,29 @@
+﻿using System.Collections.Immutable;
+using ImperitWASM.Shared.Data;
+
+namespace ImperitWASM.Shared.Config
+{
+	public record Land(string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes, int Earnings, Ratio Instability, bool IsStart, bool IsFinal, bool HasPort)
+		: Region(Name, Shape, Soldiers, ExtraTypes)
+	{
+		public override Color Fill(Settings settings) => settings.LandColor;
+
+		public override bool Inhabitable => IsStart;
+		public override bool Sailable => HasPort;
+		public override bool Port => HasPort;
+		public override bool Mainland => true;
+		public override bool Dry => true;
+
+		public override int Price(Soldiers now) => Settings.LandPrice(now, Earnings);
+		public override int Score => IsFinal ? 1 : 0;
+		public override int Income => Earnings;
+
+		public override Ratio InstabilityWith(Settings settings, Soldiers present) => settings.Instability(present, Soldiers);
+
+		string Suffix => (IsFinal ? "\u2605" : "") + (HasPort ? "\u2693" : "");
+		public override ImmutableArray<string> Text(Soldiers present) => ImmutableArray.Create(Name + Suffix, present.ToString(), Earnings + "\uD83D\uDCB0");
+
+		public virtual bool Equals(Land? region) => Name == region?.Name;
+		public override int GetHashCode() => Name.GetHashCode();
+	}
+}

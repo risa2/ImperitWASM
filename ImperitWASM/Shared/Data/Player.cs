@@ -1,58 +1,51 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Shared.Config;
 
 namespace ImperitWASM.Shared.Data
 {
-	public abstract record Player(Color Color, string Name, int Money, bool Alive, ImmutableList<IPlayerAction> Actions, Settings Settings)
+	public sealed record Player(Color Color, string Name, int Money, bool Alive, ImmutableList<IAction> Actions, Settings Settings, bool Human, Password Password, bool Active)
 	{
-		protected static readonly ImmutableList<IPlayerAction> DefaultActions = ImmutableList.Create<IPlayerAction>(new EndTurn());
 		public Description Description => new Description(Name, ImmutableArray<string>.Empty);
 		public int MaxBorrowable => Settings.Discount(Settings.DebtLimit - Debt);
 		public int MaxUsableMoney => Money + MaxBorrowable;
 		public Player ChangeMoney(int amount) => this with { Money = amount + Money };
-		public Player Earn(PlayersAndProvinces pap) => ChangeMoney(pap.IncomeOf(this));
+		public Player Earn(Provinces provinces) => ChangeMoney(provinces.IncomeOf(this));
 		
-		Player WithActions(ImmutableList<IPlayerAction> new_actions) => this with { Actions = new_actions };
-		public Player Die() => this with { Money = 0, Alive = false, Actions = ImmutableList<IPlayerAction>.Empty };
-		public Player Add(params IPlayerAction[] actions) => WithActions(Actions.AddRange(actions));
-		public Player Replace<T>(Predicate<T> cond, T value, Func<T, T, T> interact) where T : IPlayerAction
+		public Player Die() => this with { Money = 0, Alive = false, Actions = ImmutableList<IAction>.Empty };
+		public Player Add(params IAction[] actions) => this with { Actions = Actions.AddRange(actions) };
+		public Player Replace<T>(Predicate<T> cond, T value, Func<T, T, T> interact) where T : IAction
 		{
-			return WithActions(Actions.Replace(cond, interact, value));
-		}
-		public Player Borrow(int amount)
-		{
-			return ChangeMoney(amount).Replace(a => true, new Loan(amount, Settings), (x, y) => new Loan(x.Debt + y.Debt, Settings));
+			return this with { Actions = Actions.Replace(cond, interact, value) };
 		}
 
-		Player Action(PlayersAndProvinces pap)
-		{
-			var (a, p) = Actions.Fold(this, (player, action) => action.Perform(player, pap));
-			return p.WithActions(a);
-		}
+		public Player Borrow(int amount) => ChangeMoney(amount).Replace(a => true, new Loan(amount), (x, y) => x + y);
+		public Player Pay(int amount) => (amount > Money ? Borrow(amount - Money) : this).ChangeMoney(-amount);
 
-		(Province, Player) Action(Province province, PlayersAndProvinces pap)
+		public (Player, Provinces) Act(Provinces provinces, Settings settings)
 		{
-			var (a, p) = Actions.Fold(province, (province, action) => action.Perform(province, this, pap));
-			return (p, WithActions(a));
-		}
-		public (ImmutableArray<Province>.Builder, Player) Act(PlayersAndProvinces pap)
-		{
-			var player = Action(pap);
-			var new_provinces = ImmutableArray.CreateBuilder<Province>(pap.ProvincesCount);
-			foreach (var province in pap.Provinces)
+			var (new_player, new_provinces) = Actions.Aggregate((this with { Actions = ImmutableList<IAction>.Empty }, provinces), (pair, action) =>
 			{
-				var (new_province, new_player) = player.Action(province, pap);
-				player = new_player;
-				new_provinces.Add(new_province);
-			}
-			return (new_provinces, player);
+				var (player, new_provinces, new_action) = action.Perform(pair.Item1, pair.provinces, settings);
+				return (new_action is not null ? player.Add(new_action) : player, new_provinces);
+			});
+			return (new_player, new_provinces);
 		}
-		public bool IsLivingHuman => this is Human && Alive;
+
+		public Player InvertActive => this with { Active = !Active };
+		public bool LivingHuman => Human && Alive;
 		public int Debt => Actions.OfType<Loan>().Sum(a => a.Debt);
-		public virtual PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.Count(p => p is Land { IsFinal: true }), provinces.OfType<Land>().Sum(p => p.Earnings), provinces.Count(p => p is Land), Money - Debt, provinces.Sum(p => p.Power));
-		public virtual bool Equals(Player? obj) => obj is not null && Name == obj.Name;
+		public PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.Sum(p => p.Score), provinces.Sum(p => p.Earnings), provinces.Count(p => p.Mainland), Money - Debt, provinces.Sum(p => p.Power));
+
+		public bool Equals(Player? obj) => obj is not null && Name == obj.Name;
 		public override int GetHashCode() => Name.GetHashCode();
+
+		public (Player, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		{
+			return new Brain(this, settings).Think(players, provinces);
+		}
+		public static Color ColorOf(Player? p) => p?.Color ?? new Color();
 	}
 }

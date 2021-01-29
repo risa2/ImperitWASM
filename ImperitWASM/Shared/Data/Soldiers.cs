@@ -44,20 +44,25 @@ namespace ImperitWASM.Shared.Data
 		public int Length => Regiments.Length;
 		public Regiment this[int index] => Regiments[index];
 
-		public int Capacity(PlayersAndProvinces pap, Province from, Province to)
+		public int Capacity(Provinces provinces, Province from, Province to)
 		{
-			return Regiments.Sum(p => p.CanMove(pap, from, to) - p.Weight);
+			return Regiments.Sum(p => p.CanMove(provinces, from, to) - p.Weight);
 		}
-		public bool CanMove(PlayersAndProvinces pap, Province from, Province to)
+		public bool CanMove(Provinces provinces, Province from, Province to)
 		{
-			return Any && from.Has(this) && Capacity(pap, from, to) >= 0;
+			return Any && from.Has(this) && Capacity(provinces, from, to) >= 0;
 		}
-		public bool CanSurviveIn(Province province) => Regiments.Sum(p => p.CanSustain(province) - p.Weight) >= 0;
+		public bool CanSurviveIn(Region province) => Regiments.Sum(p => p.CanSustain(province) - p.Weight) >= 0;
 
-		int[] Fight(int me, int enemy, Func<SoldierType, int> powerof)
+
+		int[] Fight(int enemy, Func<SoldierType, int> powerof)
 		{
-			int died = 0;
+			int me = Regiments.Sum(regiment => powerof(regiment.Type)), died = 0;
 			int[] remaining = new int[Regiments.Length];
+			if (enemy > me)
+			{
+				return remaining;
+			}
 			for (int i = 0; i < remaining.Length; ++i)
 			{
 				if (powerof(Regiments[i].Type) > 0)
@@ -82,22 +87,23 @@ namespace ImperitWASM.Shared.Data
 			}
 			return remaining;
 		}
-		public Soldiers AttackedBy(int power) => new Soldiers(Fight(DefensePower, power, type => type.DefensePower).Select((count, i) => new Regiment(Regiments[i].Type, count)).Where(pair => pair.Count > 0));
+		public Soldiers FightAgainst(int power, Func<SoldierType, int> powerof)
+		{
+			return new Soldiers(Fight(power, powerof).Select((count, i) => new Regiment(Regiments[i].Type, count)).Where(pair => pair.Count > 0));
+		}
 		public Soldiers AttackedBy(Soldiers s2)
 		{
 			int defensePower = DefensePower, attackPower = s2.AttackPower;
-			var (s, power1, power2, powerof) = defensePower >= attackPower
-					? (this, defensePower, attackPower, (Func<SoldierType, int>)(type => type.DefensePower))
-					: (s2, attackPower, defensePower, type => type.AttackPower);
-			var remaining = s.Fight(power1, power2, powerof).Select((count, i) => new Regiment(s[i].Type, count));
-			return new Soldiers(remaining.Where(pair => pair.Count > 0));
+			return defensePower >= attackPower
+					? FightAgainst(attackPower, type => type.DefensePower)
+					: s2.FightAgainst(defensePower, type => type.AttackPower);
 		}
-		public Soldiers MaxAttackers(PlayersAndProvinces pap, Province from, Province to)
+		public Soldiers MaxMovable(Provinces provinces, Province from, Province to)
 		{
-			var result = new Soldiers(Regiments.Where(p => p.CanMoveAlone(pap, from, to)));
-			foreach (var p in Regiments.Where(p => !p.CanMoveAlone(pap, from, to)).OrderBy(p => p.Type.Weight - p.Type.CanMove(pap, from, to)))
+			var result = new Soldiers(Regiments.Where(p => p.CanMoveAlone(provinces, from, to)));
+			foreach (var p in Regiments.Where(p => !p.CanMoveAlone(provinces, from, to)).OrderBy(p => p.Type.Weight - p.Type.CanMove(provinces, from, to)))
 			{
-				result += new Soldiers(p.Type, Math.Min(result.Capacity(pap, from, to) / (p.Type.Weight - p.Type.CanMove(pap, from, to)), p.Count));
+				result += new Soldiers(p.Type, Math.Min(result.Capacity(provinces, from, to) / (p.Type.Weight - p.Type.CanMove(provinces, from, to)), p.Count));
 			}
 			return result;
 		}

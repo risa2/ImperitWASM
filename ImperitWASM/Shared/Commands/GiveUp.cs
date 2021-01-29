@@ -1,11 +1,17 @@
-﻿using ImperitWASM.Shared.Data;
+﻿using System.Collections.Generic;
+using System.Linq;
+using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Commands
 {
-	public record GiveUp(Player Player) : ICommand
+	public sealed record GiveUp : NextTurn
 	{
-		public bool Allowed(PlayersAndProvinces pap) => true;
-		public Province Perform(Province province) => province.IsAllyOf(Player) ? province.Revolt() : province;
-		public Player Perform(Player player, PlayersAndProvinces pap) => player == Player ? player.Die() : player;
+		public override bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings) => true;
+		public override (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		{
+			var (new_players, new_provinces) = actor.Active ? base.Perform(actor, players, provinces, settings) : (players, provinces);
+			return (new_players.Select(altered => actor == altered ? altered.Die() : altered), new_provinces.Select(altered => altered.IsAllyOf(actor) ? altered.Revolt() : altered));
+		}
 	}
 }

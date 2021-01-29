@@ -1,10 +1,13 @@
+using System.Linq;
+using ImperitWASM.Shared.Config;
+
 namespace ImperitWASM.Shared.Data
 {
-	public record Manoeuvre(Player Player, Soldiers Soldiers) : IProvinceAction
+	public record Manoeuvre(Province Province, Soldiers Soldiers) : IAction
 	{
-		public (Province, IProvinceAction?) Perform(Province province, PlayersAndProvinces pap)
+		public (Player, Provinces, IAction?) Perform(Player active, Provinces provinces, Settings settings)
 		{
-			return (province.IsAllyOf(Player) ? province.Reinforce(Soldiers) : province.AttackedBy(Player, Soldiers), null);
+			return (active, provinces.With(provinces.Select(altered => altered == Province ? altered.VisitedBy(active, Soldiers) : altered)), null);
 		}
 	}
 }

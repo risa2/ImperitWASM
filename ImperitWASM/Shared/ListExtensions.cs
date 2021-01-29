@@ -8,6 +8,7 @@ namespace ImperitWASM.Shared
 {
 	public static class ListExtensions
 	{
+		static readonly Random rand = new Random();
 		public static IEnumerable<int> Indices<T>(this IEnumerable<T> en, Func<T, bool> pred) => en.Select((v, i) => (v, i)).Where(x => pred(x.v)).Select(x => x.i);
 		public static T Must<T>(this T? value) where T : class => value ?? throw new ArgumentNullException(typeof(T).FullName);
 		public static T FirstOr<T>(this IEnumerable<T> e, T x) => e.DefaultIfEmpty(x).First();
@@ -53,22 +54,6 @@ namespace ImperitWASM.Shared
 				++i;
 			}
 		}
-		public static async Task EachAsync<T>(this IEnumerable<T> e, Func<T, Task> action)
-		{
-			foreach (var item in e)
-			{
-				await action(item);
-			}
-		}
-		public static async Task EachAsync<T>(this IEnumerable<T> e, Func<T, int, Task> action)
-		{
-			int i = 0;
-			foreach (var item in e)
-			{
-				await action(item, i);
-				++i;
-			}
-		}
 		public static int? Find<T>(this IList<T> ts, Func<T, bool> cond)
 		{
 			int i = 0;
@@ -91,6 +76,32 @@ namespace ImperitWASM.Shared
 				{
 					s1.Add(t2);
 				}
+			}
+		}
+		public static IEnumerable<T> Range<T>(this int count, Func<int, T> selector) => Enumerable.Range(0, count).Select(selector);
+		public static void Shuffle<T>(this IList<T> list)
+		{
+			for (int i = 0, len = list.Count; i < len - 1; ++i)
+			{
+				int r = i + rand.Next(len - i);
+				var tmp = list[r];
+				list[r] = list[i];
+				list[i] = tmp;
+			}
+		}
+		public static List<T> Shuffled<T>(this IEnumerable<T> e)
+		{
+			var list = e.ToList();
+			list.Shuffle();
+			return list;
+		}
+		public static IEnumerable<TR> SelectAccumulate<T, TA, TR>(this IEnumerable<T> e, TA accumulator, Func<T, TA, (TR, TA)> selector)
+		{
+			foreach (var item in e)
+			{
+				var (new_item, new_accumulator) = selector(item, accumulator);
+				accumulator = new_accumulator;
+				yield return new_item;
 			}
 		}
 	}

@@ -1,14 +1,20 @@
+using System.Collections.Generic;
+using System.Linq;
+using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Commands
 {
-	public record Move(Player Player, Province From, Province To, Soldiers Soldiers) : ICommand
+	public sealed record Move(Province From, Province To, Soldiers Soldiers) : ICommand
 	{
-		public bool Allowed(PlayersAndProvinces pap) => From.CanMove(pap, To, Player, Soldiers);
-		public Province Perform(Province province)
+		public bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return province == From ? province.Subtract(Soldiers) : province == To ? province.Add(new Manoeuvre(Player, Soldiers)) : province;
+			return actor.Active && From.CanMove(provinces, To, actor, Soldiers);
 		}
-		public bool HasEnoughCapacity(PlayersAndProvinces pap) => Soldiers.Capacity(pap, From, To) >= 0;
+		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		{
+			return (players.Select(altered => altered == actor ? altered.Add(new Manoeuvre(To, Soldiers)) : altered), provinces.Select(altered => altered == From ? altered.Subtract(Soldiers) : altered));
+		}
+		public bool HasEnoughCapacity(Provinces provinces) => Soldiers.Capacity(provinces, From, To) >= 0;
 	}
 }

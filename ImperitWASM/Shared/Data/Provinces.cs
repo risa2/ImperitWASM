@@ -7,52 +7,40 @@ using ImperitWASM.Shared.Config;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Provinces(ImmutableArray<Province> Items, Settings Settings, ImmutableDictionary<Province, int> Lookup) : IReadOnlyList<Province>
+	public record Provinces(ImmutableArray<Province> Items, Graph Graph, ImmutableDictionary<Province, int> Lookup) : IReadOnlyList<Province>
 	{
-		public Provinces(ImmutableArray<Province> Items, Settings Settings) : this(Items, Settings, Items.Lookup()) { }
-		public Provinces With(ImmutableArray<Province> new_Items) => new Provinces(new_Items, Settings, Lookup);
-		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty)
-		{
-			return Settings.Passable(Lookup[from], Lookup[to], distance, (start, dest) => difficulty(this[start], this[dest]));
-		}
-		public int NeighborCount(Province p) => Settings.NeighborCount(Lookup[p]);
-		public ImmutableArray<int> NeighborIndices(Province p) => Settings.NeighborsOf(Lookup[p]);
-		public IEnumerable<Province> NeighborsOf(Province p) => NeighborIndices(p).Select(vertex => Items[vertex]);
+		public Provinces(ImmutableArray<Province> items, Graph graph) : this(items, graph, items.Lookup()) { }
+		public Provinces With(ImmutableArray<Province> new_items) => this with { Items = new_items };
+		public Provinces With(IEnumerable<Province> new_items) => With(new_items.ToImmutableArray());
 
 		public Province this[int key] => Items[key];
 		public IEnumerator<Province> GetEnumerator() => (Items as IEnumerable<Province>).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
 		public ImmutableArray<Province>.Builder ToBuilder() => Items.ToBuilder();
 		public int Count => Items.Length;
 
-		public List<IEnumerable<Province>> Split(Func<Province, bool> relevant, Func<Province, Province, bool> passable)
+		public int NeighborCount(Province p) => Graph.NeighborCount(Lookup[p]);
+		public ImmutableArray<int> NeighborIndices(Province p) => Graph[Lookup[p]];
+		public IEnumerable<Province> NeighborsOf(Province p) => NeighborIndices(p).Select(vertex => Items[vertex]);
+
+		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty)
 		{
-			bool[] visited = new bool[Count];
-			var result = new List<IEnumerable<Province>>();
-			for (int from = 0; from < Count; ++from)
-			{
-				if (!visited[from] && relevant(this[from]))
-				{
-					visited[from] = true;
-					var points = new List<int> { from };
-					for (int i = 0; i < points.Count; ++i)
-					{
-						var neighbors = Settings.NeighborsOf(points[i]);
-						for (int n = 0; n < neighbors.Length; ++n)
-						{
-							if (!visited[neighbors[n]] && passable(this[points[i]], this[neighbors[n]]))
-							{
-								visited[neighbors[n]] = true;
-								points.Add(neighbors[n]);
-							}
-						}
-					}
-					result.Add(points.Select(i => this[i]));
-				}
-			}
-			return result;
+			return Graph.Passable(Lookup[from], Lookup[to], distance, (start, dest) => difficulty(this[start], this[dest]));
 		}
 		public IEnumerable<Province> ControlledBy(Player player) => Items.Where(p => p.IsAllyOf(player));
+		public IEnumerable<IEnumerable<Province>> Split(Func<Province, bool> relevant, Func<Province, Province, bool> passable)
+		{
+			return Graph.Split(i => relevant(Items[i]), (from, to) => passable(Items[from], Items[to])).Select(list => list.Select(i => Items[i]));
+		}
+		public int IncomeOf(Player player)
+		{
+			var divisions = Split(p => p.IsAllyOf(player), (from, to) => to.IsAllyOf(player));
+			return divisions.DefaultIfEmpty().Max(prov => prov?.OfType<Land>()?.Sum(p => p.Earnings) ?? 0);
+		}
+
+		public bool HasAny(Player player) => ControlledBy(player).Any();
+		public bool HasNeighborRuledBy(Province province, Player player) => NeighborsOf(province).Any(p => p.Mainland && p.IsAllyOf(player));
+		public IEnumerable<int> Inhabitable => Items.Indices(it => it.Inhabitable);
+		public (Player?, int) Winner => Items.GroupBy(province => province.Player).Where(g => g.Key is { Human: true }).Select(g => (g.Key, g.Sum(province => province.Score))).OrderBy(p => p.Item2).FirstOrDefault() is ({ Human: true } human, int finals) ? (human, finals) : (null, 0);
 	}
 }

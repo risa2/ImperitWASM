@@ -10,9 +10,9 @@ namespace ImperitWASM.Shared.Config
 		public string Symbol => Description.Symbol;
 		public ImmutableArray<string> Text => Description.Text;
 		public int Power => AttackPower + DefensePower;
-		public abstract bool IsRecruitable(Province province);
-		public abstract int CanSustain(Province province);
-		public abstract int CanMove(PlayersAndProvinces pap, Province from, Province to);
-		public bool CanMoveAlone(PlayersAndProvinces pap, Province from, Province to) => CanMove(pap, from, to) >= Weight;
+		public abstract bool IsRecruitable(Region province);
+		public abstract int CanSustain(Region province);
+		public abstract int CanMove(Provinces provinces, Province from, Province to);
+		public bool CanMoveAlone(Provinces provinces, Province from, Province to) => CanMove(provinces, from, to) >= Weight;
 	}
 }

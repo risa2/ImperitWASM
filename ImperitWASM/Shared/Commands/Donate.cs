@@ -1,13 +1,19 @@
+using System.Collections.Generic;
+using System.Linq;
+using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Commands
 {
-	public record Donate(Player Player, Player Recipient, int Amount) : ICommand
+	public sealed record Donate(Player Recipient, int Amount) : ICommand
 	{
-		public bool Allowed(PlayersAndProvinces pap) => Player.Money >= Amount && Amount > 0;
-		public Player Perform(Player player, PlayersAndProvinces pap)
+		public bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return player.ChangeMoney(player == Player ? -Amount : player == Recipient ? Amount : 0);
+			return actor.Money >= Amount && Amount > 0;
+		}
+		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		{
+			return (players.Select(altered => altered == Recipient ? altered.ChangeMoney(Amount) : altered == actor ? altered.ChangeMoney(-Amount) : altered), provinces);
 		}
 	}
 }

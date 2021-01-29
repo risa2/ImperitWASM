@@ -2,20 +2,18 @@ using ImperitWASM.Shared.Config;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Loan(int Debt, Settings Settings) : IPlayerAction
+	public record Loan(int Debt) : IAction
 	{
-		public (Player, IPlayerAction?) Perform(Player player, PlayersAndProvinces pap)
+		public static Loan operator +(Loan a, Loan b) => new Loan(a.Debt + b.Debt);
+
+		public (Player, Provinces, IAction?) Perform(Player active, Provinces provinces, Settings settings)
 		{
-			int next_debt = Settings.CalculateDebt(Debt);
-			return next_debt <= player.Money
-				? (player.ChangeMoney(-next_debt), null)
-				: (player.ChangeMoney(-player.Money), new Loan(next_debt - player.Money, Settings));
-		}
-		public (Province, IPlayerAction?) Perform(Province province, Player active, PlayersAndProvinces pap)
-		{
-			return province is Land land && land.IsAllyOf(active) && Debt > Settings.DebtLimit + active.Money
-				? (land.Revolt(), land.Price > Debt ? null : new Loan(Debt - land.Price, Settings))
-				: (province, this);
+			int next_debt = settings.CalculateDebt(Debt);
+			return next_debt <= active.Money
+				? (active.ChangeMoney(-next_debt), provinces, null)
+				: next_debt <= settings.DebtLimit
+				? (active.ChangeMoney(-active.Money), provinces, new Loan(next_debt - active.Money))
+				: (active.ChangeMoney(-active.Money), provinces.With(provinces.Shuffled().SelectAccumulate(next_debt - active.Money, (p, acc) => p.IsAllyOf(active) && acc > 0 ? (p.Revolt(), acc - p.Price) : (p, acc))), null);
 		}
 	}
 }

@@ -1,13 +1,23 @@
+using System.Collections.Generic;
+using System.Linq;
+using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Commands
 {
-	public record Buy(Player Player, Land Land) : ICommand
+	public sealed record Buy(Province Province) : ICommand
 	{
-		bool Possible(PlayersAndProvinces pap) => pap.HasNeighborRuledBy(Land, Player);
-		public bool AllowedWithLoan(PlayersAndProvinces pap) => Player.MaxUsableMoney >= Land.Price && Possible(pap);
-		public bool Allowed(PlayersAndProvinces pap) => Player.Money >= Land.Price && Possible(pap);
-		public Province Perform(Province province) => Land == province ? province.ConqueredBy(Player) : province;
-		public Player Perform(Player player, PlayersAndProvinces pap) => Player == player ? player.ChangeMoney(-Land.Price) : player;
+		public bool Allowed(Player actor, Provinces provinces)
+		{
+			return actor.MaxUsableMoney >= Province.Price && provinces.HasNeighborRuledBy(Province, actor);
+		}
+		public bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		{
+			return Allowed(actor, provinces,);
+		}
+		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		{
+			return (players.Select(altered => altered == actor ? altered.Pay(Province.Price) : altered), provinces.Select(altered => Province == altered ? altered.RuledBy(actor) : altered));
+		}
 	}
 }

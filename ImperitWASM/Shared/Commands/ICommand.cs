@@ -1,11 +1,12 @@
-﻿using ImperitWASM.Shared.Data;
+﻿using System.Collections.Generic;
+using ImperitWASM.Shared.Config;
+using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Commands
 {
 	public interface ICommand
 	{
-		Province Perform(Province province) => province;
-		Player Perform(Player player, PlayersAndProvinces pap) => player;
-		bool Allowed(PlayersAndProvinces pap) => true;
+		bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings);
+		(IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings);
 	}
 }

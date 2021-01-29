@@ -22,7 +22,7 @@ namespace ImperitWASM.Shared.Config
 		public int Discount(int amount) => (int)((long)amount * int.MaxValue / (int.MaxValue + Interest.ToInt()));
 		public Ratio Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
 
-		public IEnumerable<SoldierType> RecruitableTypes(Province where) => SoldierTypes.Where(t => t.IsRecruitable(where));
+		public IEnumerable<SoldierType> RecruitableTypes(Region where) => SoldierTypes.Where(t => t.IsRecruitable(where));
 		public IEnumerable<string> GetNames(Func<string, int, string> obf) => Enumerable.Range(0, PlayerCount).Select(i => obf(Names[i % Names.Length], i / Names.Length));
 
 		public sealed override string ToString() => string.Empty;

@@ -14,6 +14,7 @@ namespace ImperitWASM.Server.Services
 		Player this[string name] { get; }
 		bool IsNameFree(string name);
 		string ObsfuscateName(string name, int repetition);
+		int Count(int gameId);
 	}
 	public class PlayerLoader : IPlayerLoader
 	{
@@ -77,5 +78,7 @@ namespace ImperitWASM.Server.Services
 		}
 		public bool IsNameFree(string name) => !name.All(char.IsDigit) && db.Query<int>("SELECT Count(Id) FROM Player WHERE Name=@x0", name).Single() == 0;
 		public string ObsfuscateName(string name, int repetition) => name + (db.Query<int>("SELECT MAX(CAST(SUBSTR(Name, LENGTH(@0)) AS INTEGER)) AS NumVal FROM Player WHERE Name LIKE @0 + '%' AND NumVal > 0", name.Trim()).DefaultIfEmpty(0).Max() + 1);
+
+		public int Count(int gameId) => db.Query<int>("SELECT Count(Name) FROM Player WHERE GameId = @x0").First();
 	}
 }

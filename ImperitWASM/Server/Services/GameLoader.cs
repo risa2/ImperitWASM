@@ -7,7 +7,7 @@ namespace ImperitWASM.Server.Services
 	public interface IGameLoader
 	{
 		Game? this[int gameId] { get; set; }
-		void Add(Game added);
+		int Add(Game added);
 		void RemoveOld(DateTimeOffset deadline);
 	}
 	public class GameLoader : IGameLoader
@@ -25,7 +25,11 @@ namespace ImperitWASM.Server.Services
 			set => db.Command("UPDATE Game SET CurrentState=@x1, StartTime=@x2, FinishTime=@x3 WHERE Id=@x0", gameId, (int)value!.Current, value!.StartTime.ToUnixTimeSeconds(), value!.FinishTime.ToUnixTimeSeconds());
 		}
 
-		public void Add(Game g) => db.Command("INSERT INTO Game (CurrentState,StartTime,FinishTime) VALUES (@x0,@x1,@x2)", (int)g.Current, g.StartTime.ToUnixTimeSeconds(), g.FinishTime.ToUnixTimeSeconds());
+		public int Add(Game g)
+		{
+			db.Command("INSERT INTO Game (CurrentState,StartTime,FinishTime) VALUES (@x0,@x1,@x2)", (int)g.Current, g.StartTime.ToUnixTimeSeconds(), g.FinishTime.ToUnixTimeSeconds());
+			return db.Query<long>("SELECT last_insert_rowid()").First();
+		}
 		public void RemoveOld(DateTimeOffset deadline) => db.Command("DELETE FROM Game WHERE FinishTime < @x0", deadline.ToUnixTimeSeconds());
 	}
 }

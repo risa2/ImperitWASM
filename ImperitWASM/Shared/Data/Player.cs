@@ -37,7 +37,7 @@ namespace ImperitWASM.Shared.Data
 		public Player InvertActive => this with { Active = !Active };
 		public bool LivingHuman => Human && Alive;
 		public int Debt => Actions.OfType<Loan>().Sum(a => a.Debt);
-		public PlayerPower Power(ImmutableArray<Province> provinces) => new PlayerPower(Alive, provinces.Sum(p => p.Score), provinces.Sum(p => p.Earnings), provinces.Count(p => p.Mainland), Money - Debt, provinces.Sum(p => p.Power));
+		public Power Power(ImmutableArray<Province> provinces) => new Power(Alive, provinces.Sum(p => p.Score), provinces.Sum(p => p.Earnings), Money - Debt, provinces.Sum(p => p.Power));
 
 		public bool Equals(Player? obj) => obj is not null && Name == obj.Name;
 		public override int GetHashCode() => Name.GetHashCode();

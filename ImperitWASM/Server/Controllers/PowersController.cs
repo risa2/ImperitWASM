@@ -11,6 +11,6 @@ namespace ImperitWASM.Server.Controllers
 	{
 		readonly IContextService ctx;
 		public PowersController(IContextService ctx) => this.ctx = ctx;
-		[HttpPost("List")] public IEnumerable<PlayersPower> List([FromBody] int gameId) => ctx.GetPlayersPowers(gameId);
+		[HttpPost("List")] public IEnumerable<Powers> List([FromBody] int gameId) => ctx.GetPlayersPowers(gameId);
 	}
 }

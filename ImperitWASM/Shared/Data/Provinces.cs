@@ -7,9 +7,8 @@ using ImperitWASM.Shared.Config;
 
 namespace ImperitWASM.Shared.Data
 {
-	public record Provinces(ImmutableArray<Province> Items, Graph Graph, ImmutableDictionary<Province, int> Lookup) : IReadOnlyList<Province>
+	public record Provinces(ImmutableArray<Province> Items, Graph Graph) : IReadOnlyList<Province>
 	{
-		public Provinces(ImmutableArray<Province> items, Graph graph) : this(items, graph, items.Lookup()) { }
 		public Provinces With(ImmutableArray<Province> new_items) => this with { Items = new_items };
 		public Provinces With(IEnumerable<Province> new_items) => With(new_items.ToImmutableArray());
 
@@ -19,13 +18,13 @@ namespace ImperitWASM.Shared.Data
 		public ImmutableArray<Province>.Builder ToBuilder() => Items.ToBuilder();
 		public int Count => Items.Length;
 
-		public int NeighborCount(Province p) => Graph.NeighborCount(Lookup[p]);
-		public ImmutableArray<int> NeighborIndices(Province p) => Graph[Lookup[p]];
+		public int NeighborCount(Province p) => Graph.NeighborCount(p.Order);
+		public ImmutableArray<int> NeighborIndices(Province p) => Graph[p.Order];
 		public IEnumerable<Province> NeighborsOf(Province p) => NeighborIndices(p).Select(vertex => Items[vertex]);
 
 		public bool Passable(Province from, Province to, int distance, Func<Province, Province, int> difficulty)
 		{
-			return Graph.Passable(Lookup[from], Lookup[to], distance, (start, dest) => difficulty(this[start], this[dest]));
+			return Graph.Passable(from.Order, to.Order, distance, (start, dest) => difficulty(this[start], this[dest]));
 		}
 		public IEnumerable<Province> ControlledBy(Player player) => Items.Where(p => p.IsAllyOf(player));
 		public IEnumerable<IEnumerable<Province>> Split(Func<Province, bool> relevant, Func<Province, Province, bool> passable)

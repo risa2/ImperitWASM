@@ -7,7 +7,7 @@ namespace ImperitWASM.Shared.Config
 	{
 		public override int CanMove(Provinces provinces, Province from, Province to)
 		{
-			return from.Mainland && to.Mainland && provinces.Passable(from, to, 1, (a, b) => a is Land && b is Land ? 1 : 2) ? Weight : 0;
+			return from.Mainland && to.Mainland && provinces.Passable(from, to, 1, (a, b) => a.Mainland && b.Mainland ? 1 : 2) ? Weight : 0;
 		}
 		public override bool IsRecruitable(Region province) => province.Mainland;
 		public override int CanSustain(Region province) => province.Mainland ? Weight : 0;

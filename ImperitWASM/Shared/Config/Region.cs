@@ -3,7 +3,7 @@ using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Config
 {
-	public record Region(int Id, string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes)
+	public record Region(int Order, string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes)
 	{
 		public int AttackPower => Soldiers.AttackPower;
 		public int DefensePower => Soldiers.DefensePower;
@@ -32,7 +32,7 @@ namespace ImperitWASM.Shared.Config
 		public bool Unstable(Settings settings, Soldiers present) => InstabilityWith(settings, present).Any;
 		public bool Shaky(Settings settings, Soldiers present) => InstabilityWith(settings, present).RandomBool;
 
-		public virtual bool Equals(Region? region) => Name == region?.Name;
+		public virtual bool Equals(Region? region) => Order == region?.Order;
 		public override int GetHashCode() => Name.GetHashCode();
 	}
 }

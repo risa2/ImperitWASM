@@ -9,18 +9,16 @@ namespace ImperitWASM.Server
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration) => Configuration = configuration;
-
 		public IConfiguration Configuration { get; }
+		public Startup(IConfiguration configuration) => Configuration = configuration;
 		public void ConfigureServices(IServiceCollection services)
 		{
 			_ = services.AddControllersWithViews();
 			_ = services.AddRazorPages();
-			_ = services
+			_ = services.AddScoped<IDatabase, SqliteDatabase>(_ => new SqliteDatabase("Files/imperit.db"))
 					.AddSingleton(s => Config.Load(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Settings.json"))
-					.AddTransient<IContextService, ContextService>().AddTransient<ISessionService, SessionService>()
-					.AddTransient<IProvinceLoader, ProvinceLoader>().AddTransient<IGameService, GameService>()
-					.AddTransient<IActive, Active>().AddTransient<IGameCreator, GameCreator>().AddTransient<IEndOfTurn, EndOfTurn>();
+					.AddScoped<ISessionService, SessionService>().AddScoped<IProvinceLoader, ProvinceLoader>()
+					.AddScoped<IGameCreator, GameCreator>().AddScoped<IEndOfTurn, EndOfTurn>();
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{

@@ -10,17 +10,21 @@ namespace ImperitWASM.Server.Services
 	public interface IPlayerLoader
 	{
 		ImmutableArray<Player> this[int gameId] { get; }
-		void Set(int gameId, IEnumerable<Player> players);
+		void Set(int gameId, IEnumerable<Player> players, bool fromTransaction);
 		Player this[string name] { get; }
+		bool IsNameFree(string name);
+		string ObsfuscateName(string name, int repetition);
 	}
 	public class PlayerLoader : IPlayerLoader
 	{
 		readonly IDatabase db;
 		readonly Settings settings;
+		readonly ImmutableDictionary<SoldierType, int> type_indices;
 		public PlayerLoader(IDatabase db, Settings settings)
 		{
 			this.db = db;
 			this.settings = settings;
+			type_indices = settings.GetSoldierTypeIndices();
 		}
 
 		IEnumerable<Player> Get(string where, object arg) => db.Query<string, bool, bool, bool, int, string, int?, int?, int?, string?, int?, int?>(@"
@@ -46,28 +50,32 @@ namespace ImperitWASM.Server.Services
 		public ImmutableArray<Player> this[int gameId] => Get("GameId=@x0", gameId).ToImmutableArray();
 		public Player this[string name] => Get("Name=@x0", name).First();
 
-		public void Set(int gameId, IEnumerable<Player> players)
+		public void Set(int gameId, IEnumerable<Player> players, bool fromTransaction)
 		{
-			var st_indices = settings.GetSoldierTypeIndices();
-			db.Command("DELETE FROM Players WHERE GameId=@x0", gameId);
-			foreach (var (i, player) in players.Select((p, i) => (i, p)))
+			db.Transaction(!fromTransaction, () =>
 			{
-				db.Command("INSERT INTO Players (Name,Active,Alive,GameId,Human,Money,Order,Password) VALUES (@x0,@x1,@x2,@x3,@x4,@x5,@x6,@x7)",
-				player.Name, player.Active, player.Alive, gameId, player.Human, player.Money, i, player.Password.ToString());
-
-				foreach (var action in player.Actions)
+				db.Command("DELETE FROM Players WHERE GameId=@x0", gameId);
+				foreach (var (i, player) in players.Select((p, i) => (i, p)))
 				{
-					if (action is Manoeuvre manoeuvre)
+					db.Command("INSERT INTO Players (Name,Active,Alive,GameId,Human,Money,Order,Password) VALUES (@x0,@x1,@x2,@x3,@x4,@x5,@x6,@x7)",
+					player.Name, player.Active, player.Alive, gameId, player.Human, player.Money, i, player.Password.ToString());
+
+					foreach (var action in player.Actions)
 					{
-						db.Command("INSERT INTO Actions (PlayerName, Province, Type) VALUES (@x0,@x1,@x2)", player.Name, manoeuvre.Province, "Manoeuvre");
-						var id = db.Query<long>("SELECT last_insert_rowid()");
-						foreach (var regiment in manoeuvre.Soldiers)
+						if (action is Manoeuvre manoeuvre)
 						{
-							db.Command("INSERT INTO ActionRegiment (Count, ActionId, Type) VALUES (@x0, @x1, @x2)", regiment.Count, id, st_indices[regiment.Type]);
+							db.Command("INSERT INTO Actions (PlayerName, Province, Type) VALUES (@x0,@x1,@x2)", player.Name, manoeuvre.Province, "Manoeuvre");
+							long id = db.Query<long>("SELECT last_insert_rowid()").First();
+							foreach (var regiment in manoeuvre.Soldiers)
+							{
+								db.Command("INSERT INTO ActionRegiment (Count, ActionId, Type) VALUES (@x0, @x1, @x2)", regiment.Count, id, type_indices[regiment.Type]);
+							}
 						}
 					}
 				}
-			}
+			});
 		}
+		public bool IsNameFree(string name) => !name.All(char.IsDigit) && db.Query<int>("SELECT Count(Id) FROM Player WHERE Name=@x0", name).Single() == 0;
+		public string ObsfuscateName(string name, int repetition) => name + (db.Query<int>("SELECT MAX(CAST(SUBSTR(Name, LENGTH(@0)) AS INTEGER)) AS NumVal FROM Player WHERE Name LIKE @0 + '%' AND NumVal > 0", name.Trim()).DefaultIfEmpty(0).Max() + 1);
 	}
 }

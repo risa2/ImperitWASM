@@ -39,7 +39,7 @@ namespace ImperitWASM.Shared.Commands
 			var (new_players, new_provinces) = EndOfTurn(actor, players, provinces, settings);
 			while (new_players.First(p => p.Active) is { Human: false } robot && new_players.Count(p => p is { LivingHuman: true }) > 1)
 			{
-				(robot, new_provinces) = new Brain(robot, settings).Think(new_players, new_provinces, settings);
+				(robot, new_provinces) = new Brain(robot, settings).Think(new_players, new_provinces);
 				(new_players, new_provinces) = EndOfTurn(robot, new_players.Select(player => player == robot ? robot : player).ToArray(), new_provinces, settings);
 			}
 			return (new_players, new_provinces);

@@ -6,7 +6,7 @@ namespace ImperitWASM.Shared.Data
 {
 	public sealed record Province(Region Region, Player? Player, Soldiers Soldiers, Settings Settings)
 	{
-		public int Order => Region.Id;
+		public int Order => Region.Order;
 		public string Name => Region.Name;
 		public ImmutableArray<string> Text => Region.Text(Soldiers);
 		public ImmutableArray<Point> Border => Region.Border;
@@ -41,7 +41,7 @@ namespace ImperitWASM.Shared.Data
 
 		public Province Subtract(Soldiers army) => WithSoldiers(Soldiers.Subtract(army));
 		public Province Reinforce(Soldiers another) => WithSoldiers(Soldiers.Add(another));
-		public Province AttackedBy(Player p, Soldiers s) => RuledBy(s.AttackPower > Soldiers.DefensePower ? p : Player).WithSoldiers(Soldiers.AttackedBy(s));
+		public Province AttackedBy(Player p, Soldiers s) => this with { Player = s.AttackPower > Soldiers.DefensePower ? p : Player, Soldiers = Soldiers.AttackedBy(s) };
 		public Province VisitedBy(Player p, Soldiers s) => IsAllyOf(p) ? Reinforce(s) : AttackedBy(p, s);
 
 		public bool IsAllyOf(Player p) => p == Player;

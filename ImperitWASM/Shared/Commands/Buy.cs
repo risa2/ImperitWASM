@@ -13,7 +13,7 @@ namespace ImperitWASM.Shared.Commands
 		}
 		public bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return Allowed(actor, provinces,);
+			return Allowed(actor, provinces);
 		}
 		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{

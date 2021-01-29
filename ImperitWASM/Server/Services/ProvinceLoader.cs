@@ -1,6 +1,6 @@
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
-using ImperitWASM.Shared.Commands;
 using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
 
@@ -8,64 +8,50 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IProvinceLoader
 	{
-		int PlayersCount(int gameId);
-		void Add(int gameId, Player player, int order);
-		Task<bool> AddAsync(int gameId, ICommand cmd);
-		Provinces this[int gameId] { get; set; }
-		Game Add(Provinces pap);
-		Player Player(int gameId, int i);
-		Province? Province(int gameId, int i);
-		bool GameExists(int gameId) => PlayersCount(gameId) > 0;
-		bool IsNameFree(string name);
-		string ObsfuscateName(string name, int repetition);
+		Provinces Get(int gameId, IReadOnlyList<Player> players);
+		Province Get(int gameId, int order, IReadOnlyList<Player> players);
+		void Set(int gameId, IEnumerable<Province> provinces, bool fromTransaction);
 	}
 	public class ProvinceLoader : IProvinceLoader
 	{
 		readonly IDatabase db;
 		readonly Settings settings;
+		readonly ImmutableDictionary<SoldierType, int> type_indices;
 		public ProvinceLoader(IDatabase db, Settings settings)
 		{
 			this.db = db;
 			this.settings = settings;
+			type_indices = settings.GetSoldierTypeIndices();
 		}
-		public void Add(int gameId, Player player, int i, int start)
-		{
-			db.Provinces.Include(p => p.EntityProvinceActions).Single(p => p.GameId == gameId && p.Index == start).EntityProvinceActions!.Single(a => a.Type == EntityProvinceAction.Kind.Existence).EntityPlayer = Add(gameId, player, i);
-		}
-		public EntityPlayer Add(int gameId, Player player, int i)
-		{
-			var ePlayer = EntityPlayer.From(player, i);
-			ePlayer.GameId = gameId;
-			return db.Players.Add(ePlayer).Entity;
-		}
-		public async Task<bool> AddAsync(int gameId, ICommand cmd)
-		{
-			var (new_pap, success) = this[gameId].TryAdd(cmd);
-			this[gameId] = new_pap;
-			await db.SaveAsync();
-			return success;
-		}
-		public Player Player(int gameId, int i) => db.Players.Include(p => p.EntityPlayerActions).AsNoTracking().SingleOrDefault(p => p.Index == i && p.GameId == gameId)?.Convert(settings) ?? settings.Savage;
-		public Province? Province(int gameId, int i) => db.Provinces.AsNoTracking().Include(p => p.EntityProvinceActions).ThenInclude(s => s.EntitySoldiers)
-							.Include(p => p.EntityProvinceActions).ThenInclude(a => a.EntityPlayer).ThenInclude(s => s!.EntityPlayerActions)
-							.SingleOrDefault(p => p.GameId == gameId && p.Index == i)?.Convert(settings);
-		public PlayersAndProvinces this[int gameId]
-		{
-			get => db.GetPlayersAndProvinces(gameId);
-			set => db.Set(gameId, value.Players, value.Provinces);
-		}
-		public Game Add(PlayersAndProvinces pap) => db.Add(pap.Players, pap.Provinces);
-		public int PlayersCount(int gameId) => db.Players.Count(p => p.GameId == gameId);
 
-		public bool IsNameFree(string name) => name.All(c => !char.IsDigit(c)) && db.Players.All(p => p.Name != name);
-		public string ObsfuscateName(string original, int repetition)
+		IEnumerable<Province> Get(string where, IReadOnlyList<Player> players, params object[] args) => db.Query<int, int?, int?, int?>(@"
+			SELECT Province.""Order"", Player.""Order"", ProvinceRegiment.Type, ProvinceRegiment.Count FROM Province
+			LEFT JOIN ProvinceRegiment ON ProvinceRegiment.ProvinceId = Province.Id
+			LEFT JOIN Player ON Player.Name = Province.PlayerName
+			ORDER BY Province.""Order"" " + where, args).GroupBy(p => p.Item1).Select(p_group =>
 		{
-			original = original.Trim();
-			return db.Players.Select(p => p.Name).Where(name => name.StartsWith(original)).ToList().Select(name => name[original.Length..]).Where(suf => suf.All(c => c is >= '0' and <= '9')).DefaultIfEmpty("").Max(n => n ?? "") switch
+			var (province, player, count, type) = p_group.First();
+			var regiments = p_group.Where(r => r.Item3 is not null && r.Item4 is not null).Select(r => new Regiment(settings.SoldierTypes[r.Item3!.Value], r.Item4!.Value));
+			return new Province(settings.Regions[province], player is int P ? players[P] : null, new Soldiers(regiments), settings);
+		});
+		public Provinces Get(int gameId, IReadOnlyList<Player> players) => new Provinces(Get("WHERE Province.GameId = @x0", players, gameId).ToImmutableArray(), settings.Graph);
+		public Province Get(int gameId, int order, IReadOnlyList<Player> players) => Get("WHERE Province.GameId=@x0 AND Province.Order=@x1", players, gameId, order).First();
+
+		public void Set(int gameId, IEnumerable<Province> provinces, bool fromTransaction)
+		{
+			db.Transaction(!fromTransaction, () =>
 			{
-				{ Length: > 0 } suf when suf[^1] >= '0' && suf[^1] < (char)('9' - repetition) => original + suf[..^1] + (char)(suf[^1] + 1 + repetition),
-				var suf => original + suf + (repetition + 1)
-			};
+				db.Command("DELETE FROM Province WHERE GameId=@0", gameId);
+				foreach (var province in provinces)
+				{
+					db.Command("INSERT INTO Province (GameId, Order, PlayerName) VALUES (@x0,@x1,@x2)", gameId, province.Order, province.Player?.Name);
+					long id = db.Query<long>("SELECT last_insert_rowid()").First();
+					foreach (var (type, count) in province.Soldiers)
+					{
+						db.Command("INSERT INTO ProvinceRegiment (Count, Type, ProvinceId) VALUES (@x0,@x1,@x2)", count, type_indices[type], id);
+					}
+				}
+			});
 		}
 	}
 }

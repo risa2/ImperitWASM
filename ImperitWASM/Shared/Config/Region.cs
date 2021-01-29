@@ -3,7 +3,7 @@ using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Config
 {
-	public record Region(string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes)
+	public record Region(int Id, string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes)
 	{
 		public int AttackPower => Soldiers.AttackPower;
 		public int DefensePower => Soldiers.DefensePower;

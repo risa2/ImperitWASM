@@ -14,13 +14,13 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class CommandController : ControllerBase
 	{
-		readonly IPlayersProvinces pap;
+		readonly IProvinceLoader pap;
 		readonly ISessionService session;
 		readonly Settings settings;
 		readonly IContextService ctx;
 		readonly IEndOfTurn eot;
 		readonly IActive active;
-		public CommandController(IPlayersProvinces pap, ISessionService session, Settings settings, IEndOfTurn eot, IActive active, IContextService ctx)
+		public CommandController(IProvinceLoader pap, ISessionService session, Settings settings, IEndOfTurn eot, IActive active, IContextService ctx)
 		{
 			this.pap = pap;
 			this.session = session;

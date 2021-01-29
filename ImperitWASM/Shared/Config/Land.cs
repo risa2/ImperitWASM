@@ -3,8 +3,8 @@ using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Config
 {
-	public record Land(string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes, int Earnings, Ratio Instability, bool IsStart, bool IsFinal, bool HasPort)
-		: Region(Name, Shape, Soldiers, ExtraTypes)
+	public record Land(int Id, string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes, int Earnings, Ratio Instability, bool IsStart, bool IsFinal, bool HasPort)
+		: Region(Id, Name, Shape, Soldiers, ExtraTypes)
 	{
 		public override Color Fill(Settings settings) => settings.LandColor;
 

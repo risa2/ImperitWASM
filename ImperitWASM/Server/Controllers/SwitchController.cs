@@ -12,10 +12,10 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class SwitchController : ControllerBase
 	{
-		readonly IPlayersProvinces pap;
+		readonly IProvinceLoader pap;
 		readonly Settings settings;
 		readonly IActive active;
-		public SwitchController(IPlayersProvinces pap, Settings settings, IActive active)
+		public SwitchController(IProvinceLoader pap, Settings settings, IActive active)
 		{
 			this.pap = pap;
 			this.settings = settings;

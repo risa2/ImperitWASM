@@ -11,9 +11,9 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class ProvincesController : ControllerBase
 	{
-		readonly IPlayersProvinces pap;
+		readonly IProvinceLoader pap;
 		readonly IActive active;
-		public ProvincesController(IPlayersProvinces pap, IActive active)
+		public ProvincesController(IProvinceLoader pap, IActive active)
 		{
 			this.pap = pap;
 			this.active = active;

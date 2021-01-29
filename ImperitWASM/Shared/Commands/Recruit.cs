@@ -13,7 +13,7 @@ namespace ImperitWASM.Shared.Commands
 		}
 		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return (players.Select(altered => altered == actor ? altered.Pay(Soldiers.Price).Add(new Manoeuvre(Province, Soldiers)) : altered), provinces);
+			return (players.Select(altered => altered == actor ? altered.Pay(Soldiers.Price).Add(new Manoeuvre(Province.Order, Soldiers)) : altered), provinces);
 		}
 	}
 }

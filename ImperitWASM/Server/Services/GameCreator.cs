@@ -16,11 +16,11 @@ namespace ImperitWASM.Server.Services
 	}
 	public class GameCreator : IGameCreator
 	{
-		readonly IPlayersProvinces pap;
+		readonly IProvinceLoader pap;
 		readonly IGameService game;
 		readonly Settings settings;
 		readonly IContextService ctx;
-		public GameCreator(IPlayersProvinces pap, IGameService game, Settings settings, IContextService ctx)
+		public GameCreator(IProvinceLoader pap, IGameService game, Settings settings, IContextService ctx)
 		{
 			this.pap = pap;
 			this.game = game;

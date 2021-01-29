@@ -16,11 +16,11 @@ namespace ImperitWASM.Server.Controllers
 	public class PlayerController : ControllerBase
 	{
 		readonly ISessionService session;
-		readonly IPlayersProvinces pap;
+		readonly IProvinceLoader pap;
 		readonly IContextService ctx;
 		readonly IGameCreator gameCreator;
 		readonly IGameService gs;
-		public PlayerController(IPlayersProvinces pap, ISessionService session, IContextService ctx, IGameCreator gameCreator, IGameService gs)
+		public PlayerController(IProvinceLoader pap, ISessionService session, IContextService ctx, IGameCreator gameCreator, IGameService gs)
 		{
 			this.pap = pap;
 			this.session = session;

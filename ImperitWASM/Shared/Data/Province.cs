@@ -6,6 +6,7 @@ namespace ImperitWASM.Shared.Data
 {
 	public sealed record Province(Region Region, Player? Player, Soldiers Soldiers, Settings Settings)
 	{
+		public int Order => Region.Id;
 		public string Name => Region.Name;
 		public ImmutableArray<string> Text => Region.Text(Soldiers);
 		public ImmutableArray<Point> Border => Region.Border;

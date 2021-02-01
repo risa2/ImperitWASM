@@ -23,7 +23,14 @@ namespace ImperitWASM.Shared.Config
 		public Ratio Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
 
 		public IEnumerable<SoldierType> RecruitableTypes(Region where) => SoldierTypes.Where(t => t.IsRecruitable(where));
-		public IEnumerable<string> GetNames(Func<string, int, string> obf) => Enumerable.Range(0, PlayerCount).Select(i => obf(Names[i % Names.Length], i / Names.Length));
+		IEnumerable<string> GetNames(Func<string, int, string> obf) => Enumerable.Range(0, PlayerCount).Select(i => obf(Names[i % Names.Length], i / Names.Length));
+		public IEnumerable<(int, Player)> CreateRobots(int first, IEnumerable<int> starts, Func<string, int, string> obf)
+		{
+			foreach (var (i, (start, name)) in starts.Zip(GetNames(obf)).Index())
+			{
+				yield return (i, new Player(ColorOf(i + first), name, StartMoney(start), true, ImmutableList<IAction>.Empty, this, false, new Password(), false));
+			}
+		}
 
 		public sealed override string ToString() => string.Empty;
 	}

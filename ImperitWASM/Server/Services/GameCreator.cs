@@ -4,15 +4,17 @@ using ImperitWASM.Server.Load;
 using ImperitWASM.Shared.Data;
 using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared;
+using System.Linq;
+using System.Collections.Immutable;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface IGameCreator
 	{
 		Color NextColor(int gameId);
-		Task<int> CreateAsync();
-		Task StartAllAsync();
-		Task RegisterAsync(Game game, string name, Password password, int land);
+		int Create();
+		void StartAll();
+		void Register(int gameId, string name, Password password, int land);
 	}
 	public class GameCreator : IGameCreator
 	{
@@ -29,38 +31,40 @@ namespace ImperitWASM.Server.Services
 			this.settings = settings;
 			this.db = db;
 		}
-		public async Task<int> CreateAsync()
+		public int Create() => db.Transaction(true, () =>
 		{
-			int gameId = 0;
-			db.Transaction(true, () =>
-			{
-				gameId = game_load.Add(Game.Create);
-				game_load.RemoveOld(DateTimeOffset.UtcNow.AddDays(-1.0));
-				province_load.Set(gameId, settings.Provinces, fromTransaction: true);
-			});
+			int gameId = game_load.Add(Game.Create);
+			game_load.RemoveOld(DateTimeOffset.UtcNow.AddDays(-1.0));
+			province_load.Set(gameId, settings.Provinces, fromTransaction: true);
 			return gameId;
-		}
-		public Color NextColor(int gameId) => Settings.ColorOf(province_load.PlayersCount(gameId) - 1);
-		void Start(Game g)
+		});
+		public Color NextColor(int gameId) => Settings.ColorOf(player_load.Count(gameId));
+		void Start(int gameId, bool fromTransaction) => db.Transaction(!fromTransaction, () =>
 		{
-			var p_p = province_load[g.Id] = province_load[g.Id].AddRobots(settings, settings.GetNames(province_load.ObsfuscateName));
-			ctx.Add(g.Start().SetActive(p_p.Next(0)).Id, p_p.PlayersPower);
-		}
-		public Task StartAllAsync()
+			var players = player_load[gameId];
+			var provinces = province_load.Get(gameId, players);
+			var robots = settings.CreateRobots(players.Length, provinces.Inhabitable, player_load.ObsfuscateName).ToImmutableArray();
+
+			player_load.Set(gameId, players.AddRange(robots.Select(r => r.Item2)), true);
+			province_load.Set(gameId, provinces.Alter(robots.Select(r => (r.Item1, provinces[r.Item1].RuledBy(r.Item2)))), true);
+			game_load[gameId] = Game.Start;
+		});
+		public void StartAll() => game_load.ShouldStart.Each(x => Start(x, false));
+		public void Register(int gameId, string name, Password password, int land) => db.Transaction(true, () =>
 		{
-			game_load.ShouldStart.Each(Start);
-			return ctx.SaveAsync();
-		}
-		public Task RegisterAsync(Game game, string name, Password password, int land)
-		{
-			int count = province_load.PlayersCount(game.Id);
-			province_load.Add(game.Id, settings.CreateHuman(count, name, land, password), count, land);
-			_ = count == 2 ? game.StartCountdown() : game;
-			if (count + 1 >= settings.PlayerCount)
+			var players = player_load[gameId];
+			var player = settings.CreatePlayer(players.Length, name, land, password, true);
+			player_load.Set(gameId, players.Add(player), true);
+			province_load.Set(gameId, land, province_load.Get(gameId, land, players).RuledBy(player), true);
+
+			if (players.Length + 1 == 2)
 			{
-				Start(game);
+				game_load[gameId] = Game.CountDown(settings.CountdownTime);
 			}
-			return ctx.SaveAsync();
-		}
+			if (players.Length + 1 >= settings.PlayerCount)
+			{
+				Start(gameId, true);
+			}
+		});
 	}
 }

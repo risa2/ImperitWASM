@@ -6,6 +6,7 @@ namespace ImperitWASM.Server.Services
 	public interface IDatabase
 	{
 		void Transaction(bool isTransaction, Action action);
+		T Transaction<T>(bool isTransaction, Func<T> action);
 		void Command(string sql, params object?[] args);
 		IEnumerable<T0> Query<T0>(string sql, params object?[] args);
 		IEnumerable<(T0, T1)> Query<T0, T1>(string sql, params object?[] args);

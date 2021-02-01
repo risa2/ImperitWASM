@@ -17,11 +17,11 @@ namespace ImperitWASM.Server.Controllers
 		readonly IGameService gs;
 		readonly IGameCreator gameCreator;
 		readonly IProvinceLoader pap;
-		readonly ISessionService session;
+		readonly ISessionLoader session;
 		readonly IEndOfTurn eot;
 		readonly IActive active;
 		readonly Settings settings;
-		public GameController(IGameService gs, IGameCreator gameCreator, IProvinceLoader pap, ISessionService session, IEndOfTurn eot, IActive active, Settings settings)
+		public GameController(IGameService gs, IGameCreator gameCreator, IProvinceLoader pap, ISessionLoader session, IEndOfTurn eot, IActive active, Settings settings)
 		{
 			this.gs = gs;
 			this.gameCreator = gameCreator;

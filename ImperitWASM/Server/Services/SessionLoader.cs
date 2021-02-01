@@ -4,17 +4,17 @@ using System.Security.Cryptography;
 
 namespace ImperitWASM.Server.Services
 {
-	public interface ISessionService
+	public interface ISessionLoader
 	{
 		string Add(string playerName, bool fromTransaction);
 		bool IsValid(string player, string key);
 		void Remove(string key);
 	}
-	public class SessionService : ISessionService
+	public class SessionLoader : ISessionLoader
 	{
 		static readonly RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
 		readonly IDatabase db;
-		public SessionService(IDatabase db) => this.db = db;
+		public SessionLoader(IDatabase db) => this.db = db;
 		static string GenerateToken(int len)
 		{
 			byte[] buf = new byte[len];

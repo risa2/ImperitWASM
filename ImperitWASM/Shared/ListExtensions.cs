@@ -104,5 +104,15 @@ namespace ImperitWASM.Shared
 				yield return new_item;
 			}
 		}
+		public static IEnumerable<(int i, T v)> Index<T>(this IEnumerable<T> e) => e.Select((v, i) => (i, v));
+		public static List<T> Alter<T>(this IEnumerable<T> e, IEnumerable<(int, T)> changes)
+		{
+			var result = new List<T>(e);
+			foreach (var (i, value) in changes)
+			{
+				result[i] = value;
+			}
+			return result;
+		}
 	}
 }

@@ -6,8 +6,8 @@ namespace ImperitWASM.Shared.Data
 	{
 		public enum State { Created, Countdown, Started, Finished }
 		public static Game Create => new Game(State.Created, DateTimeOffset.MaxValue, DateTimeOffset.MaxValue);
-		public Game CountDown(TimeSpan delay) => this with { Current = State.Countdown, StartTime = DateTimeOffset.UtcNow.Add(delay) };
-		public Game Start() => this with { Current = State.Started };
+		public static Game CountDown(TimeSpan delay) => new Game(State.Countdown, DateTimeOffset.UtcNow.Add(delay), DateTimeOffset.MaxValue);
+		public static Game Start => new Game(State.Countdown, DateTimeOffset.UtcNow, DateTimeOffset.MaxValue);
 		public Game Finish() => this with { Current = State.Finished, FinishTime = DateTimeOffset.UtcNow };
 
 		public bool ShouldStart => Current == State.Countdown && DateTimeOffset.UtcNow >= StartTime;

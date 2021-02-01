@@ -11,6 +11,7 @@ namespace ImperitWASM.Server.Services
 		Provinces Get(int gameId, IReadOnlyList<Player> players);
 		Province Get(int gameId, int order, IReadOnlyList<Player> players);
 		void Set(int gameId, IEnumerable<Province> provinces, bool fromTransaction);
+		void Set(int gameId, int order, Province province, bool fromTransaction);
 	}
 	public class ProvinceLoader : IProvinceLoader
 	{
@@ -37,20 +38,32 @@ namespace ImperitWASM.Server.Services
 		public Provinces Get(int gameId, IReadOnlyList<Player> players) => new Provinces(Get("WHERE Province.GameId = @x0", players, gameId).ToImmutableArray(), settings.Graph);
 		public Province Get(int gameId, int order, IReadOnlyList<Player> players) => Get("WHERE Province.GameId=@x0 AND Province.Order=@x1", players, gameId, order).First();
 
+		void Insert(int gameId, Province province)
+		{
+			db.Command("INSERT INTO Province (GameId, Order, PlayerName) VALUES (@x0,@x1,@x2)", gameId, province.Order, province.Player?.Name);
+			long id = db.Query<long>("SELECT last_insert_rowid()").First();
+			foreach (var (type, count) in province.Soldiers)
+			{
+				db.Command("INSERT INTO ProvinceRegiment (Count, Type, ProvinceId) VALUES (@x0,@x1,@x2)", count, type_indices[type], id);
+			}
+		}
 		public void Set(int gameId, IEnumerable<Province> provinces, bool fromTransaction)
 		{
 			db.Transaction(!fromTransaction, () =>
 			{
-				db.Command("DELETE FROM Province WHERE GameId=@0", gameId);
+				db.Command("DELETE FROM Province WHERE GameId=@x0", gameId);
 				foreach (var province in provinces)
 				{
-					db.Command("INSERT INTO Province (GameId, Order, PlayerName) VALUES (@x0,@x1,@x2)", gameId, province.Order, province.Player?.Name);
-					long id = db.Query<long>("SELECT last_insert_rowid()").First();
-					foreach (var (type, count) in province.Soldiers)
-					{
-						db.Command("INSERT INTO ProvinceRegiment (Count, Type, ProvinceId) VALUES (@x0,@x1,@x2)", count, type_indices[type], id);
-					}
+					Insert(gameId, province);
 				}
+			});
+		}
+		public void Set(int gameId, int order, Province province, bool fromTransaction)
+		{
+			db.Transaction(!fromTransaction, () =>
+			{
+				db.Command("DELETE FROM Province WHERE GameId=@x0 AND Order=@x1", gameId, order);
+				Insert(gameId, province);
 			});
 		}
 	}

@@ -15,12 +15,12 @@ namespace ImperitWASM.Server.Controllers
 	public class CommandController : ControllerBase
 	{
 		readonly IProvinceLoader pap;
-		readonly ISessionService session;
+		readonly ISessionLoader session;
 		readonly Settings settings;
 		readonly IContextService ctx;
 		readonly IEndOfTurn eot;
 		readonly IActive active;
-		public CommandController(IProvinceLoader pap, ISessionService session, Settings settings, IEndOfTurn eot, IActive active, IContextService ctx)
+		public CommandController(IProvinceLoader pap, ISessionLoader session, Settings settings, IEndOfTurn eot, IActive active, IContextService ctx)
 		{
 			this.pap = pap;
 			this.session = session;

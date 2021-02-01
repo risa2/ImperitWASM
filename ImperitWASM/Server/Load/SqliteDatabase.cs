@@ -13,17 +13,25 @@ namespace ImperitWASM.Server.Load
 			con = new SqliteConnection($"Data Source={dataSource};Cache=Shared");
 			con.Open();
 		}
-		public void Transaction(bool isTransaction, Action action)
+		public T Transaction<T>(bool isTransaction, Func<T> action)
 		{
 			if (isTransaction)
 			{
 				using var transaction = con.BeginTransaction();
-				action();
+				return action();
 			}
 			else
 			{
-				action();
+				return action();
 			}
+		}
+		public void Transaction(bool isTransaction, Action action)
+		{
+			_ = Transaction(isTransaction, () =>
+			{
+				action();
+				return 0;
+			});
 		}
 		SqliteCommand CreateCommand(string sql, object?[] args)
 		{

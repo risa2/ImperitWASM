@@ -6,13 +6,19 @@ using ImperitWASM.Shared.Config;
 
 namespace ImperitWASM.Shared.Data
 {
-	public sealed record Player(Color Color, string Name, int Money, bool Alive, ImmutableList<IAction> Actions, Settings Settings, bool Human, Password Password, bool Active)
+	public sealed record Player(PlayerIdentity Id, int Money, bool Alive, ImmutableList<IAction> Actions, Settings Settings, Password Password, bool Active)
 	{
+		public string Name => Id.Name;
+		public Color Color => Id.Color;
+		public int GameId => Id.GameId;
+		public int Order => Id.Order;
+		public bool Human => Id.Human;
+
 		public Description Description => new Description(Name, ImmutableArray<string>.Empty);
 		public int MaxBorrowable => Settings.Discount(Settings.DebtLimit - Debt);
 		public int MaxUsableMoney => Money + MaxBorrowable;
 		public Player ChangeMoney(int amount) => this with { Money = amount + Money };
-		public Player Earn(Provinces provinces) => ChangeMoney(provinces.IncomeOf(this));
+		public Player Earn(Provinces provinces) => ChangeMoney(provinces.IncomeOf(Id));
 		
 		public Player Die() => this with { Money = 0, Alive = false, Actions = ImmutableList<IAction>.Empty };
 		public Player Add(params IAction[] actions) => this with { Actions = Actions.AddRange(actions) };
@@ -39,8 +45,8 @@ namespace ImperitWASM.Shared.Data
 		public int Debt => Actions.OfType<Loan>().Sum(a => a.Debt);
 		public Power Power(Provinces provinces) => new Power(Alive, provinces.Sum(p => p.Score), provinces.Sum(p => p.Earnings), Money - Debt, provinces.Sum(p => p.Power));
 
-		public bool Equals(Player? obj) => obj is not null && Name == obj.Name;
-		public override int GetHashCode() => Name.GetHashCode();
+		public bool Equals(Player? p) => p is not null && Id == p.Id;
+		public override int GetHashCode() => Id.GetHashCode();
 
 		public (Player, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{

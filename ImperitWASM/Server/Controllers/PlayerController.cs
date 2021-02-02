@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Config;
@@ -30,24 +29,23 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("Money")] public int Money([FromBody] Session ses) => player_load[ses.G, ses.P].Money;
 		[HttpPost("Infos")] public IEnumerable<PlayerInfo> Infos([FromBody] Session ses)
 		{
-			if (!session.IsValid(player_load[ses.G, ses.P].Name, ses.Key))
+			if (!session.IsValid(ses.G, ses.P, ses.Key))
 			{
 				return Enumerable.Empty<PlayerInfo>();
 			}
 			var players = player_load[ses.G];
-			var provinces = province_load.Get(ses.G, players);
-			return players.Select((p, i) => new PlayerInfo(i, p.Name, p.Color, p.Alive, p.Money, p.Debt, provinces.IncomeOf(p)));
+			var provinces = province_load[ses.G];
+			return players.Select((p, i) => new PlayerInfo(i, p.Name, p.Color, p.Alive, p.Money, p.Debt, provinces.IncomeOf(p.Id)));
 		}
 		[HttpPost("Correct")]
-		public Game.State Correct([FromBody] Session ses) => session.IsValid(player_load[ses.G, ses.P].Name, ses.Key) ? game_load[ses.G]?.Current ?? Game.State.Invalid : Game.State.Invalid;
+		public Game.State Correct([FromBody] Session ses) => session.IsValid(ses.G, ses.P, ses.Key) ? game_load[ses.G]?.Current ?? Game.State.Invalid : Game.State.Invalid;
 		[HttpPost("Login")]
 		public Session Login([FromBody] Login trial)
 		{
 			game_creator.StartAll();
-			return player_load[trial.N] is Player p && p.Password.IsCorrect(trial.P) ? new Session(p.Index, p.GameId, session.Add(p.Name, false)) : new Session();
+			return player_load[trial.N] is Player p && p.Password.IsCorrect(trial.P) ? new Session(p.Order, p.GameId, session.Add(p.GameId, p.Order, false)) : new Session();
 		}
-		[HttpPost("Color")]
-		public Color GetColor([FromBody] PlayerId id) => Color.Parse(ctx.Players.AsNoTracking().SingleOrDefault(p => p.GameId == id.G && p.Index == id.P)?.Color ?? "#00000000");
+		[HttpPost("Color")] public Color GetColor([FromBody] int player) => PlayerIdentity.ColorOf(player);
 		[HttpPost("Logout")] public void Logout([FromBody] string key) => session.Remove(key);
 	}
 }

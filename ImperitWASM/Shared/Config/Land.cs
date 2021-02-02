@@ -14,7 +14,7 @@ namespace ImperitWASM.Shared.Config
 		public override bool Mainland => true;
 		public override bool Dry => true;
 
-		public override int Price(Soldiers now) => Settings.LandPrice(now, Earnings);
+		public override int Price(Soldiers now) => now.Price + now.DefensePower + Earnings * 2;
 		public override int Score => IsFinal ? 1 : 0;
 		public override int Income => Earnings;
 

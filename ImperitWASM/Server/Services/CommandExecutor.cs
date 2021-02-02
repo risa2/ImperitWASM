@@ -8,7 +8,8 @@ namespace ImperitWASM.Server.Services
 {
 	public interface ICommandExecutor
 	{
-		(bool, ImmutableArray<Player>, Provinces) Perform(int gameId, ICommand command, bool fromTransaction);
+		(bool, ImmutableArray<Player>, Provinces) Perform(int gameId, int player, ICommand command, ImmutableArray<Player> players, Provinces provinces);
+		(bool, ImmutableArray<Player>, Provinces) Perform(int gameId, int player, ICommand command, bool fromTransaction);
 	}
 	public class CommandExecutor : ICommandExecutor
 	{
@@ -24,14 +25,11 @@ namespace ImperitWASM.Server.Services
 			this.settings = settings;
 		}
 
-		public (bool, ImmutableArray<Player>, Provinces) Perform(int gameId, ICommand command, bool fromTransaction) => db.Transaction(!fromTransaction, () =>
+		public (bool, ImmutableArray<Player>, Provinces) Perform(int gameId, int player, ICommand command, ImmutableArray<Player> players, Provinces provinces)
 		{
-			var players = player_load[gameId];
-			var provinces = province_load.Get(gameId, players);
-			var player = players.First(p => p.Active);
-			if (command.Allowed(player, players, provinces, settings))
+			if (command.Allowed(players[player], players, provinces, settings))
 			{
-				var (new_player_e, new_province_e) = command.Perform(player, players, provinces, settings);
+				var (new_player_e, new_province_e) = command.Perform(players[player], players, provinces, settings);
 				var (new_players, new_provinces) = (new_player_e.ToImmutableArray(), provinces.With(new_province_e));
 
 				player_load.Set(gameId, new_players, true);
@@ -39,6 +37,11 @@ namespace ImperitWASM.Server.Services
 				return (true, new_players, new_provinces);
 			}
 			return (false, players, provinces);
-		});
+		}
+
+		public (bool, ImmutableArray<Player>, Provinces) Perform(int gameId, int player, ICommand command, bool fromTransaction)
+		{
+			return db.Transaction(!fromTransaction, () => Perform(gameId, player, command, player_load[gameId], province_load[gameId]));
+		}
 	}
 }

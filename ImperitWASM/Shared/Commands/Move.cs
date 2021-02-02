@@ -9,7 +9,7 @@ namespace ImperitWASM.Shared.Commands
 	{
 		public bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return actor.Active && From.CanMove(provinces, To, actor, Soldiers);
+			return actor.Active && From.CanMove(provinces, To, actor.Id, Soldiers);
 		}
 		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{

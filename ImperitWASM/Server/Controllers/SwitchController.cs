@@ -12,36 +12,37 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class SwitchController : ControllerBase
 	{
-		readonly IProvinceLoader pap;
+		readonly IProvinceLoader province_load;
+		readonly IPlayerLoader player_load;
 		readonly Settings settings;
-		readonly IActive active;
-		public SwitchController(IProvinceLoader pap, Settings settings, IActive active)
+		public SwitchController(IProvinceLoader province_load, IPlayerLoader player_load, Settings settings)
 		{
-			this.pap = pap;
+			this.province_load = province_load;
+			this.player_load = player_load;
 			this.settings = settings;
-			this.active = active;
 		}
 
-		bool IsPossible(PlayersAndProvinces p_p, int player, Switch s) => s.From is int from && s.To is int to && s.View switch
+		bool IsPossible(Provinces provinces, Player player, Switch s) => s.From is int from && s.To is int to && s.View switch
 		{
-			View.Recruit => settings.RecruitableTypes(p_p.Province(to)).Any(),
-			View.Move => p_p.Province(from).CanAnyMove(p_p, p_p.Province(to)),
-			View.Purchase when p_p.Province(to) is Land L => new Buy(p_p.Player(player), L).AllowedWithLoan(p_p),
+			View.Recruit => settings.RecruitableIn(to).Any(),
+			View.Move => provinces[from].CanAnyMove(provinces, provinces[to]),
+			View.Purchase => provinces[to].Mainland && new Buy(provinces[to]).Allowed(player, provinces),
 			_ => false
 		};
-		Switch IfPossible(PlayersAndProvinces p_p, int player, Switch s) => IsPossible(p_p, player, s) ? s : new Switch(s.Select, View.Map, null, null);
-		static Switch ClickedResult(PlayersAndProvinces p_p, Click c) => c.From switch
+		Switch IfPossible(Provinces provinces, Player player, Switch s) => IsPossible(provinces, player, s) ? s : new Switch(s.Select, View.Map, null, null);
+		static Switch ClickedResult(Provinces provinces, Player player, Click c) => c.From switch
 		{
 			int start => new Switch(null, start == c.Clicked ? View.Recruit : View.Move, start, c.Clicked),
-			_ when p_p.Province(c.Clicked).IsAllyOf(p_p.Player(c.Player)) => new Switch(c.Clicked, View.Map, null, null),
-			_ when p_p.Province(c.Clicked) is Land L1 && !L1.Inhabited => new Switch(null, View.Purchase, c.Clicked, c.Clicked),
+			_ when provinces[c.Clicked].IsAllyOf(player.Id) => new Switch(c.Clicked, View.Map, null, null),
+			_ when provinces[c.Clicked] is { Mainland: true, Inhabited: false } => new Switch(null, View.Purchase, c.Clicked, c.Clicked),
 			_ => new Switch(null, View.Map, null, null)
 		};
 		[HttpPost("Clicked")]
 		public Switch Clicked([FromBody] Click c)
 		{
-			var (p_p, player) = (pap[c.Game], active[c.Game]);
-			return IfPossible(p_p, player, c.Player == player ? ClickedResult(p_p, c) : new Switch(null, View.Map, null, null));
+			var player = player_load[c.Game, c.Player];
+			var provinces = province_load[player.GameId];
+			return IfPossible(provinces, player, player.Active ? ClickedResult(provinces, player, c) : new Switch(null, View.Map, null, null));
 		}
 	}
 }

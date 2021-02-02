@@ -6,7 +6,7 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IEndOfTurn
 	{
-		bool NextTurn(int gameId);
+		bool NextTurn(int gameId, int player);
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
@@ -23,9 +23,9 @@ namespace ImperitWASM.Server.Services
 			this.cmd = cmd;
 			this.db = db;
 		}
-		public bool NextTurn(int gameId) => db.Transaction(true, () =>
+		public bool NextTurn(int gameId, int player) => db.Transaction(true, () =>
 		{
-			var (_, players, provinces) = cmd.Perform(gameId, new NextTurn(), true);
+			var (_, players, provinces) = cmd.Perform(gameId, player, new NextTurn(), true);
 			power_load.Add(gameId, players.Select(p => p.Power(provinces)), true);
 
 			bool finish = players.Any(p => p is { LivingHuman: true }) || provinces.Winner.Item2 >= settings.FinalLandsCount;

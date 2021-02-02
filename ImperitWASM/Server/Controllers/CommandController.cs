@@ -20,7 +20,8 @@ namespace ImperitWASM.Server.Controllers
 		readonly ICommandExecutor cmd;
 		readonly IEndOfTurn eot;
 		readonly IPlayerLoader player_load;
-		public CommandController(IProvinceLoader province_load, ISessionLoader session, Settings settings, IEndOfTurn eot, IPlayerLoader player_load, ICommandExecutor cmd)
+		readonly IDatabase db;
+		public CommandController(IProvinceLoader province_load, ISessionLoader session, Settings settings, IEndOfTurn eot, IPlayerLoader player_load, ICommandExecutor cmd, IDatabase db)
 		{
 			this.province_load = province_load;
 			this.session = session;
@@ -28,77 +29,72 @@ namespace ImperitWASM.Server.Controllers
 			this.eot = eot;
 			this.player_load = player_load;
 			this.cmd = cmd;
+			this.db = db;
 		}
 
-		bool Validate(int playerId, int gameId, string loginId) => session.IsValid(playerId, gameId, loginId) && playerId == active[gameId];
-		[HttpPost("GiveUp")]
-		public async Task GiveUp([FromBody] Session player)
+		[HttpPost("GiveUp")] public void GiveUp([FromBody] Session player)
 		{
 			if (session.IsValid(player.P, player.G, player.Key))
 			{
-				_ = await province_load.AddAsync(player.G, new GiveUp(province_load.Player(player.G, player.P)));
-				if (active[player.G] == player.P)
-				{
-					_ = await eot.NextTurnAsync(player.G);
-				}
+				_ = cmd.Perform(player.G, player.P, new GiveUp(), false);
 			}
 		}
-		[HttpPost("MoveInfo")]
-		public MoveInfo MoveInfo([FromBody] MoveData move) => province_load.GameExists(move.G) && province_load[move.G] is PlayersAndProvinces p_p && p_p.Province(move.F) is Province from && p_p.Province(move.T) is Province to ? new MoveInfo(from.CanAnyMove(p_p, to), !from.IsAllyOf(to), to.Inhabited, from.Name, to.Name, from.Soldiers.ToString(), to.Soldiers.ToString(), from.Soldiers.Select(reg => reg.Type.Description).ToImmutableArray()) : new MoveInfo(false, false, false, "", "", "", "", ImmutableArray<Description>.Empty);
-		[HttpPost("Move")]
-		public async Task<MoveErrors> Move([FromBody] MoveCmd m)
+		[HttpPost("MoveInfo")] public MoveInfo MoveInfo([FromBody] MoveData move)
 		{
-			if (!Validate(m.P, m.Game, m.Key))
+			var prov = province_load[move.G];
+			return new MoveInfo(prov[move.F].CanAnyMove(prov, prov[move.T]), prov[move.F].Name, prov[move.T].Name, prov[move.F].Soldiers.ToString(), prov[move.T].Soldiers.ToString(), settings.SoldierTypes.Select(type => prov[move.F].Soldiers.CountOf(type)).ToImmutableArray());
+		}
+		[HttpPost("Move")]
+		public MoveErrors Move([FromBody] MoveCmd m)
+		{
+			if (!session.IsValid(m.P, m.Game, m.Key))
 			{
 				return MoveErrors.NotPlaying;
 			}
-			var p_p = province_load[m.Game];
-			var (from, to) = (p_p.Province(m.From), p_p.Province(m.To));
-			var move = new Move(p_p.Player(m.P), from, to, new Soldiers(m.Counts.Select((count, i) => new Regiment(from.Soldiers[i].Type, count))));
-			return (await province_load.AddAsync(m.Game, move)) switch
+			return db.Transaction(true, () =>
 			{
-				true => MoveErrors.Ok,
-				_ when !from.Has(move.Soldiers) => MoveErrors.FewSoldiers,
-				_ when !move.HasEnoughCapacity(p_p) => MoveErrors.LittleCapacity,
-				_ => MoveErrors.Else
-			};
-		}
-		[HttpPost("PurchaseInfo")]
-		public PurchaseInfo PurchaseInfo([FromBody] PurchaseData purchase) => province_load.GameExists(purchase.G) && province_load[purchase.G] is PlayersAndProvinces p_p && p_p.Province(purchase.L) is Land land && p_p.Player(purchase.P) is Player player ? new PurchaseInfo(new Buy(player, land).AllowedWithLoan(p_p), land.Name, land.Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
-		[HttpPost("Purchase")]
-		public async Task Purchase([FromBody] PurchaseCmd purchase)
-		{
-			if (Validate(purchase.P, purchase.Game, purchase.Key))
-			{
-				var p_p = province_load[purchase.Game];
-				if (p_p.Province(purchase.Land) is Land Land && p_p.Player(purchase.P) is Player Player)
+				var players = player_load[m.Game];
+				var provinces = province_load[m.Game];
+				var move = new Move(provinces[m.From], provinces[m.To], new Soldiers(m.Counts.Select((count, i) => new Regiment(settings.SoldierTypes[i], count))));
+				
+				return cmd.Perform(m.Game, m.P, move, players, provinces).Item1 switch
 				{
-					p_p = Land.Price > Player.Money ? p_p.Add(new Borrow(Player, Land.Price - Player.Money)) : p_p;
-					province_load[purchase.Game] = p_p.Add(new Buy(Player, Land));
-				}
-				await cmd.SaveAsync();
+					true => MoveErrors.Ok,
+					_ when !provinces[m.From].Has(move.Soldiers) => MoveErrors.FewSoldiers,
+					_ when !move.HasEnoughCapacity(provinces) => MoveErrors.LittleCapacity,
+					_ => MoveErrors.Else
+				};
+			});
+		}
+		[HttpPost("PurchaseInfo")] public PurchaseInfo PurchaseInfo([FromBody] PurchaseData purchase)
+		{
+			var player = player_load[purchase.G, purchase.P];
+			var provinces = province_load[purchase.G];
+			return provinces[purchase.L].Mainland ? new PurchaseInfo(new Buy(provinces[purchase.L]).Allowed(player, provinces), provinces[purchase.L].Name, provinces[purchase.L].Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
+		}
+		[HttpPost("Purchase")] public void Purchase([FromBody] PurchaseCmd p)
+		{
+			if (session.IsValid(p.P, p.Game, p.Key))
+			{
+				_ = cmd.Perform(p.Game, p.P, new Buy(province_load[p.Game, p.Land]), false);
 			}
 		}
-		[HttpPost("RecruitInfo")]
-		public RecruitInfo RecruitInfo([FromBody] RecruitData p) => province_load.Province(p.G, p.W) is Province province ? new RecruitInfo(province.Name, province.Soldiers.ToString(), settings.RecruitableTypes(province).Select(t => new SoldiersItem(t.Description, t.Price)).ToImmutableArray(), province_load.Player(p.G, p.P).Money, province is Land L ? L.Instability : new Ratio()) : new RecruitInfo("", "", ImmutableArray<SoldiersItem>.Empty, 0, new Ratio());
-		[HttpPost("Recruit")]
-		public async Task Recruit([FromBody] RecruitCmd r)
-		{
-			if (Validate(r.P, r.Game, r.Key))
-			{
-				var p_p = province_load[r.Game];
-				var types = settings.RecruitableTypes(p_p.Province(r.Province)).ToImmutableArray();
-				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(types[i], count)));
 
-				if (soldiers.Price > p_p.Player(r.P).Money)
-				{
-					p_p = p_p.Add(new Borrow(p_p.Player(r.P), soldiers.Price - p_p.Player(r.P).Money));
-				}
-				province_load[r.Game] = p_p.Add(new Recruit(p_p.Player(r.P), p_p.Province(r.Province), soldiers));
-				await cmd.SaveAsync();
+		[HttpPost("RecruitInfo")] public RecruitInfo RecruitInfo([FromBody] RecruitData p)
+		{
+			var player = player_load[p.G, p.P];
+			var province = province_load[player.GameId, p.W];
+			return new RecruitInfo(province.Name, province.Soldiers.ToString(), settings.SoldierTypes.Select(type => type.IsRecruitable(province.Region)).ToImmutableArray(), player.Money, province.Instability);
+		}
+		[HttpPost("Recruit")] public void Recruit([FromBody] RecruitCmd r)
+		{
+			if (session.IsValid(r.P, r.Game, r.Key))
+			{
+				var soldiers = new Soldiers(r.Counts.Select((count, i) => new Regiment(settings.SoldierTypes[i], count)));
+				_ = cmd.Perform(r.Game, r.P, new Recruit(province_load[r.Game, r.Province], soldiers), false);
 			}
 		}
 		[HttpPost("Donate")]
-		public async Task<bool> Donate([FromBody] DonationCmd donation) => session.IsValid(donation.P, donation.Game, donation.Key) && await province_load.AddAsync(donation.Game, new Donate(province_load.Player(donation.Game, donation.P), province_load.Player(donation.Game, donation.Recipient), donation.Amount));
+		public bool Donate([FromBody] DonationCmd d) => session.IsValid(d.P, d.Game, d.Key) && cmd.Perform(d.Game, d.P, new Donate(player_load[d.Game, d.Recipient], d.Amount), false).Item1;
 	}
 }

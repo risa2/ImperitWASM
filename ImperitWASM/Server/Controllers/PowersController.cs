@@ -9,8 +9,8 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class PowersController : ControllerBase
 	{
-		readonly IContextService ctx;
-		public PowersController(IContextService ctx) => this.ctx = ctx;
-		[HttpPost("List")] public IEnumerable<Powers> List([FromBody] int gameId) => ctx.GetPlayersPowers(gameId);
+		readonly IPowersLoader powers;
+		public PowersController(IPowersLoader powers) => this.powers = powers;
+		[HttpPost("List")] public IEnumerable<Powers> List([FromBody] int gameId) => powers.Get(gameId);
 	}
 }

@@ -44,6 +44,7 @@ namespace ImperitWASM.Shared.Data
 		public int Length => Regiments.Length;
 		public Regiment this[int index] => Regiments[index];
 
+		public int CountOf(SoldierType type) => Regiments.Where(r => r.Type == type).Sum(r => r.Count);
 		public int Capacity(Provinces provinces, Province from, Province to)
 		{
 			return Regiments.Sum(p => p.CanMove(provinces, from, to) - p.Weight);

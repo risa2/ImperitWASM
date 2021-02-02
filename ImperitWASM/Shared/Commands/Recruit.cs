@@ -9,11 +9,11 @@ namespace ImperitWASM.Shared.Commands
 	{
 		public bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return actor.Active && Province.IsAllyOf(actor) && actor.MaxUsableMoney >= Soldiers.Price && Soldiers.Any;
+			return actor.Active && Province.IsAllyOf(actor.Id) && actor.MaxUsableMoney >= Soldiers.Price && Soldiers.Any;
 		}
 		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return (players.Select(altered => altered == actor ? altered.Pay(Soldiers.Price).Add(new Manoeuvre(Province.Order, Soldiers)) : altered), provinces);
+			return (players.Select(altered => altered.Active ? altered.Pay(Soldiers.Price).Add(new Manoeuvre(Province.Order, Soldiers)) : altered), provinces);
 		}
 	}
 }

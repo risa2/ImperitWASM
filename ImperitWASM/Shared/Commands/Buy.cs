@@ -9,7 +9,7 @@ namespace ImperitWASM.Shared.Commands
 	{
 		public bool Allowed(Player actor, Provinces provinces)
 		{
-			return actor.MaxUsableMoney >= Province.Price && provinces.HasNeighborRuledBy(Province, actor);
+			return actor.MaxUsableMoney >= Province.Price && provinces.HasNeighborRuledBy(Province, actor.Id);
 		}
 		public bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
@@ -17,7 +17,7 @@ namespace ImperitWASM.Shared.Commands
 		}
 		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return (players.Select(altered => altered == actor ? altered.Pay(Province.Price) : altered), provinces.Select(altered => Province == altered ? altered.RuledBy(actor) : altered));
+			return (players.Select(altered => altered.Active ? altered.Pay(Province.Price) : altered), provinces.Select(altered => Province == altered ? altered.RuledBy(actor.Id) : altered));
 		}
 	}
 }

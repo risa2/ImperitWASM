@@ -20,19 +20,19 @@ namespace ImperitWASM.Shared.Data
 
 		int[] ComputeEnemies(Provinces provinces)
 		{
-			return provinces.Select(province => provinces.NeighborsOf(province).Where(n => n.IsEnemyOf(Player)).Sum(n => n.AttackPower)).ToArray();
+			return provinces.Select(province => provinces.NeighborsOf(province).Where(n => n.IsEnemyOf(Player.Id)).Sum(n => n.AttackPower)).ToArray();
 		}
 		int[] ComputeAllies(Provinces provinces, int[] enemies, int[] defense)
 		{
-			return provinces.Select(province => provinces.NeighborIndices(province).Where(n => provinces[n].IsAllyOf(Player)).Sum(n => Clamp(provinces[n].DefensePower - enemies[n] + defense[n], 0, provinces[n].DefensePower))).ToArray();
+			return provinces.Select(province => provinces.NeighborIndices(province).Where(n => provinces[n].IsAllyOf(Player.Id)).Sum(n => Clamp(provinces[n].DefensePower - enemies[n] + defense[n], 0, provinces[n].DefensePower))).ToArray();
 		}
 		IEnumerable<int> EnemyNeighborIndices(Provinces provinces, int i)
 		{
-			return provinces.NeighborIndices(provinces[i]).Where(n => provinces[n].IsEnemyOf(Player));
+			return provinces.NeighborIndices(provinces[i]).Where(n => provinces[n].IsEnemyOf(Player.Id));
 		}
 		IEnumerable<int> AllyNeighborIndices(Provinces provinces, int i)
 		{
-			return provinces.NeighborIndices(provinces[i]).Where(n => provinces[n].IsAllyOf(Player));
+			return provinces.NeighborIndices(provinces[i]).Where(n => provinces[n].IsAllyOf(Player.Id));
 		}
 		int[] Attackable(Provinces provinces, IEnumerable<int> owned)
 		{
@@ -44,7 +44,7 @@ namespace ImperitWASM.Shared.Data
 
 		int EnemiesAfterAttack(Provinces provinces, int[] enemies, int[] defense, int start, int attacked)
 		{
-			return Max(0, enemies[start] - defense[start] + (provinces[attacked].IsEnemyOf(Player) ? enemies[attacked] : 0));
+			return Max(0, enemies[start] - defense[start] + (provinces[attacked].IsEnemyOf(Player.Id) ? enemies[attacked] : 0));
 		}
 		Soldiers AttackingSoldiers(Provinces provinces, int[] enemies, int[] defense, int start, int attacked)
 		{
@@ -62,7 +62,7 @@ namespace ImperitWASM.Shared.Data
 			int[] enemies = ai.ComputeEnemies(provinces);
 			int[] defense = provinces.Select(province => province.DefensePower).ToArray();
 			int[] allies = ai.ComputeAllies(provinces, enemies, defense); // Neighbor provinces which can send reinforcements
-			int[] owned = provinces.Indices(province => province.IsAllyOf(ai.Player)).ToArray();
+			int[] owned = provinces.Indices(province => province.IsAllyOf(ai.Player.Id)).ToArray();
 
 			// Defensive reinforcements from the safe provinces to the endangered
 			for (int i = 0; i < owned.Length; ++i)
@@ -127,7 +127,7 @@ namespace ImperitWASM.Shared.Data
 				var armies = starts.Select(i => ai.AttackingSoldiers(provinces, enemies, defense, i, attacked)).ToArray();
 				if (armies.Sum(soldiers => soldiers.AttackPower) > defense[attacked])
 				{
-					if (provinces[attacked].IsEnemyOf(ai.Player))
+					if (provinces[attacked].IsEnemyOf(ai.Player.Id))
 					{
 						foreach (int neighbour in provinces.NeighborIndices(provinces[attacked]))
 						{

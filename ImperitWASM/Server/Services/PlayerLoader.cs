@@ -29,11 +29,12 @@ namespace ImperitWASM.Server.Services
 			type_indices = settings.GetSoldierTypeIndices();
 		}
 
-		IEnumerable<Player> Get(string where, object? arg, object? arg2 = null) => db.Query<string, bool, bool, bool, int, string, int?, int?, int?, string?, int?, int?>(@"
+		IEnumerable<Player> Get(string where, object? arg, object? arg2 = null) => db.Query<string, bool, bool, bool, int, string, int?, int?, int?, string?, int?, int?, int, int>(@"
 			SELECT Player.Name, Player.Active, Player.Alive, Player.Human, Player.Money, Player.Password,
-					Action.Id, Action.Debt, Action.Province, Action.Type, ActionRegiment.Count, ActionRegiment.Type FROM Players
-			LEFT JOIN Action ON Action.PlayerName=Player.Name
-			LEFT JOIN Regiment ON Regiment.ActionId=Action.Id ORDER BY Player.""Order""
+					Action.Id, Action.Debt, Action.Province, Action.Type, ActionRegiment.Count, ActionRegiment.Type,
+					Player.GameId, Player.""Order"" FROM Players
+			LEFT JOIN Action ON Action.GameId=Player.GameId AND Action.Player=Player.""Order""
+			LEFT JOIN ActionRegiment ON ActionRegiment.ActionId=Action.Id ORDER BY Player.""Order""
 			WHERE " + where, arg, arg2).GroupBy(p => p.Item1).Select((group, i) =>
 			{
 				var player = group.First();
@@ -47,10 +48,10 @@ namespace ImperitWASM.Server.Services
 						var x => throw new InvalidOperationException(x + " is not a valid Action type")
 					};
 				}).ToImmutableList();
-				return new Player(Settings.ColorOf(i), player.Item1, player.Item5, player.Item3, actions, settings, player.Item4, new Password(player.Item6), player.Item2);
+				return new Player(new PlayerIdentity(player.Item1, player.Item14, player.Item13, player.Item4), player.Item5, player.Item3, actions, settings, new Password(player.Item6), player.Item2);
 			});
 		public ImmutableArray<Player> this[int gameId] => Get("Player.GameId=@x0", gameId).ToImmutableArray();
-		public Player this[int gameId, int order] => Get(@"Player.Name=@x0 AND Player.""Order""=@x1", gameId, order).First();
+		public Player this[int gameId, int order] => Get(@"Player.GameId=@x0 AND Player.""Order""=@x1", gameId, order).First();
 		public Player this[string name] => Get("Player.Name=@x0", name).First();
 
 		public void Set(int gameId, IEnumerable<Player> players, bool fromTransaction)
@@ -67,20 +68,23 @@ namespace ImperitWASM.Server.Services
 					{
 						if (action is Manoeuvre manoeuvre)
 						{
-							db.Command("INSERT INTO Actions (PlayerName, Province, Type) VALUES (@x0,@x1,@x2)", player.Name, manoeuvre.Province, "Manoeuvre");
+							db.Command("INSERT INTO Actions (GameId,Player,Province,Type) VALUES (@x0,@x1,@x2,@x3)", gameId, player.Order, manoeuvre.Province, "Manoeuvre");
 							long id = db.Query<long>("SELECT last_insert_rowid()").First();
 							foreach (var regiment in manoeuvre.Soldiers)
 							{
 								db.Command("INSERT INTO ActionRegiment (Count, ActionId, Type) VALUES (@x0, @x1, @x2)", regiment.Count, id, type_indices[regiment.Type]);
 							}
 						}
+						else if (action is Loan loan)
+						{
+							db.Command("INSERT INTO Actions (GameId,Player,Debt,Type) VALUES (@x0,@x1,@x2,@x3)", gameId, player.Order, loan.Debt, "Loan");
+						}
 					}
 				}
 			});
 		}
-		public bool IsNameFree(string name) => !name.All(char.IsDigit) && db.Query<int>("SELECT Count(Id) FROM Player WHERE Name=@x0", name).Single() == 0;
-		public string ObsfuscateName(string name, int repetition) => name + (db.Query<int>("SELECT MAX(CAST(SUBSTR(Name, LENGTH(@0)) AS INTEGER)) AS NumVal FROM Player WHERE Name LIKE @0 + '%' AND NumVal > 0", name.Trim()).DefaultIfEmpty(0).Max() + 1);
-
+		public bool IsNameFree(string name) => !name.Any(char.IsDigit) && db.Query<int>("SELECT Count(Id) FROM Player WHERE Name=@x0", name).Single() == 0;
+		public string ObsfuscateName(string name, int repetition) => name + ((db.Query<int>("SELECT Count(Id) FROM Player WHERE Name LIKE @0", name + "%").First() + repetition) is > 0 and int n ? n.ToString() : "");
 		public int Count(int gameId) => db.Query<int>("SELECT Count(Name) FROM Player WHERE GameId = @x0").First();
 	}
 }

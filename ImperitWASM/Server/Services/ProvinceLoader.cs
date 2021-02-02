@@ -8,8 +8,8 @@ namespace ImperitWASM.Server.Services
 {
 	public interface IProvinceLoader
 	{
-		Provinces Get(int gameId, IReadOnlyList<Player> players);
-		Province Get(int gameId, int order, IReadOnlyList<Player> players);
+		Provinces this[int gameId] { get; }
+		Province this[int gameId, int order] { get; }
 		void Set(int gameId, IEnumerable<Province> provinces, bool fromTransaction);
 		void Set(int gameId, int order, Province province, bool fromTransaction);
 	}
@@ -25,46 +25,39 @@ namespace ImperitWASM.Server.Services
 			type_indices = settings.GetSoldierTypeIndices();
 		}
 
-		IEnumerable<Province> Get(string where, IReadOnlyList<Player> players, params object[] args) => db.Query<int, int?, int?, int?>(@"
-			SELECT Province.""Order"", Player.""Order"", ProvinceRegiment.Type, ProvinceRegiment.Count FROM Province
-			LEFT JOIN ProvinceRegiment ON ProvinceRegiment.ProvinceId = Province.Id
-			LEFT JOIN Player ON Player.Name = Province.PlayerName
-			ORDER BY Province.""Order"" " + where, args).GroupBy(p => p.Item1).Select(p_group =>
+		IEnumerable<Province> Get(string where, int gameId, object? arg = null) => db.Query<int, int?, string?, bool?, int?, int?>(@"
+			SELECT Province.""Order"", Player.""Order"", Player.Name, Player.Human, ProvinceRegiment.Type, ProvinceRegiment.Count FROM Province
+			LEFT JOIN ProvinceRegiment ON ProvinceRegiment.GameId=Province.GameId AND ProvinceRegiment.Province=Province.""Order""
+			LEFT JOIN Player ON Player.GameId=Province.GameId AND Player.""Order""=Province.Player
+			ORDER BY Province.""Order"" WHERE Province.GameId=@x0 " + where, gameId, arg).GroupBy(p => p.Item1).Select(p_group =>
 		{
-			var (province, player, count, type) = p_group.First();
-			var regiments = p_group.Where(r => r.Item3 is not null && r.Item4 is not null).Select(r => new Regiment(settings.SoldierTypes[r.Item3!.Value], r.Item4!.Value));
-			return new Province(settings.Regions[province], player is int P ? players[P] : null, new Soldiers(regiments), settings);
+			var (province, order, name, human, _, _) = p_group.First();
+			var regiments = p_group.Where(r => r.Item5 is not null && r.Item6 is not null).Select(r => new Regiment(settings.SoldierTypes[r.Item5!.Value], r.Item6!.Value));
+			return new Province(settings.Regions[province], order is int p ? new PlayerIdentity(name!, p, gameId, human!.Value) : null, new Soldiers(regiments), settings);
 		});
-		public Provinces Get(int gameId, IReadOnlyList<Player> players) => new Provinces(Get("WHERE Province.GameId = @x0", players, gameId).ToImmutableArray(), settings.Graph);
-		public Province Get(int gameId, int order, IReadOnlyList<Player> players) => Get("WHERE Province.GameId=@x0 AND Province.Order=@x1", players, gameId, order).First();
+		public Provinces this[int gameId] => new Provinces(Get("", gameId).ToImmutableArray(), settings.Graph);
+		public Province this[int gameId, int order] => Get("AND Province.Order=@x1", gameId, order).First();
 
 		void Insert(int gameId, Province province)
 		{
-			db.Command("INSERT INTO Province (GameId, Order, PlayerName) VALUES (@x0,@x1,@x2)", gameId, province.Order, province.Player?.Name);
-			long id = db.Query<long>("SELECT last_insert_rowid()").First();
+			db.Command("INSERT INTO Province (GameId, Order, Player) VALUES (@x0,@x1,@x2)", gameId, province.Order, province.Ruler?.Order);
 			foreach (var (type, count) in province.Soldiers)
 			{
-				db.Command("INSERT INTO ProvinceRegiment (Count, Type, ProvinceId) VALUES (@x0,@x1,@x2)", count, type_indices[type], id);
+				db.Command("INSERT INTO ProvinceRegiment (Count, Type, GameId, Province) VALUES (@x0,@x1,@x2,@x3)", count, type_indices[type], gameId, province.Order);
 			}
 		}
-		public void Set(int gameId, IEnumerable<Province> provinces, bool fromTransaction)
+		public void Set(int gameId, IEnumerable<Province> provinces, bool fromTransaction) => db.Transaction(!fromTransaction, () =>
 		{
-			db.Transaction(!fromTransaction, () =>
+			db.Command("DELETE FROM Province WHERE GameId=@x0", gameId);
+			foreach (var province in provinces)
 			{
-				db.Command("DELETE FROM Province WHERE GameId=@x0", gameId);
-				foreach (var province in provinces)
-				{
-					Insert(gameId, province);
-				}
-			});
-		}
-		public void Set(int gameId, int order, Province province, bool fromTransaction)
-		{
-			db.Transaction(!fromTransaction, () =>
-			{
-				db.Command("DELETE FROM Province WHERE GameId=@x0 AND Order=@x1", gameId, order);
 				Insert(gameId, province);
-			});
-		}
+			}
+		});
+		public void Set(int gameId, int order, Province province, bool fromTransaction) => db.Transaction(!fromTransaction, () =>
+		{
+			db.Command("DELETE FROM Province WHERE GameId=@x0 AND Order=@x1", gameId, order);
+			Insert(gameId, province);
+		});
 	}
 }

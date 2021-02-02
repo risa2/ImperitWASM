@@ -2,6 +2,7 @@
 using System.Linq;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
+using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,27 +12,26 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class ProvincesController : ControllerBase
 	{
-		readonly IProvinceLoader pap;
-		readonly IActive active;
-		public ProvincesController(IProvinceLoader pap, IActive active)
+		readonly IProvinceLoader province_load;
+		readonly IPlayerLoader player_load;
+		readonly Settings settings;
+		public ProvincesController(IProvinceLoader province_load, Settings settings, IPlayerLoader player_load)
 		{
-			this.pap = pap;
-			this.active = active;
+			this.province_load = province_load;
+			this.settings = settings;
+			this.player_load = player_load;
 		}
-		[HttpPost("Shapes")]
-		public IEnumerable<ProvinceAppearance> Shapes([FromBody] int gameId)
+		[HttpPost("Shapes")] public IEnumerable<ProvinceAppearance> Shapes([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new ProvinceAppearance(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p.Inhabitable, p.Text));
+			return province_load[gameId].Select(p => new ProvinceAppearance(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p.Inhabitable, p.Text));
 		}
-		[HttpPost("Current")]
-		public IEnumerable<ProvinceUpdate> Current([FromBody] int gameId)
+		[HttpPost("Current")] public IEnumerable<ProvinceUpdate> Current([FromBody] int gameId)
 		{
-			return pap[gameId].Provinces.Select(p => new ProvinceUpdate(p.Text, p.Fill));
+			return province_load[gameId].Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
-		[HttpPost("Preview")]
-		public IEnumerable<ProvinceUpdate> Preview([FromBody] int gameId)
+		[HttpPost("Preview")] public IEnumerable<ProvinceUpdate> Preview([FromBody] PlayerId id)
 		{
-			return pap[gameId].Act(active[gameId], false).Provinces.Select(p => new ProvinceUpdate(p.Text, p.Fill));
+			return player_load[id.G, id.P].Act(province_load[id.G], settings).Item2.Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
 	}
 }

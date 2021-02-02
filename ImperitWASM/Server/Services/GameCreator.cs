@@ -38,24 +38,24 @@ namespace ImperitWASM.Server.Services
 			province_load.Set(gameId, settings.Provinces, fromTransaction: true);
 			return gameId;
 		});
-		public Color NextColor(int gameId) => Settings.ColorOf(player_load.Count(gameId));
+		public Color NextColor(int gameId) => PlayerIdentity.ColorOf(player_load.Count(gameId));
 		void Start(int gameId, bool fromTransaction) => db.Transaction(!fromTransaction, () =>
 		{
 			var players = player_load[gameId];
-			var provinces = province_load.Get(gameId, players);
-			var robots = settings.CreateRobots(players.Length, provinces.Inhabitable, player_load.ObsfuscateName).ToImmutableArray();
+			var provinces = province_load[gameId];
+			var robots = settings.CreateRobots(gameId, players.Length, provinces.Inhabitable, player_load.ObsfuscateName).ToImmutableArray();
 
 			player_load.Set(gameId, players.AddRange(robots.Select(r => r.Item2)), true);
-			province_load.Set(gameId, provinces.Alter(robots.Select(r => (r.Item1, provinces[r.Item1].RuledBy(r.Item2)))), true);
+			province_load.Set(gameId, provinces.Alter(robots.Select(r => (r.Item1, provinces[r.Item1].RuledBy(r.Item2.Id)))), true);
 			game_load[gameId] = Game.Start;
 		});
 		public void StartAll() => game_load.ShouldStart.Each(x => Start(x, false));
 		public void Register(int gameId, string name, Password password, int land) => db.Transaction(true, () =>
 		{
 			var players = player_load[gameId];
-			var player = settings.CreatePlayer(players.Length, name, land, password, true);
+			var player = settings.CreatePlayer(gameId, players.Length, name, land, password, true);
 			player_load.Set(gameId, players.Add(player), true);
-			province_load.Set(gameId, land, province_load.Get(gameId, land, players).RuledBy(player), true);
+			province_load.Set(gameId, land, province_load[gameId, land].RuledBy(player.Id), true);
 
 			if (players.Length + 1 == 2)
 			{

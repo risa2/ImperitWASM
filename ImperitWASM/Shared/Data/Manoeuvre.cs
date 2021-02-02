@@ -7,7 +7,7 @@ namespace ImperitWASM.Shared.Data
 	{
 		public (Player, Provinces, IAction?) Perform(Player active, Provinces provinces, Settings settings)
 		{
-			return (active, provinces.With(provinces.Select(altered => altered.Order == Province ? altered.VisitedBy(active, Soldiers) : altered)), null);
+			return (active, provinces.With(provinces.Select(altered => altered.Order == Province ? altered.VisitedBy(active.Id, Soldiers) : altered)), null);
 		}
 	}
 }

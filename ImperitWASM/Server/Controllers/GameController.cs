@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.Threading.Tasks;
+using System.Linq;
 using ImperitWASM.Client.Data;
-using ImperitWASM.Server.Load;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
@@ -14,59 +13,58 @@ namespace ImperitWASM.Server.Controllers
 	[Route("api/[controller]")]
 	public class GameController : ControllerBase
 	{
-		readonly IGameService gs;
-		readonly IGameCreator gameCreator;
-		readonly IProvinceLoader pap;
+		readonly IGameLoader game_load;
+		readonly IGameCreator game_creator;
+		readonly IProvinceLoader province_load;
 		readonly ISessionLoader session;
 		readonly IEndOfTurn eot;
-		readonly IActive active;
+		readonly IPlayerLoader player_load;
 		readonly Settings settings;
-		public GameController(IGameService gs, IGameCreator gameCreator, IProvinceLoader pap, ISessionLoader session, IEndOfTurn eot, IActive active, Settings settings)
+		public GameController(IGameLoader game_load, IGameCreator game_creator, IProvinceLoader province_load, ISessionLoader session, IEndOfTurn eot, IPlayerLoader player_load, Settings settings)
 		{
-			this.gs = gs;
-			this.gameCreator = gameCreator;
-			this.pap = pap;
+			this.game_load = game_load;
+			this.game_creator = game_creator;
+			this.province_load = province_load;
 			this.session = session;
 			this.eot = eot;
-			this.active = active;
+			this.player_load = player_load;
 			this.settings = settings;
 		}
-		[HttpPost("Active")]
-		public int Active([FromBody] int gameId) => gs.FindNoTracking(gameId)?.Active ?? 0;
+		[HttpPost("Active")] public int Active([FromBody] int gameId) => player_load[gameId].First(p => p.Active).Order;
 		[HttpPost("Info")]
-		public GameInfo Info([FromBody] int gameId) => gs.FindNoTracking(gameId) is Game g ? new GameInfo(g.GetState(), g.Active) : new GameInfo();
-		[HttpPost("StartTime")]
-		public DateTime? StartTime([FromBody] int gameId) => gs.FindNoTracking(gameId)?.GetStartTime(settings.CountdownTime);
-		[HttpPost("Winner")]
-		public Winner? Winner([FromBody] int gameId) => pap[gameId].Winner(settings.FinalLandsCount) is Human H ? new Winner(H.Name, H.Color) : null;
-		async Task<RegistrationErrors> DoRegistrationAsync(RegisteredPlayer player)
+		public GameInfo Info([FromBody] PlayerId id)
 		{
-			await gameCreator.RegisterAsync(gs.Find(player.G), player.N.Trim(), new Password(player.P.Trim()), player.S);
+			return game_load[id.G] is Game g ? new GameInfo(g.Current, player_load[id.G, id.P].Active) : new GameInfo();
+		}
+		[HttpPost("StartTime")] public DateTimeOffset? StartTime([FromBody] int gameId) => game_load[gameId]?.StartTime;
+		[HttpPost("Winner")]
+		public Winner? Winner([FromBody] int gameId) => province_load[gameId].Winner is ({ Human: true } H, int final) && final >= settings.FinalLandsCount ? new Winner(H.Name, H.Color) : null;
+		RegistrationErrors DoRegistration(RegisteredPlayer player)
+		{
+			game_creator.Register(player.G, player.N.Trim(), new Password(player.P.Trim()), player.S);
 			return RegistrationErrors.Ok;
 		}
 		[HttpPost("Register")]
-		public async Task<RegistrationErrors> RegisterAsync([FromBody] RegisteredPlayer player) => player.N?.Trim() switch
+		public RegistrationErrors Register([FromBody] RegisteredPlayer player) => player.N?.Trim() switch
 		{
 			null or { Length: 0 } => RegistrationErrors.NoName,
-			string name when !pap.IsNameFree(name) => RegistrationErrors.UsedName,
+			string name when !player_load.IsNameFree(name) => RegistrationErrors.UsedName,
 			_ when string.IsNullOrWhiteSpace(player.P) => RegistrationErrors.NoPassword,
-			_ when pap.Province(player.G, player.S)?.Inhabitable is true => await DoRegistrationAsync(player),
+			_ when province_load[player.G, player.S].Inhabitable => DoRegistration(player),
 			_ => RegistrationErrors.InvalidStart
 		};
 		[HttpGet("RegistrableGame")]
-		public async Task<int> RegistrableGameAsync()
+		public int RegistrableGame()
 		{
-			await gameCreator.StartAllAsync();
-			return gs.RegistrableGame ?? await gameCreator.CreateAsync();
+			game_creator.StartAll();
+			return game_load.RegistrableGame ?? game_creator.Create();
 		}
 		[HttpPost("NextColor")]
-		public Color NextColor([FromBody] int gameId) => gameCreator.NextColor(gameId);
+		public Color NextColor([FromBody] int gameId) => game_creator.NextColor(gameId);
 		[HttpPost("NextTurn")]
-		public async Task<bool> NextTurnAsync([FromBody] Session loggedIn)
+		public bool NextTurn([FromBody] Session ses)
 		{
-			return active[loggedIn.G] == loggedIn.P && session.IsValid(loggedIn.P, loggedIn.G, loggedIn.Key) && await eot.NextTurnAsync(loggedIn.G);
+			return session.IsValid(ses.P, ses.G, ses.Key) && eot.NextTurn(ses.G, ses.P);
 		}
-		[HttpGet("Finished")]
-		public ImmutableArray<int> Finished() => gs.FinishedGames;
 	}
 }

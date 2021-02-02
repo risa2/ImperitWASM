@@ -26,20 +26,20 @@ namespace ImperitWASM.Shared.Data
 		{
 			return Graph.Passable(from.Order, to.Order, distance, (start, dest) => difficulty(this[start], this[dest]));
 		}
-		public IEnumerable<Province> ControlledBy(Player player) => Items.Where(p => p.IsAllyOf(player));
+		public IEnumerable<Province> ControlledBy(PlayerIdentity ip) => Items.Where(p => p.IsAllyOf(ip));
 		public IEnumerable<IEnumerable<Province>> Split(Func<Province, bool> relevant, Func<Province, Province, bool> passable)
 		{
 			return Graph.Split(i => relevant(Items[i]), (from, to) => passable(Items[from], Items[to])).Select(list => list.Select(i => Items[i]));
 		}
-		public int IncomeOf(Player player)
+		public int IncomeOf(PlayerIdentity ip)
 		{
-			var divisions = Split(p => p.IsAllyOf(player), (from, to) => to.IsAllyOf(player));
+			var divisions = Split(p => p.IsAllyOf(ip), (from, to) => to.IsAllyOf(ip));
 			return divisions.DefaultIfEmpty().Max(prov => prov?.OfType<Land>()?.Sum(p => p.Earnings) ?? 0);
 		}
 
-		public bool HasAny(Player player) => ControlledBy(player).Any();
-		public bool HasNeighborRuledBy(Province province, Player player) => NeighborsOf(province).Any(p => p.Mainland && p.IsAllyOf(player));
+		public bool HasAny(PlayerIdentity ip) => ControlledBy(ip).Any();
+		public bool HasNeighborRuledBy(Province province, PlayerIdentity ip) => NeighborsOf(province).Any(p => p.Mainland && p.IsAllyOf(ip));
 		public IEnumerable<int> Inhabitable => Items.Indices(it => it.Inhabitable);
-		public (Player?, int) Winner => Items.GroupBy(province => province.Player).Where(g => g.Key is { Human: true }).Select(g => (g.Key, g.Sum(province => province.Score))).OrderBy(p => p.Item2).FirstOrDefault() is ({ Human: true } human, int finals) ? (human, finals) : (null, 0);
+		public (PlayerIdentity?, int) Winner => Items.GroupBy(province => province.Ruler).Where(g => g.Key is { Human: true }).Select(g => (g.Key, g.Sum(province => province.Score))).OrderBy(p => p.Item2).FirstOrDefault() is ({ Human: true } human, int finals) ? (human, finals) : (null, 0);
 	}
 }

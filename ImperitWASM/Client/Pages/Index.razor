@@ -24,15 +24,15 @@
 	}
 	async Task LogoutAsync()
 	{
-		await http.PostAsync<Data.Session>("api/Player/Logout", Session);
+		await http.PostAsync("api/Player/Logout", Session.Key);
 		await cookies.RemoveAsync();
 		Session = new Data.Session();
-		State = Data.GameState.Invalid;
+		State = Game.State.Invalid;
 		StateHasChanged();
 	}
 	void Start()
 	{
-		State = Data.GameState.Started;
+		State = Game.State.Started;
 		StateHasChanged();
 	}
 	protected override async Task OnInitializedAsync()

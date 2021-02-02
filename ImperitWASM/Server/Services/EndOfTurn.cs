@@ -1,43 +1,39 @@
-﻿using System.Threading.Tasks;
-using ImperitWASM.Server.Load;
+﻿using System.Linq;
 using ImperitWASM.Shared.Commands;
 using ImperitWASM.Shared.Config;
-using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Services
 {
 	public interface IEndOfTurn
 	{
-		Task<bool> NextTurnAsync(int gameId);
+		bool NextTurn(int gameId);
 	}
 	public class EndOfTurn : IEndOfTurn
 	{
-		readonly IProvinceLoader pap;
-		readonly IContextService ctx;
-		readonly IGameService gs;
+		readonly IPowersLoader power_load;
+		readonly IGameLoader game_load;
+		readonly ICommandExecutor cmd;
 		readonly Settings settings;
-		public EndOfTurn(IProvinceLoader pap, Settings settings, IContextService ctx, IGameService gs)
+		readonly IDatabase db;
+		public EndOfTurn(Settings settings, ICommandExecutor cmd, IGameLoader game_load, IDatabase db, IPowersLoader power_load)
 		{
-			this.pap = pap;
+			this.power_load = power_load;
+			this.game_load = game_load;
 			this.settings = settings;
-			this.ctx = ctx;
-			this.gs = gs;
+			this.cmd = cmd;
+			this.db = db;
 		}
-		static bool FinishGame(Game g, bool finish, int active)
+		public bool NextTurn(int gameId) => db.Transaction(true, () =>
 		{
-			(finish ? g.Finish() : g).Active = active;
-			return finish;
-		}
-		public async Task<bool> NextTurnAsync(int gameId)
-		{
-			var g = gs.Find(gameId);
-			var (p_p, active) = pap[gameId].EndOfTurn(g.Active);
-			pap[gameId] = p_p;
+			var (_, players, provinces) = cmd.Perform(gameId, new NextTurn(), true);
+			power_load.Add(gameId, players.Select(p => p.Power(provinces)), true);
 
-			bool finish = FinishGame(g, !p_p.AnyHuman || p_p.Winner(settings.FinalLandsCount) is Human, active);
-			ctx.Add(gameId, p_p.PlayersPower);
-			await ctx.SaveAsync();
+			bool finish = players.Any(p => p is { LivingHuman: true }) || provinces.Winner.Item2 >= settings.FinalLandsCount;
+			if (finish)
+			{
+				game_load[gameId] = game_load[gameId]!.Finish();
+			}
 			return finish;
-		}
+		});
 	}
 }

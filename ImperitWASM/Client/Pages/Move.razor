@@ -1,17 +1,18 @@
 @inject ImperitClient http;
+@inject SettingsLoader settings;
+@inject SessionService storage;
 
 @code{
 	Data.MoveErrors error = Data.MoveErrors.Ok;
-	[Parameter] public Action Return { get; set; } = (() => { });
+	[Parameter] public System.Action Return { get; set; } = (() => { });
 	[Parameter] public int From { get; set; }
 	[Parameter] public int To { get; set; }
-	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	Data.SoldierList model = new Data.SoldierList();
+	Model<List<Model<int>>> model = new Model<List<Model<int>>>();
 	Data.MoveInfo? Info = null;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostAsync<Data.MoveData, Data.MoveInfo>("api/Command/MoveInfo", new Data.MoveData(From, To, Session.G));
-		model = new Data.SoldierList(Info.Soldiers.Length);
+		Info = await http.PostAsync<Data.MoveData, Data.MoveInfo>("api/Command/MoveInfo", new Data.MoveData(From, To, storage.GameId));
+		model.Value = Info.Counts.Select(count => new Model<int> { Value = count }).ToList();
 		if (!Info.Possible)
 		{
 			Return();
@@ -19,7 +20,7 @@
 	}
 	async Task DoMove()
 	{
-		error = await http.PostAsync<Data.MoveCmd, Data.MoveErrors>("api/Command/Move", new Data.MoveCmd(Session.P, Session.Key, From, To, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
+		error = await http.PostAsync<Data.MoveCmd, Data.MoveErrors>("api/Command/Move", new Data.MoveCmd(storage.Player, storage.Key, From, To, model.Value!.Select(s => s.Value).ToImmutableArray(), storage.GameId));
 		if (error == Data.MoveErrors.Ok || error == Data.MoveErrors.NotPlaying)
 		{
 			Return();
@@ -45,18 +46,18 @@
 	{
 		<p>Přesun není možný</p>
 	}
-	@if (Info?.Soldiers is { IsDefault: false })
+	@if (Info ?.Counts is { IsDefaultOrEmpty: false })
 	{
 		<EditForm Model="@model" OnValidSubmit="DoMove">
 			<DataAnnotationsValidator /><ValidationSummary />
 			<p>Začátek: @(Info.FromName) @Info.FromSoldiers</p>
 			<p>Cíl: @(Info.ToName) @Info.ToSoldiers</p>
 			<table>
-				@foreach (var (i, type) in Info.Soldiers.Index())
+				@foreach (var (i, count) in Info.Counts.Index().Where(p => p.v > 0))
 				{
 					<tr>
-						<td class="dotted" @onclick="() => infobox?.Open(type)">@type.Name</td>
-						<td><InputNumber @bind-Value="model.Soldiers[i].Value"/></td>
+						<td class="dotted" @onclick="() => infobox?.Open(settings.Types[i].D)">@settings.Types[i].D.Name</td>
+						<td><InputNumber @bind-Value="model.Value![i].Value"/></td>
 					</tr>
 				}
 				<tr><td></td><td><button type="submit">Přesunout</button></td></tr>

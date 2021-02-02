@@ -1,22 +1,21 @@
 @inject ImperitClient http;
-
-@using Mode = Data.View;
+@inject ProvinceContainer provinces;
+@inject SessionService storage;
 
 @code{
-	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	[Parameter] public bool IsActive { get; set; }
-	[Parameter] public Action<Mode, int?, int?> Switch { get; set; } = ((a, x, y) => { });
+	[Parameter] public Action<View, int?, int?> Switch { get; set; } = ((a, x, y) => { });
 	[Parameter] public bool Preview { get; set; }
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Func<Task>? NextTurnAsync { get; set; }
-	[Parameter] public List<Data.ProvinceAppearance>? Provinces { get; set; }
-	[Parameter] public Action<ImmutableArray<Data.ProvinceUpdate>> UpdateProvinces { get; set; } = x => { };
+	[Parameter] public List<ProvinceDisplay>? Provinces { get; set; }
+	[Parameter] public Action<ImmutableArray<ProvinceUpdate>> UpdateProvinces { get; set; } = x => { };
 	int PlayerMoney = 0;
 	int? Selected = null;
 	Map? map;
 	async Task OnClickAsync(int i)
 	{
-		var s = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(Session.P, Selected, i, Session.G));
+		var s = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(storage.Player, Selected, i, storage.GameId));
 		Switch(s.View, s.From, s.To);
 		map?.Select(Selected = s.Select);
 		await Task.Delay(5000);
@@ -27,8 +26,8 @@
 	}
 	public async Task Update(bool isActive)
 	{
-		PlayerMoney = await http.PostAsync<Data.Session, int>("api/Player/Money", Session);
-		UpdateProvinces(await http.PostAsync<int, ImmutableArray<Data.ProvinceUpdate>>(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", Session.G));
+		PlayerMoney = await http.PostAsync<Data.Session, int>("api/Player/Money", storage.Session);
+		await provinces.Update(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", storage.GameId);
 		IsActive = isActive;
 		StateHasChanged();
 	}
@@ -37,7 +36,7 @@
 <nav>
 	@if (Preview)
 	{
-		<a @onclick="() => Switch(Mode.Map, null, null)">Zpět</a>
+		<a @onclick="() => Switch(View.Map, null, null)">Zpět</a>
 		<a class="this">Náhled</a>
 	}
 	else
@@ -51,8 +50,8 @@
 			<a @onclick="LogoutAsync.Must()">Odhlášení</a>
 		}
 		<a class="this">@(PlayerMoney)@Sym.Money</a>
-		<a @onclick="() => Switch(Mode.Statistics, null, null)">Hráči</a>
-		<a @onclick="() => Switch(Mode.Preview, null, null)">Náhled</a>
+		<a @onclick="() => Switch(View.Statistics, null, null)">Hráči</a>
+		<a @onclick="() => Switch(View.Preview, null, null)">Náhled</a>
 	}
 </nav>
-<main><Map @ref="map" Width="1000" Height="1000" Provinces="Provinces" OnClickAsync="OnClickAsync" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" TextColor="p => p.GetColor()" /></main>
+<main><Map @ref="map" Width="1000" Height="1000" Provinces="provinces" OnClickAsync="OnClickAsync" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" TextColor="(p, i) => p.GetColor()" /></main>

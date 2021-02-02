@@ -1,20 +1,22 @@
 @inject ImperitClient http;
+@inject ProvinceContainer provinces;
 
-@using Mode = StartSwitch.Mode; 
+@using Mode = StartSwitch.Mode;
 
 @code{
 	[Parameter] public Action<Mode> Set { get; set; } = _ => { };
 	[Parameter] public Func<Data.Login, Task<bool>>? LoginAsync { get; set; }
+	ImmutableArray<bool> Inhabitable;
 	string Username { get; set; } = "";
 	string Password { get; set; } = "";
-	int? Selected = null, GameId = null;
-	ImmutableArray<Data.ProvinceAppearance> Provinces;
+	int? Selected = null;
+	int GameId;
 	Color NextColor = new Color();
 	Data.RegistrationErrors Error = Data.RegistrationErrors.Ok;
 	Map? map;
 	async Task OnSubmit()
 	{
-		Error = await http.PostAsync<Data.RegisteredPlayer, Data.RegistrationErrors>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, Selected ?? 0, GameId ?? 0));
+		Error = await http.PostAsync<Data.RegisteredPlayer, Data.RegistrationErrors>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, Selected ?? 0, GameId));
 		if (Error == Data.RegistrationErrors.Ok)
 		{
 			await LoginAsync!(new Data.Login(Username, Password));
@@ -24,13 +26,14 @@
 	protected override async Task OnInitializedAsync()
 	{
 		GameId = await http.GetAsync<int>("api/Game/RegistrableGame");
-		NextColor = await http.PostAsync<int, Color>("api/Game/NextColor", GameId.Value);
-		Provinces = await http.PostAsync<int, ImmutableArray<Data.ProvinceAppearance>>("api/Provinces/Shapes", GameId.Value);
+		await provinces.Update("api/Provinces/Current", GameId);
+		Inhabitable = await http.PostAsync<int, ImmutableArray<bool>>("api/Provinces/Free", GameId);
+		NextColor = await http.PostAsync<int, Color>("api/Game/NextColor", GameId);
 	}
 #pragma warning disable 1998
 	async Task OnClickAsync(int i)
 	{
-		if (Provinces![i].R)
+		if (Inhabitable[i])
 		{
 			map?.Select(Selected = i);
 		}
@@ -67,8 +70,8 @@
 	<p>Jméno:</p><p><input type="text" @bind-value="Username" autocomplete="username"/></p>
 	<p>Heslo:</p><p><input type="password" @bind-value="Password" autocomplete="current-password"/></p>
 	<p>Vyber si zemi, kde budeš začínat:</p>
-	@if (!Provinces.IsDefaultOrEmpty)
+	@if (!Inhabitable.IsDefaultOrEmpty)
 	{
-		<Map @ref="map" Width="1000" Height="1000" Provinces="Provinces" SelectedColor="NextColor" OnClickAsync="OnClickAsync" FontSize="9" TextColor="p => p.GetRegistrationColor()" />
+		<Map @ref="map" Width="1000" Height="1000" Provinces="provinces" SelectedColor="NextColor" OnClickAsync="OnClickAsync" FontSize="9" TextColor="(p, i) => Inhabitable[i] ? p.GetColor() : new Color(80,80,80)" />
 	}
 </main>

@@ -1,13 +1,13 @@
 @inject ImperitClient http;
+@inject SessionService storage;
 
 @code{
-	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
 	[Parameter] public Data.PlayerInfo? Recipient { get; set; }
-	[Parameter] public Action Return { get; set; } = (() => { });
-	Data.Int model = new Data.Int();
+	[Parameter] public System.Action Return { get; set; } = (() => { });
+	Model<int> model = new Model<int>();
 	async Task DoDonate()
 	{
-		if (await http.PostAsync<Data.DonationCmd, bool>("api/Command/Donate", new Data.DonationCmd(Session.P, Session.Key, Recipient!.P, model.Value, Session.G)))
+		if (await http.PostAsync<DonationCmd, bool>("api/Command/Donate", new DonationCmd(storage.Player, storage.Key, Recipient!.P, model.Value, storage.GameId)))
 		{
 			Return();
 		}

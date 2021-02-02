@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
@@ -31,14 +30,21 @@ namespace ImperitWASM.Server.Controllers
 			this.settings = settings;
 		}
 		[HttpPost("Active")] public int Active([FromBody] int gameId) => player_load[gameId].First(p => p.Active).Order;
-		[HttpPost("Info")]
-		public GameInfo Info([FromBody] PlayerId id)
+		[HttpPost("Info")] public GameInfo Info([FromBody] PlayerId id)
 		{
 			return game_load[id.G] is Game g ? new GameInfo(g.Current, player_load[id.G, id.P].Active) : new GameInfo();
 		}
+		[HttpPost("StartInfo")] public StartInfo StartInfo([FromBody] int gameId)
+		{
+			game_creator.StartAll();
+			return game_load[gameId] is Game g ? new(g.Current, g.StartTime) : new(Game.State.Invalid, DateTime.MinValue);
+		}
 		[HttpPost("StartTime")] public DateTimeOffset? StartTime([FromBody] int gameId) => game_load[gameId]?.StartTime;
 		[HttpPost("Winner")]
-		public Winner? Winner([FromBody] int gameId) => province_load[gameId].Winner is ({ Human: true } H, int final) && final >= settings.FinalLandsCount ? new Winner(H.Name, H.Color) : null;
+		public Winner? Winner([FromBody] int gameId)
+		{
+			return province_load[gameId].Winner is ({ Human: true } H, int final) && final >= settings.FinalLandsCount ? new Winner(H.Name, H.Color) : null;
+		}
 		RegistrationErrors DoRegistration(RegisteredPlayer player)
 		{
 			game_creator.Register(player.G, player.N.Trim(), new Password(player.P.Trim()), player.S);

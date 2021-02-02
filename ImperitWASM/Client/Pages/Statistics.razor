@@ -7,7 +7,7 @@
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Action<Mode, int?, int?, Data.PlayerInfo?> Switch { get; set; } = ((a, x, y, z) => { });
 	ImmutableArray<Data.PlayerInfo> Players;
-	ImmutableArray<PlayersPower> Powers;
+	ImmutableArray<Powers> Powers;
 	int Active = 0;
 
 	void Clicked(int player)
@@ -27,7 +27,7 @@
 		Active = await http.PostAsync<int, int>("api/Game/Active", Session.G);
 		Players = await http.PostAsync<Data.Session, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", Session);
 		StateHasChanged();
-		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Session.G);
+		Powers = await http.PostAsync<int, ImmutableArray<Powers>>("api/Powers/List", Session.G);
 	}
 }
 <nav>
@@ -39,18 +39,18 @@
 	{
 		<p>Na tahu je: <span style="color:@Players[Active].C;">@Players[Active].N</span></p>
 		<table class="players">
-			@foreach (var player in Players.Where(p => p.D))
+			@foreach (var (i, name, color, alive, money, debt, income) in Players)
 			{
-				<tr @onclick="() => Clicked(player.P)">
-					<td style="color:@player.C;">@player.N@Sym.Stars(Powers[^1][player.P].Final)</td>
-					@if (player.A)
+				<tr @onclick="() => Clicked(i)">
+					<td style="color:@color;">@name@Sym.Stars(Powers[^1][i].Final)</td>
+					@if (alive)
 					{
-						<td>@player.M@Sym.Money</td>
-						<td>(+@player.I@Sym.Money)</td>
+						<td>@money@Sym.Money</td>
+						<td>(+@income@Sym.Money)</td>
 						<td>
-							@if (player.Debt > 0)
+							@if (debt > 0)
 							{
-								<text>-@player.Debt@Sym.Money</text>
+								<text>-@debt@Sym.Money</text>
 							}
 						</td>
 					}

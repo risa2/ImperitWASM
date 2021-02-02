@@ -1,18 +1,18 @@
 @inject ImperitClient http;
+@inject SessionService storage;
 
 @code{
-	[Parameter] public Action Return { get; set; } = (() => { });
-	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
+	[Parameter] public System.Action Return { get; set; } = (() => { });
 	[Parameter] public int Land { get; set; }
-	Data.PurchaseInfo? Info = null;
+	PurchaseInfo? Info = null;
 	async Task DoPurchase()
 	{
-		await http.PostAsync<Data.PurchaseCmd>("api/Command/Purchase", new Data.PurchaseCmd(Session.P, Session.Key, Land, Session.G));
+		await http.PostAsync<Data.PurchaseCmd>("api/Command/Purchase", new PurchaseCmd(storage.Player, storage.Key, Land, storage.GameId));
 		Return();
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostAsync<Data.PurchaseData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new Data.PurchaseData(Session.P, Land, Session.G));
+		Info = await http.PostAsync<Data.PurchaseData, Data.PurchaseInfo>("api/Command/PurchaseInfo", new PurchaseData(storage.Player, Land, storage.GameId));
 		if (!Info.Possible)
 		{
 			Return();

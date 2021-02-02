@@ -1,35 +1,34 @@
 @inject ImperitClient http;
-
-@using Mode = Data.View;
+@inject SettingsLoader settings;
+@inject SessionService storage;
 
 @code{
-	[Parameter] public Action<Mode> Switch { get; set; } = (x => { });
+	[Parameter] public Action<View> Switch { get; set; } = (x => { });
 	[Parameter] public int Land { get; set; }
-	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	Data.SoldierList model = new Data.SoldierList();
-	Data.RecruitInfo Info = new Data.RecruitInfo("", "", ImmutableArray<Data.SoldiersItem>.Empty, 0, new Ratio());
-	int Price => model.Soldiers.Zip(Info.R.Try(), (count, type) => count.Value * type.P).Sum();
+	List<Model<int>> model = new List<Model<int>>();
+	RecruitInfo Info = new RecruitInfo("", "", ImmutableArray<bool>.Empty, 0, new Ratio());
+	int Price => model?.Zip(settings.Types, (count, type) => count.Value * type.P)?.Sum() ?? 0;
 	int Missing => Price - Info.M;
 	SoldierTypeInfobox? infobox;
 	bool Borrow = false;
 	protected override async Task OnInitializedAsync()
 	{
-		Info = await http.PostAsync<Data.RecruitData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.RecruitData(Land, Session.P, Session.G));
-		model = new Data.SoldierList(Info.R.Length);
+		Info = await http.PostAsync<Data.RecruitData, Data.RecruitInfo>("api/Command/RecruitInfo", new Data.RecruitData(Land, storage.Player, storage.GameId));
+		model = settings.Types.Select(_ => new Model<int>()).ToList();
 	}
 	async Task DoRecruit()
 	{
 		if (Borrow || Missing <= 0)
 		{
-			await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(Session.P, Session.Key, Land, model.Soldiers.Select(s => s.Value).ToImmutableArray(), Session.G));
-			Switch(Mode.Map);
+			await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(storage.Player, storage.Key, Land, model.Select(s => s.Value).ToImmutableArray(), storage.GameId));
+			Switch(View.Map);
 		}
 	}
 }
 <nav>
-	<a @onclick="() => Switch(Mode.Map)">Zrušit</a>
+	<a @onclick="() => Switch(View.Map)">Zrušit</a>
 	<a class="this">Verbování</a>
-	<a @onclick="() => Switch(Mode.Statistics)">@Info.M@Sym.Money</a>
+	<a @onclick="() => Switch(View.Statistics)">@Info.M@Sym.Money</a>
 </nav>
 <main>
 	<SoldierTypeInfobox @ref="infobox" />
@@ -46,11 +45,11 @@
 				<p>@Info.N nemá žádné vojáky @if (Info.I.Any) { <text>(pravděpodobnost odtržení @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
 			}
 			<table>
-				@foreach (var (i, (type, price)) in Info.R.Index())
+				@foreach (var (i, type) in settings.Types.Index().Where((_, i) => Info.R[i]))
 				{
 					<tr>
-						<td class="dotted" @onclick="() => infobox?.Open(type)">@type.Name @price@Sym.Money</td>
-						<td><InputNumber @bind-Value="model.Soldiers[i].Value" /></td>
+						<td class="dotted" @onclick="() => infobox?.Open(type.D)">@type.D.Name @type.P@Sym.Money</td>
+						<td><InputNumber @bind-Value="model[i].Value" /></td>
 					</tr>
 				}
 				<tr>

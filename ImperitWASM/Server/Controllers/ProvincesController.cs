@@ -3,7 +3,6 @@ using System.Linq;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
 using ImperitWASM.Shared.Config;
-using ImperitWASM.Shared.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperitWASM.Server.Controllers
@@ -21,10 +20,11 @@ namespace ImperitWASM.Server.Controllers
 			this.settings = settings;
 			this.player_load = player_load;
 		}
-		[HttpPost("Shapes")] public IEnumerable<ProvinceAppearance> Shapes([FromBody] int gameId)
+		[HttpGet] public IEnumerable<ProvinceDisplay> GetProvinceList()
 		{
-			return province_load[gameId].Select(p => new ProvinceAppearance(p.Border, p.Center, p.Fill, p.Stroke, p.StrokeWidth, p.Inhabitable, p.Text));
+			return settings.Regions.Select(region => new ProvinceDisplay(region.Border, region.Center, region.Fill(settings), region.Stroke(settings), region.StrokeWidth(settings), region.Text(region.Soldiers)));
 		}
+		[HttpPost("Free")] public IEnumerable<bool> Free([FromBody] int gameId) => province_load[gameId].Select(p => p.Inhabitable);
 		[HttpPost("Current")] public IEnumerable<ProvinceUpdate> Current([FromBody] int gameId)
 		{
 			return province_load[gameId].Select(p => new ProvinceUpdate(p.Text, p.Fill));

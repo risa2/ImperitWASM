@@ -1,32 +1,31 @@
 ﻿@page "/"
 
 @inject ImperitClient http;
-@inject SessionService cookies;
+@inject SessionService storage;
+@inject ProvinceContainer provinces;
+@inject SettingsLoader settings;
 
 @code{
-	Data.Session Session = new Data.Session();
-	Data.GameState State = Data.GameState.Invalid;
+	Game.State State = Game.State.Invalid;
 	async Task UpdateState()
 	{
-		if (Session.IsSet())
+		if (storage.IsSet)
 		{
-			State = await http.PostAsync<Data.Session, Data.GameState>("api/Player/Correct", Session);
-			Session = State == Data.GameState.Invalid ? new Data.Session() : Session;
+			State = await http.PostAsync<Session, Game.State>("api/Player/Correct", storage.Session);
+			await storage.SetAsync(State == Game.State.Invalid ? new Session() : storage.Session);
 		}
 	}
 	async Task<bool> LoginAsync(Data.Login login)
 	{
-		Session = await http.PostAsync<Data.Login, Data.Session>("api/Player/Login", login);
-		await cookies.SetAsync(Session);
+		await storage.SetAsync(await http.PostAsync<Data.Login, Session>("api/Player/Login", login), login.N);
 		await UpdateState();
 		StateHasChanged();
-		return Session.IsSet();
+		return storage.IsSet;
 	}
 	async Task LogoutAsync()
 	{
-		await http.PostAsync("api/Player/Logout", Session.Key);
-		await cookies.RemoveAsync();
-		Session = new Data.Session();
+		await http.PostAsync("api/Player/Logout", storage.Session);
+		await storage.SetAsync(null);
 		State = Game.State.Invalid;
 		StateHasChanged();
 	}
@@ -37,19 +36,21 @@
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		Session = await cookies.GetAsync();
+		await storage.LoadAsync();
 		await UpdateState();
+		await provinces.Load("api/Provinces");
+		await settings.LoadAsync("api/SoldierTypes");
 	}
 }
-@if (!Session.IsSet() || State == Data.GameState.Invalid)
+@if (!storage.IsSet || State == Game.State.Invalid)
 {
 	<StartSwitch LoginAsync="LoginAsync"/>
 }
-else if (State == Data.GameState.Started)
+else if (State == Game.State.Started)
 {
-	<GameSwitch LogoutAsync="LogoutAsync" Session="Session"/>
+	<GameSwitch LogoutAsync="LogoutAsync"/>
 }
 else
 {
-	<WaitingRoom LogoutAsync="LogoutAsync" Session="Session" State="State" Start="Start"/>
+	<WaitingRoom LogoutAsync="LogoutAsync" State="State" Start="Start"/>
 }

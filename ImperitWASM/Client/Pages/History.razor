@@ -5,15 +5,15 @@
 @code {
 	[Parameter] public Action<Mode> Set { get; set; } = _ => { };
 	ImmutableArray<int> Finished;
-	Data.Int model = new Data.Int();
+	Model<int> model = new Model<int>();
 	ImmutableArray<Color> Colors;
-	ImmutableArray<PlayersPower> Powers;
+	ImmutableArray<Powers> Powers;
 	Data.Winner? Winner = null;
 	protected override async Task OnInitializedAsync() => Finished = await http.GetAsync<ImmutableArray<int>>("api/Game/Finished");
 	async Task UpdateHistoryGraphs()
 	{
 		Colors = await http.PostAsync<int, ImmutableArray<Color>>("api/Player/Colors", Finished[model.Value]);
-		Powers = await http.PostAsync<int, ImmutableArray<PlayersPower>>("api/Powers/List", Finished[model.Value]);
+		Powers = await http.PostAsync<int, ImmutableArray<Powers>>("api/Powers/List", Finished[model.Value]);
 		Winner = await http.PostAsync<int, Data.Winner?>("api/Game/Winner", Finished[model.Value]);
 	}
 }

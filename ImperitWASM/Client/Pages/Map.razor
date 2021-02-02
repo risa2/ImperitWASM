@@ -1,9 +1,9 @@
 @code{
 	[Parameter] public int Width { get; set; }
 	[Parameter] public int Height { get; set; }
-	[Parameter] public IReadOnlyList<Data.ProvinceAppearance>? Provinces { get; set; }
+	[Parameter] public IReadOnlyList<ProvinceDisplay>? Provinces { get; set; }
 	[Parameter] public Color SelectedColor { get; set; } = new Color();
-	[Parameter] public Func<Data.ProvinceAppearance, Color> TextColor { get; set; } = _ => new Color(255, 255, 255);
+	[Parameter] public Func<ProvinceDisplay, int, Color> TextColor { get; set; } = (a, b) => new Color(255, 255, 255);
 	[Parameter] public Func<int, Task>? OnClickAsync { get; set; }
 	[Parameter] public int FontSize { get; set; }
 	int? selected = null;
@@ -26,7 +26,7 @@
 		<BorderLines Borders="Provinces.Select(p => p.B as IEnumerable<Point>)" Width="Width" Height="Height" LineWidth="0.8"/>
 		@foreach (var (i, province) in Provinces.Index())
 		{
-			<Caption Text="@province.T" Color="TextColor(province)" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClickAsync="() => OnClickAsync!(i)" />
+			<Caption Text="@province.T" Color="TextColor(province, i)" Center="province.C" Width="Width" Height="Height" FontSize="FontSize" OnClickAsync="() => OnClickAsync!(i)" />
 		}
 	}
 </svg>

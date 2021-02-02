@@ -1,33 +1,37 @@
 ﻿@inject ImperitClient http;
+@inject SessionService storage;
 
 @code{
-	[Parameter] public Data.Session Session { get; set; } = new Data.Session();
-	[Parameter] public Data.GameState State { get; set; }
+	[Parameter] public Game.State State { get; set; }
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
-	[Parameter] public Action Start { get; set; } = () => { };
-	System.Timers.Timer Timer = new System.Timers.Timer(3000);
+	[Parameter] public System.Action Start { get; set; } = () => { };
+	System.Timers.Timer Timer = new System.Timers.Timer(1000);
 	string Text { get; set; } = "";
-	async void UpdateAsync(object? _1 = null, object? _2 = null)
+	StartInfo? Info = null;
+	async Task UpdateAsync()
 	{
-		var state = await http.PostAsync<Data.Session, Data.GameState>("api/Player/Correct", Session);
-		if (state == Data.GameState.Started)
+		if (Info is null || Info.S == Game.State.Created || (Info.S == Game.State.Countdown && Info.D < DateTimeOffset.UtcNow.AddSeconds(2)))
+		{
+			Info = await http.PostAsync<int, StartInfo>("api/Game/StartInfo", storage.GameId);
+		}
+		if (Info.S == Game.State.Started)
 		{
 			Timer.Stop();
 			Start();
 		}
-		Text = state switch
+		Text = Info.S switch
 		{
-			Data.GameState.Created => "Zatím jsi jediný zaregistrovaný hráč, počkej prosím na další",
-			Data.GameState.Countdown => "Hra začne v " + (await http.PostAsync<int, DateTimeOffset?>("api/Game/StartTime", Session.G))!.Value.ToString("HH:mm:ss"),
-			Data.GameState.Finished => "Hra již skončila, můžeš se zaregistrovat do další",
+			Game.State.Created => "Zatím jsi jediný zaregistrovaný hráč, počkej prosím na další",
+			Game.State.Countdown => "Hra začne za " + (Info.D - DateTimeOffset.UtcNow).ToString("mm\\:ss"),
+			Game.State.Finished => "Hra již skončila, můžeš se zaregistrovat do další",
 			_ => ""
 		};
 		StateHasChanged();
 	}
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
-		UpdateAsync();
-		Timer.Elapsed += UpdateAsync;
+		await UpdateAsync();
+		Timer.Elapsed += async (x, y) => await UpdateAsync();
 		Timer.Start();
 	}
 }

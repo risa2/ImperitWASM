@@ -52,11 +52,11 @@ namespace ImperitWASM.Shared.Data
 			return movable.FightAgainst(EnemiesAfterAttack(provinces, enemies, defense, start, attacked), type => type.DefensePower);
 		}
 
-		static (Player, Provinces) Thinking(Brain ai, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		static (Player, Provinces) Thinking(Brain ai, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
 			(Brain, Provinces) Do(Brain doer, ICommand command)
 			{
-				var (new_players, new_provinces) = command.Perform(doer.Player, players, provinces, settings);
+				var (new_players, new_provinces, _) = command.Perform(doer.Player, players, provinces, settings, game);
 				return (new Brain(new_players.First(p => p == doer.Player), settings), provinces.With(new_provinces))!;
 			}
 			int[] enemies = ai.ComputeEnemies(provinces);
@@ -142,9 +142,9 @@ namespace ImperitWASM.Shared.Data
 			}
 			return (ai.Player, provinces);
 		}
-		public (Player, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces)
+		public (Player, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces, Game game)
 		{
-			return Thinking(this, players, provinces, Settings);
+			return Thinking(this, players, provinces, Settings, game);
 		}
 	}
 }

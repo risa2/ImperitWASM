@@ -11,9 +11,9 @@ namespace ImperitWASM.Shared.Commands
 		{
 			return actor.Active && From.CanMove(provinces, To, actor.Id, Soldiers);
 		}
-		public (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		public (IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
-			return (players.Select(altered => altered == actor ? altered.Add(new Manoeuvre(To.Order, Soldiers)) : altered), provinces.Select(altered => altered == From ? altered.Subtract(Soldiers) : altered));
+			return (players.Select(altered => altered == actor ? altered.Add(new Manoeuvre(To.Order, Soldiers)) : altered), provinces.Select(altered => altered == From ? altered.Subtract(Soldiers) : altered), game);
 		}
 		public bool HasEnoughCapacity(Provinces provinces) => Soldiers.Capacity(provinces, From, To) >= 0;
 	}

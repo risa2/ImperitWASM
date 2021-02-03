@@ -34,15 +34,16 @@ namespace ImperitWASM.Shared.Commands
 			(new_players, new_provinces) = Clear(actor, new_players, new_provinces.ToArray());
 			return (NextActive(active, new_players.ToArray()), provinces.With(new_provinces));
 		}
-		public virtual (IEnumerable<Player>, IEnumerable<Province>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		public virtual (IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
 			var (new_players, new_provinces) = EndOfTurn(actor, players, provinces, settings);
 			while (new_players.First(p => p.Active) is { Human: false } robot && new_players.Count(p => p is { LivingHuman: true }) > 1)
 			{
-				(robot, new_provinces) = new Brain(robot, settings).Think(new_players, new_provinces);
+				(robot, new_provinces) = robot.Think(new_players, new_provinces, settings, game);
 				(new_players, new_provinces) = EndOfTurn(robot, new_players.Select(player => player == robot ? robot : player).ToArray(), new_provinces, settings);
 			}
-			return (new_players, new_provinces);
+			bool finish = new_players.Any(p => p.LivingHuman) || new_provinces.Winner.Item2 >= settings.FinalLandsCount;
+			return (new_players, new_provinces, finish ? game.Finish(): game);
 		}
 	}
 }

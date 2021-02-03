@@ -42,8 +42,7 @@ namespace ImperitWASM.Server.Controllers
 			var prov = province_load[move.G];
 			return new MoveInfo(prov[move.F].CanAnyMove(prov, prov[move.T]), prov[move.F].Name, prov[move.T].Name, prov[move.F].Soldiers.ToString(), prov[move.T].Soldiers.ToString(), settings.SoldierTypes.Select(type => prov[move.F].Soldiers.CountOf(type)).ToImmutableArray());
 		}
-		[HttpPost("Move")]
-		public MoveErrors Move([FromBody] MoveCmd m)
+		[HttpPost("Move")] public MoveErrors Move([FromBody] MoveCmd m)
 		{
 			if (!session.IsValid(m.P, m.Game, m.Key))
 			{
@@ -92,7 +91,13 @@ namespace ImperitWASM.Server.Controllers
 				_ = cmd.Perform(r.Game, r.P, new Recruit(province_load[r.Game, r.Province], soldiers), false);
 			}
 		}
-		[HttpPost("Donate")]
-		public bool Donate([FromBody] DonationCmd d) => session.IsValid(d.P, d.Game, d.Key) && cmd.Perform(d.Game, d.P, new Donate(player_load[d.Game, d.Recipient], d.Amount), false).Item1;
+		[HttpPost("Donate")] public bool Donate([FromBody] DonationCmd d)
+		{
+			return session.IsValid(d.P, d.Game, d.Key) && cmd.Perform(d.Game, d.P, new Donate(player_load[d.Game, d.Recipient], d.Amount), false).Item1;
+		}
+		[HttpPost("NextTurn")] public bool NextTurn([FromBody] Session ses)
+		{
+			return session.IsValid(ses.P, ses.G, ses.Key) && cmd.Perform(ses.G, ses.P, new NextTurn(), false).Item4 is { Current: Game.State.Finished };
+		}
 	}
 }

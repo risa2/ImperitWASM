@@ -18,7 +18,7 @@ namespace ImperitWASM.Server
 			_ = services.AddScoped<IDatabase, SqliteDatabase>(_ => new SqliteDatabase("Files/imperit.db"))
 					.AddSingleton(s => Config.Load(System.AppDomain.CurrentDomain.BaseDirectory ?? ".", "Files/Settings.json"))
 					.AddScoped<ISessionLoader, SessionLoader>().AddScoped<IProvinceLoader, ProvinceLoader>()
-					.AddScoped<IGameCreator, GameCreator>().AddScoped<IEndOfTurn, EndOfTurn>();
+					.AddScoped<IGameCreator, GameCreator>();
 		}
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{

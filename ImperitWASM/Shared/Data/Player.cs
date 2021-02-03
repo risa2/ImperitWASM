@@ -48,9 +48,9 @@ namespace ImperitWASM.Shared.Data
 		public bool Equals(Player? p) => p is not null && Id == p.Id;
 		public override int GetHashCode() => Id.GetHashCode();
 
-		public (Player, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces, Settings settings)
+		public (Player, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
-			return new Brain(this, settings).Think(players, provinces);
+			return new Brain(this, settings).Think(players, provinces, game);
 		}
 		public static Color ColorOf(Player? p) => p?.Color ?? new Color();
 	}

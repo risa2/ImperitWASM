@@ -17,18 +17,14 @@ namespace ImperitWASM.Server.Controllers
 		readonly IGameLoader game_load;
 		readonly IGameCreator game_creator;
 		readonly IProvinceLoader province_load;
-		readonly ISessionLoader session;
-		readonly IEndOfTurn eot;
 		readonly IPlayerLoader player_load;
 		readonly Settings settings;
 		readonly IPowersLoader power_load;
-		public GameController(IGameLoader game_load, IGameCreator game_creator, IProvinceLoader province_load, ISessionLoader session, IEndOfTurn eot, IPlayerLoader player_load, Settings settings, IPowersLoader power_load)
+		public GameController(IGameLoader game_load, IGameCreator game_creator, IProvinceLoader province_load, IPlayerLoader player_load, Settings settings, IPowersLoader power_load)
 		{
 			this.game_load = game_load;
 			this.game_creator = game_creator;
 			this.province_load = province_load;
-			this.session = session;
-			this.eot = eot;
 			this.player_load = player_load;
 			this.settings = settings;
 			this.power_load = power_load;
@@ -67,7 +63,6 @@ namespace ImperitWASM.Server.Controllers
 			return game_load.RegistrableGame ?? game_creator.Create();
 		}
 		[HttpPost("NextColor")] public Color NextColor([FromBody] int gameId) => game_creator.NextColor(gameId);
-		[HttpPost("NextTurn")] public bool NextTurn([FromBody] Session ses) => session.IsValid(ses.P, ses.G, ses.Key) && eot.NextTurn(ses.G, ses.P);
 
 		[HttpPost("History")] public HistoryRecord? History([FromBody] string name)
 		{

@@ -22,7 +22,7 @@
 	}
 	async Task NextTurnAsync()
 	{
-		if (await http.PostAsync<Data.Session, bool>("api/Game/NextTurn", storage.Session))
+		if (await http.PostAsync<Data.Session, bool>("api/Command/NextTurn", storage.Session))
 		{
 			await DoLogoutAsync();
 		}

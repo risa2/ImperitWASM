@@ -9,9 +9,9 @@ namespace ImperitWASM.Client.Services
 {
 	public class ProvinceContainer : IReadOnlyList<ProvinceDisplay>
 	{
-		readonly ImperitClient http;
+		readonly IClient http;
 		List<ProvinceDisplay>? provinces;
-		public ProvinceContainer(ImperitClient http) => this.http = http;
+		public ProvinceContainer(IClient http) => this.http = http;
 
 		public ProvinceDisplay this[int index] => provinces![index];
 		public int Count => provinces!.Count;

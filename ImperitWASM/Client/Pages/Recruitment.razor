@@ -1,4 +1,4 @@
-@inject ImperitClient http;
+@inject IClient http;
 @inject SettingsLoader settings;
 @inject SessionService storage;
 
@@ -20,7 +20,7 @@
 	{
 		if (Borrow || Missing <= 0)
 		{
-			await http.PostAsync<Data.RecruitCmd>("api/Command/Recruit", new Data.RecruitCmd(storage.Player, storage.Key, Land, model.Select(s => s.Value).ToImmutableArray(), storage.GameId));
+			await http.PostAsync("api/Command/Recruit", new Data.RecruitCmd(storage.Player, storage.Key, Land, model.Select(s => s.Value).ToImmutableArray(), storage.GameId));
 			Switch(View.Map);
 		}
 	}

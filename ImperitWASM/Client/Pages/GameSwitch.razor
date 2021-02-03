@@ -1,4 +1,4 @@
-@inject ImperitClient http;
+@inject IClient http;
 @inject SessionService storage;
 
 @code{
@@ -33,7 +33,7 @@
 	}
 	async Task CheckSession()
 	{
-		var info = await http.PostAsync<string, GameInfo>("api/Game/Info", storage.Name);
+		var info = await http.PostAsync<string, GameInfo>("api/Game/Info", storage.Name!);
 		if (info.S != Game.State.Started)
 		{
 			await DoLogoutAsync();
@@ -47,7 +47,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		await CheckSession();
-		PlayerColor = await http.PostAsync<string, Color>("api/Player/Color", storage.Name);
+		PlayerColor = await http.PostAsync<string, Color>("api/Player/Color", storage.Name!);
 		timer.Elapsed += async (sender, e) => await CheckSession();
 		timer.Start();
 	}

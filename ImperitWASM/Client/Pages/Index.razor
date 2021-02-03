@@ -1,6 +1,6 @@
 ﻿@page "/"
 
-@inject ImperitClient http;
+@inject IClient http;
 @inject SessionService storage;
 @inject ProvinceContainer provinces;
 @inject SettingsLoader settings;
@@ -24,7 +24,7 @@
 	}
 	async Task LogoutAsync()
 	{
-		await http.PostAsync("api/Player/Logout", storage.Session);
+		await http.PostAsync("api/Player/Logout", storage.Key);
 		await storage.SetAsync(null);
 		State = Game.State.Invalid;
 		StateHasChanged();

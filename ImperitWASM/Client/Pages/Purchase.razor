@@ -1,4 +1,4 @@
-@inject ImperitClient http;
+@inject IClient http;
 @inject SessionService storage;
 
 @code{
@@ -7,7 +7,7 @@
 	PurchaseInfo? Info = null;
 	async Task DoPurchase()
 	{
-		await http.PostAsync<Data.PurchaseCmd>("api/Command/Purchase", new PurchaseCmd(storage.Player, storage.Key, Land, storage.GameId));
+		await http.PostAsync("api/Command/Purchase", new PurchaseCmd(storage.Player, storage.Key, Land, storage.GameId));
 		Return();
 	}
 	protected override async Task OnInitializedAsync()

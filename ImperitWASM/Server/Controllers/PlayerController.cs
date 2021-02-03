@@ -27,14 +27,10 @@ namespace ImperitWASM.Server.Controllers
 		}
 		[HttpPost("Colors")] public IEnumerable<Color> Colors([FromBody] int gameId) => player_load[gameId].Select(p => p.Color);
 		[HttpPost("Money")] public int Money([FromBody] Session ses) => player_load[ses.G, ses.P].Money;
-		[HttpPost("Infos")] public IEnumerable<PlayerInfo> Infos([FromBody] Session ses)
+		[HttpPost("Infos")] public IEnumerable<PlayerInfo> Infos([FromBody] int gameId)
 		{
-			if (!session.IsValid(ses.G, ses.P, ses.Key))
-			{
-				return Enumerable.Empty<PlayerInfo>();
-			}
-			var players = player_load[ses.G];
-			var provinces = province_load[ses.G];
+			var provinces = province_load[gameId];
+			var players = player_load[gameId];
 			return players.Select((p, i) => new PlayerInfo(i, p.Name, p.Color, p.Alive, p.Money, p.Debt, provinces.IncomeOf(p.Id)));
 		}
 		[HttpPost("Correct")]

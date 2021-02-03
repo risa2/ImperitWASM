@@ -29,9 +29,9 @@ namespace ImperitWASM.Server.Controllers
 		{
 			return province_load[gameId].Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
-		[HttpPost("Preview")] public IEnumerable<ProvinceUpdate> Preview([FromBody] PlayerId id)
+		[HttpPost("Preview")] public IEnumerable<ProvinceUpdate> Preview([FromBody] int gameId)
 		{
-			return player_load[id.G, id.P].Act(province_load[id.G], settings).Item2.Select(p => new ProvinceUpdate(p.Text, p.Fill));
+			return player_load[gameId].First(p => p.Active).Act(province_load[gameId], settings).Item2.Select(p => new ProvinceUpdate(p.Text, p.Fill));
 		}
 	}
 }

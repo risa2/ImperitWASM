@@ -6,9 +6,9 @@ namespace ImperitWASM.Client.Services
 {
 	public class SettingsLoader
 	{
-		readonly ImperitClient http;
+		readonly IClient http;
 		public ImmutableArray<SoldiersItem> Types { get; private set; }
-		public SettingsLoader(ImperitClient http) => this.http = http;
+		public SettingsLoader(IClient http) => this.http = http;
 		public async Task LoadAsync(string typesUrl)
 		{
 			if (Types.IsDefaultOrEmpty)

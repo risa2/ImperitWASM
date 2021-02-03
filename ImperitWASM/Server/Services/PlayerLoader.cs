@@ -10,7 +10,7 @@ namespace ImperitWASM.Server.Services
 	public interface IPlayerLoader
 	{
 		ImmutableArray<Player> this[int gameId] { get; }
-		Player this[string name] { get; }
+		Player? this[string name] { get; }
 		Player this[int gameId, int order] { get; }
 		void Set(int gameId, IEnumerable<Player> players, bool fromTransaction);
 		bool IsNameFree(string name);
@@ -52,7 +52,7 @@ namespace ImperitWASM.Server.Services
 			});
 		public ImmutableArray<Player> this[int gameId] => Get("Player.GameId=@x0", gameId).ToImmutableArray();
 		public Player this[int gameId, int order] => Get(@"Player.GameId=@x0 AND Player.""Order""=@x1", gameId, order).First();
-		public Player this[string name] => Get("Player.Name=@x0", name).First();
+		public Player? this[string name] => Get("Player.Name=@x0", name).FirstOrDefault();
 
 		public void Set(int gameId, IEnumerable<Player> players, bool fromTransaction)
 		{

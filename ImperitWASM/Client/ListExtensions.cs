@@ -8,7 +8,6 @@ namespace ImperitWASM.Client
 	public static class ListExtensions
 	{
 		public static IEnumerable<T> ReverseIf<T>(this IEnumerable<T> e, bool reverse) => reverse ? e.Reverse() : e;
-		public static ImmutableArray<T> Try<T>(this ImmutableArray<T> ar) => ar.IsDefault ? ImmutableArray<T>.Empty : ar;
 		public static T? Try<T>(this ImmutableArray<T> ar, int i) where T : class => ar.IsDefault || ar.Length <= i ? default : ar[i];
 		public static IEnumerable<TR> Pairs<T, TR>(this IEnumerable<T> e, Func<T, T, TR> f) => e.Zip(e.Skip(1), f);
 	}

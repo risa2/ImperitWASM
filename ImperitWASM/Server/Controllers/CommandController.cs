@@ -18,15 +18,13 @@ namespace ImperitWASM.Server.Controllers
 		readonly ISessionLoader session;
 		readonly Settings settings;
 		readonly ICommandExecutor cmd;
-		readonly IEndOfTurn eot;
 		readonly IPlayerLoader player_load;
 		readonly IDatabase db;
-		public CommandController(IProvinceLoader province_load, ISessionLoader session, Settings settings, IEndOfTurn eot, IPlayerLoader player_load, ICommandExecutor cmd, IDatabase db)
+		public CommandController(IProvinceLoader province_load, ISessionLoader session, Settings settings, IPlayerLoader player_load, ICommandExecutor cmd, IDatabase db)
 		{
 			this.province_load = province_load;
 			this.session = session;
 			this.settings = settings;
-			this.eot = eot;
 			this.player_load = player_load;
 			this.cmd = cmd;
 			this.db = db;

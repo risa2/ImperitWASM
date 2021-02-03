@@ -14,8 +14,8 @@ namespace ImperitWASM.Client
 			var builder = WebAssemblyHostBuilder.CreateDefault(args);
 			builder.RootComponents.Add<App>("#app");
 
-			_ = builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) })
-					.AddScoped<Services.ImperitClient>().AddBlazoredSessionStorage().AddScoped<Services.SessionService>();
+			_ = builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) }).AddBlazoredSessionStorage()
+									.AddScoped<Services.IClient, Services.ImperitClient>().AddScoped<Services.SessionService>();
 			return builder.Build().RunAsync();
 		}
 	}

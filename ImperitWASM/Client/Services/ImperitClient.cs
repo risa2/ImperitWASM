@@ -5,7 +5,13 @@ using System.Threading.Tasks;
 
 namespace ImperitWASM.Client.Services
 {
-	public class ImperitClient
+	public interface IClient
+	{
+		Task<T> GetAsync<T>(string url);
+		Task PostAsync<T>(string url, T data);
+		Task<TR> PostAsync<T, TR>(string url, T data);
+	}
+	public class ImperitClient : IClient
 	{
 		class Policy : JsonNamingPolicy
 		{
@@ -19,7 +25,8 @@ namespace ImperitWASM.Client.Services
 		{
 			PropertyNameCaseInsensitive = true,
 			PropertyNamingPolicy = new Policy()
-		}; static async Task<T> Parse<T>(HttpResponseMessage msg) => (await JsonSerializer.DeserializeAsync<T>(await msg.Content.ReadAsStreamAsync(), opt))!;
+		};
+		static async Task<T> Parse<T>(HttpResponseMessage msg) => (await JsonSerializer.DeserializeAsync<T>(await msg.Content.ReadAsStreamAsync(), opt))!;
 		static StringContent MakeContent<T>(T data) => new StringContent(JsonSerializer.Serialize(data, opt), Encoding.UTF8, "application/json");
 		public async Task<T> GetAsync<T>(string url) => await Parse<T>(await http.GetAsync(url));
 		public Task PostAsync<T>(string url, T data) => http.PostAsync(url, MakeContent(data));

@@ -5,12 +5,12 @@ using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Server.Services
 {
-	public interface IPowersLoader
+	public interface IPowerLoader
 	{
 		void Add(int gameId, IEnumerable<Power> powers, bool fromTransaction);
 		ImmutableArray<Powers> Get(int gameId);
 	}
-	public class PowerLoader : IPowersLoader
+	public class PowerLoader : IPowerLoader
 	{
 		readonly IDatabase db;
 		readonly IPlayerLoader players;
@@ -25,7 +25,7 @@ namespace ImperitWASM.Server.Services
 			int order = db.Query<int>("SELECT Count(Id) FROM Power WHERE GameId = @x0").First();
 			foreach (var (i, power) in powers.Select((p, i) => (i, p)))
 			{
-				db.Command("INSERT INTO Power (GameId, Order, Alive, Final, Income, Money, Soldiers) VALUES (@x0,@x1,@x2,@x3,@x4,@x5,@x6)", gameId, order + i, power.Alive, power.Final, power.Income, power.Money, power.Soldiers);
+				db.Command("INSERT INTO Power (GameId, \"Order\", Alive, Final, Income, Money, Soldiers) VALUES (@x0,@x1,@x2,@x3,@x4,@x5,@x6)", gameId, order + i, power.Alive, power.Final, power.Income, power.Money, power.Soldiers);
 			}
 		});
 		public ImmutableArray<Powers> Get(int gameId)

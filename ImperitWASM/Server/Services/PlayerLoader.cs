@@ -61,7 +61,7 @@ namespace ImperitWASM.Server.Services
 				db.Command("DELETE FROM Players WHERE GameId=@x0", gameId);
 				foreach (var (i, player) in players.Select((p, i) => (i, p)))
 				{
-					db.Command("INSERT INTO Players (Name,Active,Alive,GameId,Human,Money,Order,Password) VALUES (@x0,@x1,@x2,@x3,@x4,@x5,@x6,@x7)",
+					db.Command(@"INSERT INTO Players (Name,Active,Alive,GameId,Human,Money,""Order"",Password) VALUES (@x0,@x1,@x2,@x3,@x4,@x5,@x6,@x7)",
 					player.Name, player.Active, player.Alive, gameId, player.Human, player.Money, i, player.Password.ToString());
 
 					foreach (var action in player.Actions)
@@ -72,7 +72,7 @@ namespace ImperitWASM.Server.Services
 							long id = db.Query<long>("SELECT last_insert_rowid()").First();
 							foreach (var regiment in manoeuvre.Soldiers)
 							{
-								db.Command("INSERT INTO ActionRegiment (Count, ActionId, Type) VALUES (@x0, @x1, @x2)", regiment.Count, id, type_indices[regiment.Type]);
+								db.Command(@"INSERT INTO ActionRegiment (""Count"", ActionId, Type) VALUES (@x0, @x1, @x2)", regiment.Count, id, type_indices[regiment.Type]);
 							}
 						}
 						else if (action is Loan loan)
@@ -85,6 +85,6 @@ namespace ImperitWASM.Server.Services
 		}
 		public bool IsNameFree(string name) => !name.Any(char.IsDigit) && db.Query<int>("SELECT Count(Id) FROM Player WHERE Name=@x0", name).Single() == 0;
 		public string ObsfuscateName(string name, int repetition) => name + ((db.Query<int>("SELECT Count(Id) FROM Player WHERE Name LIKE @0", name + "%").First() + repetition) is > 0 and int n ? n.ToString() : "");
-		public int Count(int gameId) => db.Query<int>("SELECT Count(Name) FROM Player WHERE GameId = @x0").First();
+		public int Count(int gameId) => db.Query<int>("SELECT Count(Name) FROM Player WHERE GameId = @x0", gameId).First();
 	}
 }

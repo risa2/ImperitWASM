@@ -3,8 +3,8 @@ using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Config
 {
-	public record Mountains(int Id, string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes)
-		: Region(Id, Name, Shape, Soldiers, ExtraTypes)
+	public record Mountains(int Id, string Name, Shape Shape)
+		: Region(Id, Name, Shape, new Soldiers(), ImmutableArray<SoldierType>.Empty)
 	{
 		public override Color Stroke(Settings settings) => settings.MountainsColor;
 		public override int StrokeWidth(Settings settings) => settings.MountainsWidth;

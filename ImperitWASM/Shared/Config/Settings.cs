@@ -6,6 +6,7 @@ using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Config
 {
+	[Newtonsoft.Json.JsonConverter(typeof(Conversion.NewtonsoftSettings))]
 	public sealed record Settings(int CountdownSeconds, Ratio DefaultInstability, int DebtLimit, int DefaultMoney, int FinalLandsCount, Graph Graph, Ratio Interest, Color LandColor, int PlayerCount, Color MountainsColor, int MountainsWidth, ImmutableArray<string> Names, ImmutableArray<Region> Regions, Color SeaColor, ImmutableArray<SoldierType> SoldierTypes)
 	{
 		public Player CreatePlayer(int gameId, int i, string name, int land, Password password, bool human) => new Player(new PlayerIdentity(name, i, gameId, human), StartMoney(land), true, ImmutableList<IAction>.Empty, this, password, i == 0);

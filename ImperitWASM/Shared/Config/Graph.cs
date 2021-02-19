@@ -5,13 +5,11 @@ using System.Collections.Immutable;
 
 namespace ImperitWASM.Shared.Config
 {
-	public sealed record Graph(ImmutableArray<ImmutableArray<int>> Neighbors) : IReadOnlyList<ImmutableArray<int>>
+	public sealed record Graph(ImmutableArray<ImmutableArray<int>> Neighbors)
 	{
 		public int NeighborCount(int vertex) => Neighbors[vertex].Length;
 		public ImmutableArray<int> this[int vertex] => Neighbors[vertex];
 		public int Count => Neighbors.Length;
-		public IEnumerator<ImmutableArray<int>> GetEnumerator() => (Neighbors as IEnumerable<ImmutableArray<int>>).GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public bool Passable(int from, int to, int limit, Func<int, int, int> difficulty)
 		{

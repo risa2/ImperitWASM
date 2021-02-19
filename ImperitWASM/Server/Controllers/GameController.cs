@@ -19,8 +19,8 @@ namespace ImperitWASM.Server.Controllers
 		readonly IProvinceLoader province_load;
 		readonly IPlayerLoader player_load;
 		readonly Settings settings;
-		readonly IPowersLoader power_load;
-		public GameController(IGameLoader game_load, IGameCreator game_creator, IProvinceLoader province_load, IPlayerLoader player_load, Settings settings, IPowersLoader power_load)
+		readonly IPowerLoader power_load;
+		public GameController(IGameLoader game_load, IGameCreator game_creator, IProvinceLoader province_load, IPlayerLoader player_load, Settings settings, IPowerLoader power_load)
 		{
 			this.game_load = game_load;
 			this.game_creator = game_creator;

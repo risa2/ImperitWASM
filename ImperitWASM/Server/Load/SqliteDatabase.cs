@@ -10,12 +10,12 @@ namespace ImperitWASM.Server.Load
 		readonly SqliteConnection con;
 		public SqliteDatabase(string dataSource)
 		{
-			con = new SqliteConnection($"Data Source={dataSource};Cache=Shared");
+			con = new SqliteConnection($"DataSource={dataSource};Cache=Shared;");
 			con.Open();
 		}
-		public T Transaction<T>(bool isTransaction, Func<T> action)
+		public T Transaction<T>(bool use, Func<T> action)
 		{
-			if (isTransaction)
+			if (use)
 			{
 				using var transaction = con.BeginTransaction();
 				return action();
@@ -25,21 +25,18 @@ namespace ImperitWASM.Server.Load
 				return action();
 			}
 		}
-		public void Transaction(bool isTransaction, Action action)
+		public void Transaction(bool use, Action action) => Transaction(use, () =>
 		{
-			_ = Transaction(isTransaction, () =>
-			{
-				action();
-				return 0;
-			});
-		}
+			action();
+			return 0;
+		});
 		SqliteCommand CreateCommand(string sql, object?[] args)
 		{
 			var command = con.CreateCommand();
 			command.CommandText = sql;
 			for (int i = 0; i < args.Length; ++i)
 			{
-				_ = command.Parameters.AddWithValue("@x" + i, args[i]);
+				_ = command.Parameters.AddWithValue("@x" + i, args[i] ?? DBNull.Value);
 			}
 			return command;
 		}

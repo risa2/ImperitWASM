@@ -17,9 +17,9 @@ namespace ImperitWASM.Server.Services
 		readonly IPlayerLoader player_load;
 		readonly IProvinceLoader province_load;
 		readonly Settings settings;
-		readonly IPowersLoader power_load;
+		readonly IPowerLoader power_load;
 		readonly IGameLoader game_load;
-		public CommandExecutor(IDatabase db, IPlayerLoader player_load, IProvinceLoader province_load, Settings settings, IPowersLoader power_load, IGameLoader game_load)
+		public CommandExecutor(IDatabase db, IPlayerLoader player_load, IProvinceLoader province_load, Settings settings, IPowerLoader power_load, IGameLoader game_load)
 		{
 			this.db = db;
 			this.player_load = player_load;

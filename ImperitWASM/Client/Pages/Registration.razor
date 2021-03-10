@@ -70,7 +70,7 @@
 	<p>Jméno:</p><p><input type="text" @bind-value="Username" autocomplete="username"/></p>
 	<p>Heslo:</p><p><input type="password" @bind-value="Password" autocomplete="current-password"/></p>
 	<p>Vyber si zemi, kde budeš začínat:</p>
-	@if (!Inhabitable.IsDefaultOrEmpty)
+	@if (!Inhabitable.IsDefault)
 	{
 		<Map @ref="map" Width="1000" Height="1000" Provinces="provinces" SelectedColor="NextColor" OnClickAsync="OnClickAsync" FontSize="9" TextColor="(p, i) => Inhabitable[i] ? p.GetColor() : new Color(80,80,80)" />
 	}

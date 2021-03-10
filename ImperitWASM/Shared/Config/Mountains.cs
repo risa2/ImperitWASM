@@ -10,7 +10,7 @@ namespace ImperitWASM.Shared.Config
 		public override int StrokeWidth(Settings settings) => settings.MountainsWidth;
 
 		public override bool Sailable => true;
-		public override ImmutableArray<string> Text(Soldiers present) => ImmutableArray.Create(Name, present.ToString());
+		public override ImmutableArray<string> Text(Soldiers present) => ImmutableArray<string>.Empty;
 
 		public virtual bool Equals(Sea? region) => Name == region?.Name;
 		public override int GetHashCode() => Name.GetHashCode();

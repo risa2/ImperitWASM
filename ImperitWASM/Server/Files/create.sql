@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS "Action" (
     "Province" INTEGER NULL,
     "Type" TEXT NOT NULL,
     FOREIGN KEY ("GameId", "Player") REFERENCES "Player"("GameId", "Order") ON DELETE CASCADE,
-    FOREIGN KEY ("GameId", "Province") REFERENCES "Province"("GameId", "Order") ON DELETE NO ACTION
+    FOREIGN KEY ("GameId", "Province") REFERENCES "Province"("GameId", "Order") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "ActionRegiment" (
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "Province" (
     "Order" INTEGER NOT NULL,
     "Player" INTEGER NULL,
     PRIMARY KEY ("GameId", "Order"),
-    FOREIGN KEY ("GameId", "Player") REFERENCES "Player"("GameId", "Order") ON DELETE NO ACTION
+    FOREIGN KEY ("GameId", "Player") REFERENCES "Player"("GameId", "Order") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "ProvinceRegiment" (
@@ -69,3 +69,5 @@ CREATE TABLE IF NOT EXISTS "ProvinceRegiment" (
     "Type" INTEGER NOT NULL,
     FOREIGN KEY ("GameId", "Province") REFERENCES "Province"("GameId", "Order") ON DELETE CASCADE
 );
+
+PRAGMA journal_mode = WAL;

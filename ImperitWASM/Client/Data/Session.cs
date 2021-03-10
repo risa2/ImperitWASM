@@ -8,7 +8,7 @@ namespace ImperitWASM.Client.Data
 		[JsonInclude] public int P { get; private set; }
 		[JsonInclude] public string Key { get; private set; }
 		public bool IsSet() => Key is { Length: > 0 };
-		public Session(int g, int p, string key) => (G, P, Key) = (g, p, key);
+		public Session(int p, int g, string key) => (G, P, Key) = (g, p, key);
 		public Session() : this(0, 0, "") { }
 	}
 }

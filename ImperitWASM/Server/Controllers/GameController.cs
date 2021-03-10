@@ -37,7 +37,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("StartInfo")] public StartInfo StartInfo([FromBody] int gameId)
 		{
 			game_creator.StartAll();
-			return game_load[gameId] is Game g ? new(g.Current, g.StartTime) : new(Game.State.Invalid, DateTime.MinValue);
+			return game_load[gameId] is Game g ? new(g.Current, g.StartTime) : new(Game.State.Invalid, DateTimeOffset.MinValue);
 		}
 		[HttpPost("StartTime")] public DateTimeOffset? StartTime([FromBody] int gameId) => game_load[gameId]?.StartTime;
 		[HttpPost("Winner")] public Winner? Winner([FromBody] int gameId)
@@ -46,7 +46,7 @@ namespace ImperitWASM.Server.Controllers
 		}
 		RegistrationErrors DoRegistration(RegisteredPlayer player)
 		{
-			game_creator.Register(player.G, player.N.Trim(), new Password(player.P.Trim()), player.S);
+			game_creator.Register(player.G, player.N.Trim(), Password.FromPassword(player.P.Trim()), player.S);
 			return RegistrationErrors.Ok;
 		}
 		[HttpPost("Register")] public RegistrationErrors Register([FromBody] RegisteredPlayer player) => player.N?.Trim() switch

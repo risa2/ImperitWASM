@@ -34,12 +34,12 @@ namespace ImperitWASM.Server.Controllers
 			return players.Select((p, i) => new PlayerInfo(i, p.Name, p.Color, p.Alive, p.Money, p.Debt, provinces.IncomeOf(p.Id)));
 		}
 		[HttpPost("Correct")]
-		public Game.State Correct([FromBody] Session ses) => session.IsValid(ses.G, ses.P, ses.Key) ? game_load[ses.G]?.Current ?? Game.State.Invalid : Game.State.Invalid;
+		public Game.State Correct([FromBody] Session ses) => session.IsValid(ses.P, ses.G, ses.Key) ? game_load[ses.G]?.Current ?? Game.State.Invalid : Game.State.Invalid;
 		[HttpPost("Login")]
 		public Session Login([FromBody] Login trial)
 		{
 			game_creator.StartAll();
-			return player_load[trial.N] is Player p && p.Password.IsCorrect(trial.P) ? new Session(p.Order, p.GameId, session.Add(p.GameId, p.Order, false)) : new Session();
+			return player_load[trial.N] is Player p && p.Password.IsCorrect(trial.P) ? new Session(p.Order, p.GameId, session.Add(p.Order, p.GameId, false)) : new Session();
 		}
 		[HttpPost("Color")] public Color GetColor([FromBody] int player) => PlayerIdentity.ColorOf(player);
 		[HttpPost("Logout")] public void Logout([FromBody] string key) => session.Remove(key);

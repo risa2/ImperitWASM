@@ -19,6 +19,7 @@
 		Error = await http.PostAsync<Data.RegisteredPlayer, Data.RegistrationErrors>("api/Game/Register", new Data.RegisteredPlayer(Username, Password, Selected ?? 0, GameId));
 		if (Error == Data.RegistrationErrors.Ok)
 		{
+			Console.WriteLine("Ok: " + Username + " " + Password);
 			await LoginAsync!(new Data.Login(Username, Password));
 		}
 		StateHasChanged();

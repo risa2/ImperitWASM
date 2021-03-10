@@ -12,13 +12,17 @@
 		if (storage.IsSet)
 		{
 			State = await http.PostAsync<Session, Game.State>("api/Player/Correct", storage.Session);
+			Console.WriteLine("State updated: " + State + ", session key " + storage.Session);
 			await storage.SetAsync(State == Game.State.Invalid ? new Session() : storage.Session);
 		}
 	}
 	async Task<bool> LoginAsync(Data.Login login)
 	{
+		Console.WriteLine("LoginAsync called");
 		await storage.SetAsync(await http.PostAsync<Data.Login, Session>("api/Player/Login", login), login.N);
+		Console.WriteLine("Login successful: " + storage.IsSet);
 		await UpdateState();
+		Console.WriteLine("Login successful after update: " + storage.IsSet);
 		StateHasChanged();
 		return storage.IsSet;
 	}

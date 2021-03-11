@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS "Power" (
 CREATE TABLE IF NOT EXISTS "Session" (
     "Key" TEXT NOT NULL PRIMARY KEY,
     "GameId" INTEGER NOT NULL REFERENCES "Game"("Id") ON DELETE CASCADE,
-    "Player" INTEGER NOT NULL,
-    FOREIGN KEY ("GameId", "Player") REFERENCES "Player"("GameId", "Order") ON DELETE CASCADE
+    "Player" INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "Action" (
@@ -42,8 +41,7 @@ CREATE TABLE IF NOT EXISTS "Action" (
     "Player" INTEGER NOT NULL,
     "Province" INTEGER NULL,
     "Type" TEXT NOT NULL,
-    FOREIGN KEY ("GameId", "Player") REFERENCES "Player"("GameId", "Order") ON DELETE CASCADE,
-    FOREIGN KEY ("GameId", "Province") REFERENCES "Province"("GameId", "Order") ON DELETE CASCADE
+    FOREIGN KEY ("GameId", "Player") REFERENCES "Player"("GameId", "Order") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "ActionRegiment" (
@@ -57,8 +55,7 @@ CREATE TABLE IF NOT EXISTS "Province" (
     "GameId" INTEGER NOT NULL REFERENCES "Game"("Id") ON DELETE CASCADE,
     "Order" INTEGER NOT NULL,
     "Player" INTEGER NULL,
-    PRIMARY KEY ("GameId", "Order"),
-    FOREIGN KEY ("GameId", "Player") REFERENCES "Player"("GameId", "Order") ON DELETE CASCADE
+    PRIMARY KEY ("GameId", "Order")
 );
 
 CREATE TABLE IF NOT EXISTS "ProvinceRegiment" (
@@ -70,4 +67,5 @@ CREATE TABLE IF NOT EXISTS "ProvinceRegiment" (
     FOREIGN KEY ("GameId", "Province") REFERENCES "Province"("GameId", "Order") ON DELETE CASCADE
 );
 
+PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;

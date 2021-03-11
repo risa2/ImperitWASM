@@ -53,7 +53,7 @@ namespace ImperitWASM.Server.Services
 			var players = player_load[gameId];
 			var player = settings.CreatePlayer(gameId, players.Length, name, land, password, true);
 			player_load.Set(gameId, players.Add(player), true);
-			province_load.Set(gameId, land, province_load[gameId, land].RuledBy(player.Id), true);
+			province_load.Set(gameId, province_load[gameId, land].RuledBy(player.Id), true);
 
 			if (players.Length + 1 == 2)
 			{

@@ -27,7 +27,7 @@ namespace ImperitWASM.Shared.Config
 		{
 			foreach (var (i, (start, name)) in starts.Zip(GetNames(obf)).Index())
 			{
-				yield return (start, CreatePlayer(gameId, i + first, name, start, new Password(), false));
+				yield return (start, CreatePlayer(gameId, i + first, name, start, Password.Random, false));
 			}
 		}
 

@@ -46,7 +46,7 @@ namespace ImperitWASM.Server.Load
 			command.CommandText = sql;
 			for (int i = 0; i < args.Length; ++i)
 			{
-				_ = command.Parameters.AddWithValue("@x" + i, args[i] ?? DBNull.Value);
+				_ = command.Parameters.AddWithValue("@" + i, args[i] ?? DBNull.Value);
 			}
 			return command;
 		}

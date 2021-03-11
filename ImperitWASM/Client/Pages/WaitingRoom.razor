@@ -8,9 +8,11 @@
 	System.Timers.Timer Timer = new System.Timers.Timer(1000);
 	string Text { get; set; } = "";
 	StartInfo? Info = null;
+	
+	bool StartsSoon() => Info?.S == Game.State.Countdown && Info.D < DateTimeOffset.UtcNow.AddSeconds(2);
 	async Task UpdateAsync()
 	{
-		if (Info is null || Info.S == Game.State.Created || (Info.S == Game.State.Countdown && Info.D < DateTimeOffset.UtcNow.AddSeconds(2)))
+		if (Info is null || Info.S == Game.State.Created || StartsSoon())
 		{
 			Info = await http.PostAsync<int, StartInfo>("api/Game/StartInfo", storage.GameId);
 		}

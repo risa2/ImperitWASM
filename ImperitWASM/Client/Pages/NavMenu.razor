@@ -3,7 +3,8 @@
 	[Parameter] public int Selected { get; set; } = 0;
 	[Parameter] public Action<int> OnClick { get; set; } = x => { };
 	[Parameter] public Func<int, Task>? OnClickAsync { get; set; }
-	[Parameter] public Color Fill { get; set; } = new Color(85, 238, 255);
+	[Parameter] public Color? Fill { get; set; }
+	Color FillColor => Fill ?? new Color(85, 238, 255);
 	async Task OnClickFn(int i)
 	{
 		if (OnClickAsync is null)
@@ -18,15 +19,15 @@
 }
 <style>
 	nav > a:hover {
-		background-color: @Fill.WithAlpha(100);
+		background-color: @FillColor.WithAlpha(100);
 	}
 	nav > a.this {
-		background-color: @Fill;
+		background-color: @FillColor;
 		color: #000;
 	}
 </style>
 <nav>
-	@foreach (var (option, i) in Options.Split(';').Select((v, i) => (v, i)))
+	@foreach (var (i, option) in Options.Split(';').Index())
 	{
 		<a class="@(i == Selected ? "this" : "")" @onclick="() => OnClickFn(i)">@option</a>
 	}

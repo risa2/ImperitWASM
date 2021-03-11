@@ -8,6 +8,9 @@
 \usepackage{fancyhdr}
 \usepackage[backend=bibtex,sorting=none]{biblatex}
 \usepackage{tikz}
+\usepackage{xcolor}
+
+\definecolor{keyword}{RGB}{0, 64, 255}
 
 \usetikzlibrary{shapes.geometric, arrows}
 \tikzstyle{block} = [rectangle, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=gray!25]
@@ -71,11 +74,11 @@
 \thispagestyle{empty}
 \Large\textbf{Prohlášení}\normalsize
 
-Prohlašuji, že jsem svou závěrečnou maturitní práci vypracoval samostatně a použil jsem pouze prameny a literaturu uvedené v seznamu bibliografických záznamů.
+Prohlašuji, že jsem svou závěrečnou maturitní práci vypracoval samostatně a použil jsem pouze prameny a literaturu uvedené v~seznamu bibliografických záznamů.
 
 Prohlašuji, že tištěná verze a elektronická verze závěrečné maturitní práce jsou shodné.
 
-Nemám závažný důvod proti zpřístupňování této práce v souladu se zákonem č. 121/2000 Sb., o právu autorském, o právech souvisejících s právem autorským a o změně některých zákonů (autorský zákon) ve znění pozdějších předpisů. 
+Nemám závažný důvod proti zpřístupňování této práce v~souladu se zákonem č. 121/2000 Sb., o právu autorském, o právech souvisejících s právem autorským a o změně některých zákonů (autorský zákon) ve znění pozdějších předpisů. 
 
 V Brně dne \today{} \repeatchar{40}{.}
 \newpage
@@ -87,7 +90,7 @@ Tímto bych chtěl poděkovat Mgr. Marku Blahovi za odborné vedení práce.
 \thispagestyle{empty}
 \Large\textbf{Anotace}\normalsize
 
-Práce se zabývá vytvořením internetové počítačové hry zvané Imperit pomocí Blazor WebAssembly z frameworku .NET. Hra je koncipovaná jako tahová strategie, jejímž tématem je dobývání území na herním plánu, s právě jedním vítězem a omezeným náhodným prvkem.
+Práce se zabývá vytvořením internetové počítačové hry zvané Imperit pomocí Blazor WebAssembly z~frameworku .NET. Hra je koncipovaná jako tahová strategie, jejímž tématem je dobývání území na herním plánu, s právě jedním vítězem a omezeným náhodným prvkem.
 
 \Large\textbf{Klíčová slova}\normalsize
 
@@ -105,26 +108,26 @@ computer game; turn-based strategy; war strategy; territorial expansion; zero-su
 \tableofcontents
 \newpage
 \section{Úvod}
-Rozhodl jsem se vytvořit hru o dobývání území navrženou tak, aby byla konečná a vítěz byl jednoznačně určen. Vítězství by však nemělo na konci hry nastat neočekávaně, již v průběhu hry bude patrný vývoj, z něhož vyplyne, který hráč má k výhře nejblíže, ale tento vývoj budou moci ostatní hráči zvrátit. Hra by také měla obsahovat náhodný prvek, ovšem pravděpodobnost náhodných jevů by měla být známá, aby byli hráči nuceni s rizikem počítat.
+Rozhodl jsem se vytvořit hru o dobývání území navrženou tak, aby byla konečná a vítěz byl jednoznačně určen. Vítězství by však nemělo na konci hry nastat neočekávaně, již v~průběhu hry bude patrný vývoj, z~něhož vyplyne, který hráč má k výhře nejblíže, ale tento vývoj budou moci ostatní hráči zvrátit. Hra by také měla obsahovat náhodný prvek, ovšem pravděpodobnost náhodných jevů by měla být známá, aby byli hráči nuceni s rizikem počítat.
 
-Pro vytvoření hry jsem zvolil formát tahové strategie, neboť strategie v reálném čase buď vyvíjí tlak na hráče z důvodu nedostatku času, nebo ve snaze vyhnout se tomuto problému vede ke zdlouhavému čekání na dokončení některých akcí \cite{turnreal1}. V obou případech realtimová strategie vede k orientaci na postřeh a trpělivost spíše než na vymýšlení strategie\cite{turnreal2}. Kromě toho \uv{připoutává} hráče k jejich obrazovkám, což sice může být mnohdy žádoucí, ale můj záměr takový nebyl.
+Pro vytvoření hry jsem zvolil formát tahové strategie, protože strategie v~reálném čase buď vyvíjí tlak na hráče z~důvodu nedostatku času, nebo ve snaze vyhnout se tomuto problému vede ke zdlouhavému čekání na dokončení některých akcí \cite{turnreal1}. v~obou případech realtimová strategie vede k orientaci na postřeh a trpělivost spíše než na vymýšlení strategie\cite{turnreal2}. Kromě toho \uv{připoutává} hráče k jejich obrazovkám, což sice může být mnohdy žádoucí, ale můj záměr takový nebyl.
 
 \section{Popis hry}
-Hru může hrát 2--16 hráčů. Hra se odehrává na mapě, která se skládá z provincií, jejichž názvy a tvary přibližně odpovídají evropským státům, krajům, mořím a horám. Cílem hry je získat alespoň tři z cílových zemí (Anhaltsko, Katalánsko, Kosovo a Královec). K dobytí všech je sice nutné ovládnout podstatnou část mapy, ale při vhodně zvolené strategii může hráč vyhrát, i když bude mít menší území než ostatní hráči.
+Hru může hrát 2--16 hráčů. Hra se odehrává na mapě, která se skládá z~provincií, jejichž názvy a tvary přibližně odpovídají evropským státům, krajům, mořím a horám. Cílem hry je získat alespoň tři z~cílových zemí (Anhaltsko, Katalánsko, Kosovo a Královec). K dobytí všech je sice nutné ovládnout podstatnou část mapy, ale při vhodně zvolené strategii může hráč vyhrát, i když bude mít menší území než ostatní hráči.
 \subsection{Registrace}
 Při registraci si hráč zvolí jméno a heslo a zobrazí se mu mapa, na níž si kliknutím vybere zemi, kde bude začínat. Nemůže si vybrat zemi, jejíž název je napsán šedě. Po registraci hráč musí počkat, než začne jeho hra, což se stane čtyři minuty po registraci druhého hráče.
 \subsection{Průběh hry}
-Tahy hráčů se střídají v tom pořadí, v němž se tito hráči zaregistrovali. Během tahu může hráč provádět libovolné množství akcí bez časového omezení, dokud se sám nerozhodne svůj tah ukončit. Některé akce se však dokončí až po ukončení tahu.
+Tahy hráčů se střídají v~tom pořadí, v~němž se tito hráči zaregistrovali. Během tahu může hráč provádět libovolné množství akcí bez časového omezení, dokud se sám nerozhodne svůj tah ukončit. Některé akce se však dokončí až po ukončení tahu.
 \subsection{Provincie}
-Jsou tři typy provincií: země, moře a pohoří. Země a moře můžou patřit nějakému hráči, který v nich může mít svou armádu. Pohoří nikomu nepatří a armáda v nich být nemůže. Hráč dobude provincii, pokud do ní pošle armádu, jejíž útočná síla je vyšší než obranná síla tamních jednotek, a ovládá ji, dokud mu ji stejným způsobem nedobude jiný hráč, nebo dokud se tato provincie sama neodtrhne.
+Jsou tři typy provincií: země, moře a pohoří. Země a moře můžou patřit nějakému hráči, který v~nich může mít svou armádu. Pohoří nikomu nepatří a armáda v~nich být nemůže. Hráč dobude provincii, pokud do ní pošle armádu, jejíž útočná síla je vyšší než obranná síla tamních jednotek, a ovládá ji, dokud mu ji stejným způsobem nedobude jiný hráč, nebo dokud se tato provincie sama neodtrhne.
 
-Země se může hráči odtrhnout vždy po jeho tahu. Pravděpodobnost odtržení země bez armády je 10 \% a s růstem obranné síly armády klesá tak, že když má armáda obrannou sílu stejnou nebo vyšší než armáda v zemi na začátku hry, země se již nemůže odtrhnout.
+Země se může hráči odtrhnout vždy po jeho tahu. Pravděpodobnost odtržení země bez armády je 10 \% a s růstem obranné síly armády klesá tak, že když má armáda obrannou sílu stejnou nebo vyšší než armáda v~zemi na začátku hry, země se již nemůže odtrhnout.
 \subsection{Peníze}
-Hráč získává po svém tahu daňový výnos ze svých zemí a tento výnos se u různých zemí liší. Jestli chce hráč získat výnos ze všech svých zemí, musí jeho provincie tvořit souvislé území. Pokud je území hráče rozdělené na více částí, mezi nimiž jsou provincie, které jsou neobydlené nebo jsou pod kontrolou jiného hráče, získá hráč pouze výnos z části s nejvyším výnosem. Existuje tedy značná motivace udržovat své území souvislé.
+Hráč získává po svém tahu daňový výnos ze svých zemí a tento výnos se u různých zemí liší. Jestli chce hráč získat výnos ze všech svých zemí, musí jeho provincie tvořit souvislé území. Pokud je území hráče rozdělené na více částí, mezi nimiž jsou provincie, které jsou neobydlené nebo jsou pod kontrolou jiného hráče, získá hráč pouze výnos z~části s nejvyším výnosem. Existuje tedy značná motivace udržovat své území souvislé.
 
 Za peníze je možné kupovat další země nebo vojenské jednotky, s nimiž lze dobývat provincie a bránit provincie už dobyté. Cena země je součtem ceny jejích vojenských jednotek, dvojnásobku jejího výnosu a obranné síly jejích vojenských jednotek. Pokud hráč dluží nějaké peníze, jsou mu po získání daňového výnosu zabaveny peníze ke splacení dluhu. Pokud všechny jeho peníze ke splacení dluhu nestačí, je zbývající dluh navýšen o úrok 25 \% a zůstává hráči do dalšího kola. Dluh nesmí přesáhnout 400, pokud k tomu dojde, provede se exekuce, hráč ztratí několik svých zemí a jeho dluh bude snížen o cenu těchto zemí.
 \subsection{Vojenské jednotky}
-V tabulce jsou uvedeny typy vojenských jednotek, které se ve hře dají koupit. Je zde uvedena jejich cena, síla v boji, vzdálenost, na jakou se mohou samy přesunout a v jakém prostředí. Pokud se jednotka dokáže přesunout a navíc má nějakou nosnost, může přepravit jiné jednotky, které to nedokáží. Celková nosnost jednotek, které přepravu provádějí, musí být stejná nebo vyšší než je celková hmotnost přepravovaných jednotek.
+V tabulce jsou uvedeny typy vojenských jednotek, které se ve hře dají koupit. Je zde uvedena jejich cena, síla v~boji, vzdálenost, na jakou se mohou samy přesunout a v~jakém prostředí. Pokud se jednotka dokáže přesunout a navíc má nějakou nosnost, může přepravit jiné jednotky, které to nedokáží. Celková nosnost jednotek, které přepravu provádějí, musí být stejná nebo vyšší než je celková hmotnost přepravovaných jednotek.
 
 \begin{tabular}{l r r r r r l}
 Název		& Cena	& Síla	& Vzdálenost	&Nosnost& Hmotnost	& Prostředí\\ \hline
@@ -135,29 +138,29 @@ Fénická loď	& 50		& 0		& 2			& 400	& 500		& země s přístavem/moře\\
 Veslice		& 130	& 130	& 1			& 120	& 500		& země s přístavem/moře\\
 \end{tabular}
 
-Slon může pohoří přecházet, ale nemůže v nich zůstat, je u něj uvedena před lomítkem síla v útoku z lomítkem v obraně. Slona a fénickou loď lze koupit jen v Kartágu, veslici (celým názvem \uv{germánská bojová veslice}) jen v zemích s přístavem u Bodensee.
+Slon může pohoří přecházet, ale nemůže v~nich zůstat, je u něj uvedena před lomítkem síla v~útoku z~lomítkem v~obraně. Slona a fénickou loď lze koupit jen v~Kartágu, veslici (celým názvem \uv{germánská bojová veslice}) jen v~zemích s přístavem u Bodensee.
 
 \subsection{Ovládání}
-Na okraji obrazovky (levý okraj na širokých obrazovkách, horní na úzkých) je navigační menu, v němž může hráč přepínat mezi stránkami. Při přihlášení se jako výchozí stránka zobrazuje mapa provincií.
+Na okraji obrazovky (levý okraj na širokých obrazovkách, horní na úzkých) je navigační menu, v~němž může hráč přepínat mezi stránkami. Při přihlášení se jako výchozí stránka zobrazuje mapa provincií.
 \subsubsection{Mapa}
-Na této stránce hráč vidí mapu všech provincií. Pohoří se zobrazují jen jako šedá čára mezi zeměmi. Pokud jim žádný z hráčů nevládne, jsou moře tyrkysová a země černošedé; pokud v nich však někdo vládne, mají barvu onoho hráče. Dále se u moří a zemí zobrazuje jejich název a počet vojenských jednotek, u zemí se navíc zobrazuje jejich výnos za jedno kolo. Země, které mají přístav, mají u svého názvu kotvu, a země, které hráč potřebuje k vítězství, u svého názvu mají hvězdičku.
+Na této stránce hráč vidí mapu všech provincií. Pohoří se zobrazují jen jako šedá čára mezi zeměmi. Pokud jim žádný z~hráčů nevládne, jsou moře tyrkysová a země černošedé; pokud v~nich však někdo vládne, mají barvu onoho hráče. Dále se u moří a zemí zobrazuje jejich název a počet vojenských jednotek, u zemí se navíc zobrazuje jejich výnos za jedno kolo. Země, které mají přístav, mají u svého názvu kotvu, a země, které hráč potřebuje k vítězství, u svého názvu mají hvězdičku.
 
 
 \includegraphics[width=\textwidth]{ProvinceMap.png}
 
-Klikne-li hráč dvakrát na svou provincii, může v ní verbovat jednotky; klikne-li na ni jednou a poté klikne na druhou provincii, může přesunout jednotky z první provincie do druhé; klikne-li na cizí zemi, jež sousedí s jeho zemí, může tuto zemi koupit.
+Klikne-li hráč dvakrát na svou provincii, může v~ní verbovat jednotky; klikne-li na ni jednou a poté klikne na druhou provincii, může přesunout jednotky z~první provincie do druhé; klikne-li na cizí zemi, jež sousedí s jeho zemí, může tuto zemi koupit.
 
-Při verbování a přesunu se ukáže nabídka, v níž může hráč vybrat, kolik jednotek kterého druhu chce verbovat (resp. přesunout). Pokud se hráč rozhodne verbovat více jednotek, než si může za své peníze koupit, nebo si koupit zemi, která stojí více peněz, než kolik daný hráč má, umožní mu hra si chybějící částku půjčít. Pokud se země může odtrhnout, zobrazí se v této nabídce pravděpodobnost, že k tomu dojde.
+Při verbování a přesunu se ukáže nabídka, v~níž může hráč vybrat, kolik jednotek kterého druhu chce verbovat (resp. přesunout). Pokud se hráč rozhodne verbovat více jednotek, než si může za své peníze koupit, nebo si koupit zemi, která stojí více peněz, než kolik daný hráč má, umožní mu hra si chybějící částku půjčít. Pokud se země může odtrhnout, zobrazí se v~této nabídce pravděpodobnost, že k tomu dojde.
 
 \includegraphics[width=\textwidth]{Recruit.png}
 
-Navigační menu na této stránce má čtyři položky. První z nich je konec tahu, nebo odhlášení, podle toho, zda je přihlášený hráč na tahu. Druhá položka pouze informuje o tom, kolik peněz má přihlášený hráč. Třetí položka přepíná na stránku \textit{Hráči} a poslední možnost ukazuje náhled mapy po provedení akcí hráče na tahu.
+Navigační menu na této stránce má čtyři položky. První z~nich je konec tahu, nebo odhlášení, podle toho, zda je přihlášený hráč na tahu. Druhá položka pouze informuje o tom, kolik peněz má přihlášený hráč. Třetí položka přepíná na stránku \textit{Hráči} a poslední možnost ukazuje náhled mapy po provedení akcí hráče na tahu.
 \subsubsection{Hráči}
-Na této stránce se zobrazuje seznam všech hráčů, jejich peníze, příjmy, případě výše jejich dluhů. Klikne-li hráč na jméno jiného hráče, může mu věnovat peníze. Zobrazí se nabídka a v ní lze vybrat, kolik peněz darovat. Pod seznamem hráčů je možnost vzdát se, kliknutím na ni hráč zemře a všechny jeho provincie se odtrhnou.
+Na této stránce se zobrazuje seznam všech hráčů, jejich peníze, příjmy, případě výše jejich dluhů. Klikne-li hráč na jméno jiného hráče, může mu věnovat peníze. Zobrazí se nabídka a v~ní lze vybrat, kolik peněz darovat. Pod seznamem hráčů je možnost vzdát se, kliknutím na ni hráč zemře a všechny jeho provincie se odtrhnou.
 
 \includegraphics[width=\textwidth]{Players.png}
 
-Pokud hra trvá dostatečně dlouho, zobrazí se pod možností vzdát se tři grafy. První z nich popisuje vývoj celkových sil hráčů (počítají se jako součet ceny všech vojáků, peněz, pětinásobku příjmů a stonásobku počtu cílových zemí, které daný hráč vlastní). Na druhém grafu se zobrazuje poměrná změna této síly. Na třetím se zobrazuje poměr vojenských sil hráčů (počítají se jako součet ceny všech vojáků a peněz) vůči sobě.
+Po proběhnutí prvních několika tahů se pod možností vzdát se zobrazí tři grafy. První z~nich popisuje vývoj celkových sil hráčů (počítají se jako součet ceny všech vojáků, peněz, pětinásobku příjmů a stonásobku počtu cílových zemí, které daný hráč vlastní). Na druhém grafu se zobrazuje poměrná změna této síly. Na třetím se zobrazuje poměr vojenských sil hráčů (počítají se jako součet ceny všech vojáků a peněz) vůči sobě.
 
 Na obrázku níže je ukázka prvního grafu ze hry, kterou vyhrál hráč, jenž má podle grafu až třetí největší sílu a jehož území zdaleka nebylo největší. Je tedy vidět, že při běžné hře k tomu může dojít.
 
@@ -165,19 +168,22 @@ Na obrázku níže je ukázka prvního grafu ze hry, kterou vyhrál hráč, jen�
 
 \section{Použité technologie}
 \subsection{\CS{}}
-Celý program je napsaný v jazyce \CS{}, neboť tento jazyk může běžet na straně serveru (viz ASP.NET Core) i klienta (viz Blazor WebAssembly) a obě části mohou využívat společné knihovny a pracovat s týmiž datovými typy. Navíc tento jazyk umožňuje využívat knihoven z frameworku .NET a na rozdíl od jazyků PHP a JavaScript, které se často pro vývoj webových aplikací používají, je staticky typovaný a kompilovaný do bytekódu, což do určité míry kontroluje správnost programu.
+Celý program je napsaný v~jazyce \CS{}, jelikož tento jazyk může běžet na straně serveru (viz ASP.NET Core) i klienta (viz Blazor WebAssembly) a obě části mohou využívat společné knihovny a pracovat s týmiž datovými typy. Navíc tento jazyk umožňuje využívat knihoven z~frameworku .NET a na rozdíl od jazyků PHP a JavaScript, které se často pro vývoj webových aplikací používají, je staticky typovaný a kompilovaný do bytekódu, což do určité míry kontroluje správnost programu.
 \subsection{ASP.NET Core}
 Framework ASP.NET Core je využíván na straně serveru ke zpracovávání HTTP dotazů a odesílání odpovědí.
 \subsection{Blazor WebAssembly}
-Blazor WebAssembly je framework, který umožňuje vyvíjet v jazyce  \CS{} aplikace spustitelné v prohlížeči. Kód v jazyce  \CS{} se přeloží do binárního formátu WebAssembly a prohlížeč pomocí krátkého kódu v JavaScriptu výsledný soubor stáhne a spustí. Spuštěný program následně reaguje na akce uživatele, komunikuje se serverem pomocí HTTP a podle potřeby překresluje zobrazovanou webovou stránku.
+Blazor WebAssembly je framework, který umožňuje vyvíjet v~jazyce \CS{} aplikace spustitelné v~prohlížeči. Kód v~jazyce \CS{} se přeloží do binárního formátu WebAssembly a prohlížeč pomocí krátkého kódu v~JavaScriptu výsledný soubor stáhne a spustí. Spuštěný program následně reaguje na akce uživatele, komunikuje se serverem pomocí HTTP a podle potřeby překresluje zobrazovanou webovou stránku.
 
 \section{Struktura}
 Program se skládá ze tří projektů:
 \begin{itemize}
-\item\textit{Shared} -- Obsahuje třídy, které druhé dva projekty využívají, nachází se v něm většina herní logiky a odpovídá větší části modelu v architektuře MVC\cite{mvc}
-\item\textit{Client} -- Odpovídá pohledu v architektuře MVC a obsahuje soubory v HTML, CSS a kód v  \CS{}, překládaný do WebAssembly a spouštěný v prohlížeči klienta
-\item\textit{Server} -- Zahrnuje kód spouštěný na straně serveru, což znamená zejména práci s databází a webové API, které odesílá odpovědi na dotazy klienta; v architektuře MVC odpovídá kontroleru a části modelu
+\item\textit{Shared} -- Obsahuje třídy, které druhé dva projekty využívají, nachází se v~něm většina herní logiky a odpovídá větší části modelu v~architektuře MVC\cite{mvc}
+\item\textit{Client} -- Odpovídá pohledu v~architektuře MVC a obsahuje soubory v~HTML, CSS a kód v~\CS{}, překládaný do WebAssembly a spouštěný v~prohlížeči klienta
+\item\textit{Server} -- Implementuje webové API, jež odesílá odpovědi na dotazy klienta, a zahrnuje kód, který je potřebný k funkčnosti API, tedy práci s databází a s třídami z~projektu \textit{Shared}; v~architektuře MVC odpovídá kontroleru a části modelu
 \end{itemize}
+
+Graf závislostí mezi projekty:
+
 \begin{tikzpicture}[node distance=2cm]
 \node (shared) [block] {Shared};
 \node (client) [block, right of=shared, xshift=2cm] {Client};
@@ -186,6 +192,25 @@ Program se skládá ze tří projektů:
 \draw [arrow] (server) -- (shared);
 \draw [arrow] (server) -- (client);
 \end{tikzpicture}
+
+\subsection{Shared}
+Projekt \textit{Shared} obsahuje složku \textit{Conversion}, v~níž jsou třídy zajišťující načítání některých typů v~ostatních složkách z~formátu JSON nebo naopak zápis do tohoto formátu. Ve složkách \textit{Commands}, \textit{Config} a \textit{Data} jsou datové typy, které odpovídají různým jevům ve hře. Jedná se o neměnné datové typy a z~pohledu jazyka \CS{} jsou to záznamy (\textit{records}), nikoliv třídy. Dále je však budu označovat jako třídy, protože v~paradigmatu objektově orientovaného programování se skutečně o třídy jedná, neboť jejich instance obsahují data i funkce, které s těmito daty pracují.\cite{oop} Neměnné typy umožňují psát funkce a metody, které jsou referenčně transparentní (tj. nemají vedlejší účinky), a tím usnadňují přemýšlení o programu a snižují riziko chyb. \cite{immutable1}\cite{immutable2}
+
+Ve složce \textit{Commands} se nachází rozhraní \textit{ICommand} a třídy, jež ho implementují. Každá z~nich odpovídá nějakému příkazu, který může hráč provést: nákup provincie, darování peněz, verbování vojáků, přesun vojáků, kapitulace a konec tahu. Rozhraní má dvě metody; obě přebírají jako paramtetry seznam hráčů a provincií, nastavení hry a hráče, jenž příkaz provedl. Jedna z~nich ověřuje, zda je příkaz možné provést a druhá jej provede a vrátí změněný seznam hráčů a provincií (aniž by měnila ten původní). Kód rozhraní vypadá takto:
+
+\scriptsize\selectfont
+\texttt{\color{keyword}public interface \color{black}ICommand}\\
+\texttt{\{}\\
+\hspace*{8mm}\texttt{\color{keyword}bool \color{black}Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings);}\\
+\hspace*{8mm}\texttt{(IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players,}\\
+\hspace*{48mm}\texttt{Provinces provinces, Settings settings, Game game);}\\
+\texttt{\}}
+\normalsize
+
+Ve složce \textit{Config} se nachází třída \textit{Settings}, jež obsahuje data načtená při spuštění programu z~konfiguračního souboru a společná pro všechny hry. Instance ostatních tříd v~této složce jsou členské proměnné této třídy. Jedná se především o neměnná data provincií (výnosy, tvar, \ldots) a typy vojáků. Třídy pro provincie jsou \textit{Land}, \textit{Sea} a \textit{Mountains}, všechny jsou odvozené od třídy \textit{Region} a typy vojáků dědí z třídy \textit{SoldierType} a jsou to \textit{Pedestrian}, \textit{Elephant}, \textit{Ship} a \textit{OutlandishShip}.
+
+Ve složce \textit{Data} se nacházejí třídy pro data, která se během hry mění. Instance těchto tříd jsou však neměnné, změna se provádí nahrazením jedné instance jinou.
+
 \newpage
 \printbibliography[heading=bibintoc, title={Použitá literatura}]
 \end{document}

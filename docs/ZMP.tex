@@ -19,6 +19,7 @@
 
 \def\max #1{\textrm{max}\left\{#1\right\}}
 \def\CS{C\texttt{\#}}
+\def\keyword #1{\color{keyword}#1\color{black}}
 \renewcommand{\labelitemii}{$\circ$}
 \renewcommand{\labelitemiii}{$-$}
 \makeatletter
@@ -174,7 +175,7 @@ Framework ASP.NET Core je využíván na straně serveru ke zpracovávání HTTP
 \subsection{Blazor WebAssembly}
 Blazor WebAssembly je framework, který umožňuje vyvíjet v~jazyce \CS{} aplikace spustitelné v~prohlížeči. Kód v~jazyce \CS{} se přeloží do binárního formátu WebAssembly a prohlížeč pomocí krátkého kódu v~JavaScriptu výsledný soubor stáhne a spustí. Spuštěný program následně reaguje na akce uživatele, komunikuje se serverem pomocí HTTP a podle potřeby překresluje zobrazovanou webovou stránku.
 
-\section{Struktura}
+\section{Program}
 Program se skládá ze tří projektů:
 \begin{itemize}
 \item\textit{Shared} -- Obsahuje třídy, které druhé dva projekty využívají, nachází se v~něm většina herní logiky a odpovídá větší části modelu v~architektuře MVC\cite{mvc}
@@ -199,17 +200,57 @@ Projekt \textit{Shared} obsahuje složku \textit{Conversion}, v~níž jsou tří
 Ve složce \textit{Commands} se nachází rozhraní \textit{ICommand} a třídy, jež ho implementují. Každá z~nich odpovídá nějakému příkazu, který může hráč provést: nákup provincie, darování peněz, verbování vojáků, přesun vojáků, kapitulace a konec tahu. Rozhraní má dvě metody; obě přebírají jako paramtetry seznam hráčů a provincií, nastavení hry a hráče, jenž příkaz provedl. Jedna z~nich ověřuje, zda je příkaz možné provést a druhá jej provede a vrátí změněný seznam hráčů a provincií (aniž by měnila ten původní). Kód rozhraní vypadá takto:
 
 \scriptsize\selectfont
-\texttt{\color{keyword}public interface \color{black}ICommand}\\
+\texttt{\keyword{public interface }ICommand}\\
 \texttt{\{}\\
-\hspace*{8mm}\texttt{\color{keyword}bool \color{black}Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings);}\\
+\hspace*{8mm}\texttt{\keyword{bool }Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings);}\\
 \hspace*{8mm}\texttt{(IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players,}\\
 \hspace*{48mm}\texttt{Provinces provinces, Settings settings, Game game);}\\
-\texttt{\}}
-\normalsize
+\texttt{\}}\normalsize
 
-Ve složce \textit{Config} se nachází třída \textit{Settings}, jež obsahuje data načtená při spuštění programu z~konfiguračního souboru a společná pro všechny hry. Instance ostatních tříd v~této složce jsou členské proměnné této třídy. Jedná se především o neměnná data provincií (výnosy, tvar, \ldots) a typy vojáků. Třídy pro provincie jsou \textit{Land}, \textit{Sea} a \textit{Mountains}, všechny jsou odvozené od třídy \textit{Region} a typy vojáků dědí z třídy \textit{SoldierType} a jsou to \textit{Pedestrian}, \textit{Elephant}, \textit{Ship} a \textit{OutlandishShip}.
+Ve složce \textit{Config} se nachází třída \textit{Settings}, jež obsahuje data načtená při spuštění programu z~konfiguračního souboru a společná pro všechny hry. Instance ostatních tříd v~této složce jsou členské proměnné této třídy. Jsou zde třídy \textit{Land}, \textit{Sea} a \textit{Mountains}, odvozené z třídy \textit{Region} a uchovávající údaje o provinciích, jež se nemění v~průběhu hry: výnosy, výchozí armáda, popisek, tvar, barva, pravděpodobnost odtržení a zvláštní jednotky, verbovatelné v~provincii (například slon nebo fénická loď). Dále se ve~složce nachází třídy \textit{Pedestrian}, \textit{Elephant}, \textit{Ship} a \textit{OutlandishShip}, které dědí ze~třídy \textit{SoldierType} a reprezentují typy vojáků.
 
-Ve složce \textit{Data} se nacházejí třídy pro data, která se během hry mění. Instance těchto tříd jsou však neměnné, změna se provádí nahrazením jedné instance jinou.
+Graf hierarchie tříd pro data provincií:
+
+\begin{tikzpicture}[node distance=2cm]
+\node (region) [block] {Region};
+\node (sea) [block, right of=region, xshift=2cm] {Sea};
+\node (land) [block, below of=region] {Land};
+\node (mountains) [block, below of=sea] {Mountains};
+\draw [arrow] (sea) -- (region);
+\draw [arrow] (land) -- (region);
+\draw [arrow] (mountains) -- (region);
+\end{tikzpicture}
+
+Graf hierarchie tříd pro typy vojáků:
+
+\begin{tikzpicture}[node distance=2cm]
+\node (soldiertype) [block] {SoldierType};
+\node (pedestrian) [block, below of=soldiertype] {Pedestrian};
+\node (elephant) [block, below of=pedestrian] {Elephant};
+\node (ship) [block, right of=pedestrian, xshift=2cm] {Ship};
+\node (outlandishship) [block, below of=ship] {OutlandishShip};
+\draw [arrow] (pedestrian) -- (soldiertype);
+\draw [arrow] (ship) -- (soldiertype);
+\draw [arrow] (elephant) -- (pedestrian);
+\draw [arrow] (outlandishship) -- (ship);
+\end{tikzpicture}
+
+Ve složce \textit{Data} se nacházejí třídy pro data, jež reprezentují stav hry, a proto se v průběhu stále mění. Přesto se však jedná o neměnné datové typy, změna se provádí nahrazením jednoho objektu za jiný. Dvě nejdůležitější třídy jsou \textit{Player} a \textit{Province}, které reprezentují o hráče a provincii. Kromě třídy \textit{Player} je zde také třída \textit{PlayerIdentity}, jež obsahuje hráčovo jméno, pořadí na tahu, hru a údaj, zda se jedná o lidského hráče či algoritmus, tedy informace, které hráče jednoznačně identifikují a nemění se během hry. Třída \textit{Player} následně obsahuje instanci třídy \textit{PlayerIdentity}, instanci třídy \textit{Settings}, protože metody třídy potřebují znát nastavení, počet peněz, heslo, údaje, zda hráč žije a zda je na tahu, a neměnný seznam prvků \textit{IAction}, jež obsahuje hráčem prováděné akce, jež se uskuteční při ukončení tahu. Kód rozhraní \textit{IAction}:
+
+\scriptsize\selectfont
+\texttt{\keyword{public interface }IAction}\\
+\texttt{\{}\\
+\hspace*{8mm}\texttt{(Player, Provinces, IAction?) Perform(Player active, Provinces provinces, Settings settings);}\\
+\texttt{\}}\normalsize
+
+Akce tedy podobně jako příkaz přebírá informace o stavu a vrací změněný stav. Třetí vrácená hodnota je potom akce, která v příštím kole nahradí v poli akcí hráče tuto akci, nebo hodnota \textit{null}, pokud má být tato akce bez náhrady odstraněna. Rozhraní \textit{IAction} implementují třídy \textit{Loan} a \textit{Manoeuvre}, které reprezentují splácení půjčky a přesun vojska. Třetí vrácená hodnota je u přesunu vojska vždy \textit{null}, neboť vojsko se vždy na konci tahu přesune, zatímco u půjčky se vrací opět půjčka, jejíž dlužná částka je zvýšená o úrok a snížená o splacenou částku, nebo \textit{null}, pokud již došlo ke splacení půjčky.
+
+Třída \textit{Province} obsahuje instanci třídy \textit{Region}, jež uchovává základní a neměnné informace o provincii, a třídy \textit{Settings}, která je využívána v metodách. Dále obsahuje \textit{PlayerIdentity} hráče, jemuž provincie náleží, nebo hodnotu \textit{null}, pokud provincie žádnému hráči nepatří. Důvod, proč třída \textit{Province} obsahuje pouze identitu hráče a nikoliv přímo instanci třídy \textit{Player}, je ten, že ostatní údaje o hráči se mohou měnit, což by při použití neměnných datových typů vyžadovalo pokaždé přímo měnit všechny provincie změněného hráče, což by do kódu vneslo zbytečnou složitost, vzhledem k tomu, že ve třídě \textit{Province} je identita hráče použita pouze pro porovnání, zda hráč, který do provincie poslal vojenské jednotky je vládcem provincie, nebo se snaží provincii dobýt. Třída \textit{Province} ještě obsahuje objekt třídy \textit{Soldiers}, který reprezentuje současnou armádu v provincii a obsahuje neměnné pole typu \textit{Regiment}, což je třída obsahující instanci \textit{SoldierType} a počet vojenských jednotek onoho typu. Provincie jsou následně zapouzdřené ve třídě \textit{Provinces}, která obsahuje pole provincií a objekt třídy \textit{Graph}, v němž je uloženo, mezi kterými provinciemi vede cesta.
+
+Mezi další třídy v této složce patří \textit{Game}, obsahující informace o stavu samotné hry, což je údaj o tom, zda hra již začala nebo skončila (a kdy se tak stalo), zda je nově vytvořená, nebo zda brzy začne (a kdy se tak stane). Síla hráče v daném kole se ukládá do třídy \textit{Power} a skládá se z počtu jeho čílových zemí, peněz, výše příjmů, síly vojáků a údaje, zda je hráč vůbec naživu. Hodnoty síly každého hráče pro dané kolo se ukládají do pole typu \textit{Power} ve třídě \textit{Powers}. Dále se ve složce nachází pomocné typy \textit{Ratio}, jež reprezentuje zlomek od $0$ do $1$, a \textit{Password}, jež reprezentuje hashované heslo. Algoritmus hráče robota se nachází ve třídě \textit{Brain}.
+
+\subsection{Server}
+V projektu \textit{Server} se nachází složky \textit{Controllers}, \textit{Files}, \textit{Pages}, \textit{Properties} a \textit{Services}. Složky \textit{Properties} a \textit{Pages} slouží pro potřeby frameworku ASP.NET Core. Ve složce \textit{Files} se nachází nastavení hry, načtená při spuštění do objektu \textit{Settings}, a SQL kód pro vytvoření tabulek v databázi. Složka \textit{Services} obsahuje třídy služeb, které zajišťují propojení databáze a kontrolerů. Služby vždy implementují nějaké rozhraní a do metody ostatních tříd mají přístup jen k tomu rozhraní, aby se případná implementace mohla změnit. Nejpravděpodobnější je změna u třídy \textit{SqliteDatabase} implementující rozhraní \textit{IDatabase}, která zajišťuje připojení a dotazování pro Sqlite databázi. Kdyby měla být v budoucnu nahrazena Sqlite databáze například databází MySQL, rozhraní by mohlo zůstat stejné a třídy, které přistupují skrze něj, by zůstaly nedotčeny.
 
 \newpage
 \printbibliography[heading=bibintoc, title={Použitá literatura}]

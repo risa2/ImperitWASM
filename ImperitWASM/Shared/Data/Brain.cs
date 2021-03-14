@@ -5,15 +5,8 @@ using ImperitWASM.Shared.Config;
 
 namespace ImperitWASM.Shared.Data
 {
-	public class Brain
+	public sealed record Brain(Player Player, Settings Settings)
 	{
-		readonly Player Player;
-		readonly Settings Settings;
-		public Brain(Player player, Settings settings)
-		{
-			Player = player;
-			Settings = settings;
-		}
 		static int Max(params int[] values) => values.Max();
 		static int Clamp(int value, int min, int max) => value < min ? min : value > max ? max : value;
 		static int Updiv(int a, int b) => (a + b - 1) / b;

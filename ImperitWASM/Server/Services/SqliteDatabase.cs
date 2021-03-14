@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using ImperitWASM.Server.Services;
 using Microsoft.Data.Sqlite;
 
-namespace ImperitWASM.Server.Load
+namespace ImperitWASM.Server.Services
 {
 	public class SqliteDatabase : IDatabase
 	{

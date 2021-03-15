@@ -66,7 +66,7 @@ namespace ImperitWASM.Server.Controllers
 		{
 			var player = player_load[purchase.G, purchase.P];
 			var provinces = province_load[purchase.G];
-			return provinces[purchase.L].Mainland ? new PurchaseInfo(new Buy(provinces[purchase.L]).Allowed(player, provinces), provinces[purchase.L].Name, provinces[purchase.L].Price, player.Money) : new PurchaseInfo(false, "", 0, 0);
+			return provinces[purchase.L].Mainland ? new PurchaseInfo(new Buy(provinces[purchase.L]).Allowed(player, provinces), provinces[purchase.L].Name, provinces[purchase.L].Price, player.Money) : new PurchaseInfo();
 		}
 		[HttpPost("Purchase")] public void Purchase([FromBody] PurchaseCmd p)
 		{
@@ -96,7 +96,7 @@ namespace ImperitWASM.Server.Controllers
 		}
 		[HttpPost("NextTurn")] public bool NextTurn([FromBody] Session ses)
 		{
-			return session.IsValid(ses.P, ses.G, ses.Key) && cmd.Perform(ses.G, ses.P, new NextTurn(), false).Item4 is { Current: Game.State.Finished };
+			return session.IsValid(ses.P, ses.G, ses.Key) && cmd.Perform(ses.G, ses.P, new NextTurn(), false).Item4?.Current == Game.State.Finished;
 		}
 	}
 }

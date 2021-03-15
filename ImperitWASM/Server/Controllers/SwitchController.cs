@@ -35,14 +35,14 @@ namespace ImperitWASM.Server.Controllers
 			int start => new Switch(null, start == c.Clicked ? View.Recruit : View.Move, start, c.Clicked),
 			_ when provinces[c.Clicked].IsAllyOf(player.Id) => new Switch(c.Clicked, View.Map, null, null),
 			_ when provinces[c.Clicked] is { Mainland: true, Inhabited: false } => new Switch(null, View.Purchase, c.Clicked, c.Clicked),
-			_ => new Switch(null, View.Map, null, null)
+			_ => new Switch()
 		};
 		[HttpPost("Clicked")]
 		public Switch Clicked([FromBody] Click c)
 		{
 			var player = player_load[c.Game, c.Player];
 			var provinces = province_load[player.GameId];
-			return IfPossible(provinces, player, player.Active ? ClickedResult(provinces, player, c) : new Switch(null, View.Map, null, null));
+			return IfPossible(provinces, player, player.Active ? ClickedResult(provinces, player, c) : new Switch());
 		}
 	}
 }

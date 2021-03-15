@@ -23,15 +23,15 @@ namespace ImperitWASM.Client.Data
 	public sealed record ProvinceUpdate(ImmutableArray<string> T, Color F);
 	public sealed record PurchaseCmd(int P, string Key, int Land, int Game);
 	public sealed record PurchaseData(int P, int L, int G);
-	public sealed record PurchaseInfo(bool Possible, string Name, int Price, int Money);
+	public sealed record PurchaseInfo(bool Possible = false, string Name = "", int Price = 0, int Money = 0);
 	public sealed record RecruitCmd(int P, string Key, int Province, ImmutableArray<int> Counts, int Game);
 	public sealed record RecruitData(int W, int P, int G);
 	public sealed record RecruitInfo(string N, string S, ImmutableArray<bool> R, int M, Ratio I);
 	public sealed record RegisteredPlayer(string N, string P, int S, int G);
 	public enum RegistrationErrors { Ok, UsedName, NoName, InvalidStart, NoPassword }
 	public sealed record SoldiersItem(Description D, int P);
-	public sealed record StartInfo(Game.State S, DateTimeOffset D);
-	public sealed record Switch(int? Select, View View, int? From, int? To);
+	public sealed record StartInfo(Game.State S = Game.State.Invalid, DateTimeOffset D = default);
+	public sealed record Switch(int? Select = null, View View = View.Map, int? From = null, int? To = null);
 	public enum View { Map, Donation, Move, Preview, Purchase, Recruit, Statistics }
 	public sealed record Winner(string N, Color C);
 }

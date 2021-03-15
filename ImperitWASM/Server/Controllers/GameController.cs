@@ -37,7 +37,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("StartInfo")] public StartInfo StartInfo([FromBody] int gameId)
 		{
 			game_creator.StartAll();
-			return game_load[gameId] is Game g ? new(g.Current, g.StartTime) : new(Game.State.Invalid, DateTimeOffset.MinValue);
+			return game_load[gameId] is Game g ? new StartInfo(g.Current, g.StartTime) : new StartInfo();
 		}
 		[HttpPost("StartTime")] public DateTimeOffset? StartTime([FromBody] int gameId) => game_load[gameId]?.StartTime;
 		[HttpPost("Winner")] public Winner? Winner([FromBody] int gameId)

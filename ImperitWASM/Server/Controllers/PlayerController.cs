@@ -34,7 +34,7 @@ namespace ImperitWASM.Server.Controllers
 			return players.Select((p, i) => new PlayerInfo(i, p.Name, p.Color, p.Alive, p.Money, p.Debt, provinces.IncomeOf(p.Id)));
 		}
 		[HttpPost("Correct")]
-		public Game.State Correct([FromBody] Session ses) => session.IsValid(ses.P, ses.G, ses.Key) ? game_load[ses.G]?.Current ?? Game.State.Invalid : Game.State.Invalid;
+		public Game.State Correct([FromBody] Session ses) => session.IsValid(ses.P, ses.G, ses.Key) && game_load[ses.G] is { Current: var state } ? state : Game.State.Invalid;
 		[HttpPost("Login")]
 		public Session Login([FromBody] Login trial)
 		{

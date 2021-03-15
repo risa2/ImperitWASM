@@ -95,7 +95,7 @@ namespace ImperitWASM.Shared
 			list.Shuffle();
 			return list;
 		}
-		public static IEnumerable<TR> SelectAccumulate<T, TA, TR>(this IEnumerable<T> e, TA accumulator, Func<T, TA, (TR, TA)> selector)
+		public static IEnumerable<TR> MapFold<T, TA, TR>(this IEnumerable<T> e, TA accumulator, Func<T, TA, (TR, TA)> selector)
 		{
 			foreach (var item in e)
 			{
@@ -105,14 +105,18 @@ namespace ImperitWASM.Shared
 			}
 		}
 		public static IEnumerable<(int i, T v)> Index<T>(this IEnumerable<T> e) => e.Select((v, i) => (i, v));
-		public static List<T> Alter<T>(this IEnumerable<T> e, IEnumerable<(int, T)> changes)
+		public static ImmutableArray<T> Alter<T>(this IReadOnlyCollection<T> e, IEnumerable<(int, T)> changes)
 		{
-			var result = new List<T>(e);
+			var result = ImmutableArray.CreateBuilder<T>(e.Count);
+			foreach (var item in e)
+			{
+				result.Add(item);
+			}
 			foreach (var (i, value) in changes)
 			{
 				result[i] = value;
 			}
-			return result;
+			return result.MoveToImmutable();
 		}
 	}
 }

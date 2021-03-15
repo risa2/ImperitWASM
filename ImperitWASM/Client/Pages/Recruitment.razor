@@ -34,22 +34,22 @@
 	<SoldierTypeInfobox @ref="infobox" />
 	<EditForm Model="model" OnValidSubmit="DoRecruit">
 		<DataAnnotationsValidator /><ValidationSummary />
-		@if (Info?.R is { IsDefault: false })
+		@if (Info is not null && Info.R is { IsDefault: false })
 		{
-			@if (Info.S is { Length: > 0 })
+			@if (Info.S.Length > 0)
 			{
-				<p>@Info.N má @Info.S @if (Info.I.Any) { <text>(pravděpodobnost odtržení @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
+				<p>@Info.N má @Info.S (pravděpodobnost odtržení @Info.I.ToString("{0}.{1} %", 100, 10))</p>
 			}
 			else
 			{
-				<p>@Info.N nemá žádné vojáky @if (Info.I.Any) { <text>(pravděpodobnost odtržení @Info.I.ToString("{0}.{1} %", 100, 10))</text> }</p>
+				<p>@Info.N nemá žádné vojáky (pravděpodobnost odtržení @Info.I.ToString("{0}.{1} %", 100, 10))</p>
 			}
 			<table>
-				@foreach (var (i, type) in settings.Types.Index().Where((_, i) => Info.R[i]))
+				@foreach (var ((type, _), mod) in settings.Types.Zip(Info.R).Where(x => x.Second).Zip(model))
 				{
 					<tr>
 						<td class="dotted" @onclick="() => infobox?.Open(type.D)">@type.D.Name @type.P@Sym.Money</td>
-						<td><InputNumber @bind-Value="model[i].Value" /></td>
+						<td><InputNumber @bind-Value="mod.Value" /></td>
 					</tr>
 				}
 				<tr>

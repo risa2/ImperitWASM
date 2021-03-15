@@ -21,13 +21,15 @@ namespace ImperitWASM.Server.Services
 		readonly IGameLoader game_load;
 		readonly Settings settings;
 		readonly IDatabase db;
-		public GameCreator(IProvinceLoader province_load, IGameLoader game_load, IPlayerLoader player_load, Settings settings, IDatabase db)
+		readonly IPowerLoader power_load;
+		public GameCreator(IProvinceLoader province_load, IGameLoader game_load, IPlayerLoader player_load, Settings settings, IDatabase db, IPowerLoader power_load)
 		{
 			this.province_load = province_load;
 			this.game_load = game_load;
 			this.player_load = player_load;
 			this.settings = settings;
 			this.db = db;
+			this.power_load = power_load;
 		}
 		public int Create() => db.Transaction(true, () =>
 		{
@@ -42,9 +44,12 @@ namespace ImperitWASM.Server.Services
 			var players = player_load[gameId];
 			var provinces = province_load[gameId];
 			var robots = settings.CreateRobots(gameId, players.Length, provinces.Inhabitable, player_load.ObsfuscateName).ToImmutableArray();
+			var new_players = players.AddRange(robots.Select(r => r.Item2));
+			var new_provinces = provinces.With(provinces.Alter(robots.Select(r => (r.Item1, provinces[r.Item1].RuledBy(r.Item2.Id)))));
 
-			player_load.Set(gameId, players.AddRange(robots.Select(r => r.Item2)), true);
-			province_load.Set(gameId, provinces.Alter(robots.Select(r => (r.Item1, provinces[r.Item1].RuledBy(r.Item2.Id)))), true);
+			player_load.Set(gameId, new_players, true);
+			province_load.Set(gameId, new_provinces, true);
+			power_load.Add(gameId, new_players.Select(player => player.Power(new_provinces)), true);
 			game_load[gameId] = Game.Start;
 		});
 		public void StartAll() => game_load.ShouldStart.Each(x => Start(x, false));

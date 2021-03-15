@@ -85,8 +85,8 @@ namespace ImperitWASM.Server.Services
 				Add(gameId, i, player);
 			}
 		});
-		public bool IsNameFree(string name) => !name.Any(char.IsDigit) && db.Query<int>("SELECT Count(Name) FROM Player WHERE Name=@0", name).Single() == 0;
-		public string ObsfuscateName(string name, int repetition) => name + ((db.Query<int>("SELECT Count(Name) FROM Player WHERE Name LIKE @0", name + "%").First() + repetition) is > 0 and int n ? n.ToString() : "");
-		public int Count(int gameId) => db.Query<int>("SELECT Count(Name) FROM Player WHERE GameId = @0", gameId).First();
+		public bool IsNameFree(string name) => !name.Any(char.IsDigit) && db.Query<int>("SELECT COUNT(*) FROM Player WHERE Name=@0", name).Single() == 0;
+		public string ObsfuscateName(string name, int repetition) => name + ((db.Query<int>("SELECT COUNT(*) FROM Player WHERE Name LIKE @0", name + "%").First() + repetition) is > 0 and int n ? n.ToString() : "");
+		public int Count(int gameId) => db.Query<int>("SELECT COUNT(*) FROM Player WHERE GameId = @0", gameId).First();
 	}
 }

@@ -22,7 +22,7 @@ namespace ImperitWASM.Server.Services
 
 		public void Add(int gameId, IEnumerable<Power> powers, bool fromTransaction) => db.Transaction(!fromTransaction, () =>
 		{
-			int order = db.Query<int>("SELECT Count(Id) FROM Power WHERE GameId = @0").First();
+			int order = db.Query<int>("SELECT COUNT(*) FROM Power WHERE GameId = @0", gameId).First();
 			foreach (var (i, power) in powers.Select((p, i) => (i, p)))
 			{
 				db.Command("INSERT INTO Power (GameId, \"Order\", Alive, Final, Income, Money, Soldiers) VALUES (@0,@1,@2,@3,@4,@5,@6)", gameId, order + i, power.Alive, power.Final, power.Income, power.Money, power.Soldiers);
@@ -31,7 +31,7 @@ namespace ImperitWASM.Server.Services
 		public ImmutableArray<Powers> Get(int gameId)
 		{
 			int player_count = players.Count(gameId);
-			return db.Query<int, bool, int, int, int, int>(@"SELECT ""Order"", Alive, Final, Income, Money, Soldiers FROM Power WHERE GameId=@0 ORDER BY ""Order"" ").GroupBy(p => p.Item1 / player_count).Select(pg => new Powers(pg.Select(p => new Power(p.Item2, p.Item3, p.Item4, p.Item5, p.Item6)).ToImmutableArray())).ToImmutableArray();
+			return db.Query<int, bool, int, int, int, int>(@"SELECT ""Order"", Alive, Final, Income, Money, Soldiers FROM Power WHERE GameId=@0 ORDER BY ""Order"" ", gameId).GroupBy(p => p.Item1 / player_count).Select(pg => new Powers(pg.Select(p => new Power(p.Item2, p.Item3, p.Item4, p.Item5, p.Item6)).ToImmutableArray())).ToImmutableArray();
 		}
 	}
 }

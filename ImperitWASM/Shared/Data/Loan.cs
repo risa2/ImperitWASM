@@ -13,7 +13,7 @@ namespace ImperitWASM.Shared.Data
 				? (active.ChangeMoney(-next_debt), provinces, null)
 				: next_debt <= settings.DebtLimit
 				? (active.ChangeMoney(-active.Money), provinces, new Loan(next_debt - active.Money))
-				: (active.ChangeMoney(-active.Money), provinces.With(provinces.Shuffled().SelectAccumulate(next_debt - active.Money, (p, acc) => p.IsAllyOf(active.Id) && acc > 0 ? (p.Revolt(), acc - p.Price) : (p, acc))), null);
+				: (active.ChangeMoney(-active.Money), provinces.With(provinces.Shuffled().MapFold(next_debt - active.Money, (p, acc) => p.IsAllyOf(active.Id) && acc > 0 ? (p.Revolt(), acc - p.Price) : (p, acc))), null);
 		}
 	}
 }

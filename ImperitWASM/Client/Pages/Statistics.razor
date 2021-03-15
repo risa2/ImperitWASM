@@ -32,7 +32,7 @@
 }
 <nav>
 	<a @onclick="() => Switch(Mode.Map, null, null, null)">Zpět</a>
-	<a class="this">@Players.Try(storage.GameId)?.M@Sym.Money</a>
+	<a class="this">@Players.Try(storage.Player)?.M@Sym.Money</a>
 </nav>
 <main>
 	@if (!Players.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty)

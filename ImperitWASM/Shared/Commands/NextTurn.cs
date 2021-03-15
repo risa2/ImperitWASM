@@ -42,7 +42,7 @@ namespace ImperitWASM.Shared.Commands
 				(robot, new_provinces) = robot.Think(new_players, new_provinces, settings, game);
 				(new_players, new_provinces) = EndOfTurn(robot, new_players.Select(player => player == robot ? robot : player).ToArray(), new_provinces, settings);
 			}
-			bool finish = new_players.Any(p => p.LivingHuman) || new_provinces.Winner.Item2 >= settings.FinalLandsCount;
+			bool finish = !new_players.Any(p => p.LivingHuman) || new_provinces.Winner.Item2 >= settings.FinalLandsCount;
 			return (new_players, new_provinces, finish ? game.Finish(): game);
 		}
 	}

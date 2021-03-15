@@ -57,5 +57,6 @@ namespace ImperitWASM.Shared.Data
 			return new Brain(this, settings).Think(players, provinces, game);
 		}
 		public static Color ColorOf(Player? p) => p?.Color ?? new Color();
+		public override string ToString() => Name;
 	}
 }

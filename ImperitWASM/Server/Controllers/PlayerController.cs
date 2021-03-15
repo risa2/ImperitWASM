@@ -26,7 +26,7 @@ namespace ImperitWASM.Server.Controllers
 			this.game_load = game_load;
 		}
 		[HttpPost("Colors")] public IEnumerable<Color> Colors([FromBody] int gameId) => player_load[gameId].Select(p => p.Color);
-		[HttpPost("Money")] public int Money([FromBody] Session ses) => player_load[ses.G, ses.P].Money;
+		[HttpPost("Money")] public int Money([FromBody] PlayerId id) => player_load[id.G, id.P].Money;
 		[HttpPost("Infos")] public IEnumerable<PlayerInfo> Infos([FromBody] int gameId)
 		{
 			var provinces = province_load[gameId];

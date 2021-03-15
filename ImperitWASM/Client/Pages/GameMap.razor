@@ -26,7 +26,7 @@
 	}
 	public async Task Update(bool isActive)
 	{
-		PlayerMoney = await http.PostAsync<Data.Session, int>("api/Player/Money", storage.Session);
+		PlayerMoney = await http.PostAsync<PlayerId, int>("api/Player/Money", new PlayerId(storage.Player, storage.GameId));
 		await provinces.Update(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", storage.GameId);
 		IsActive = isActive;
 		StateHasChanged();

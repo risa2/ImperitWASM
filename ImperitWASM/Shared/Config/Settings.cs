@@ -17,7 +17,7 @@ namespace ImperitWASM.Shared.Config
 
 		public int StartMoney(int province) => DefaultMoney - (Regions[province].Income * 4);
 		public int CalculateDebt(int amount) => amount + amount * Interest;
-		public int Discount(int amount) => (int)((long)amount * int.MaxValue / (int.MaxValue + Interest.ToInt()));
+		public int Discount(int amount) => (int)Interest.Discount(amount);
 		public Ratio Instability(Soldiers now, Soldiers start) => DefaultInstability.Adjust(Math.Max(start.DefensePower - now.DefensePower, 0), start.DefensePower);
 
 		public IEnumerable<SoldierType> RecruitableIn(Region where) => SoldierTypes.Where(t => t.IsRecruitable(where));

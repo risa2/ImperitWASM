@@ -37,6 +37,7 @@ namespace ImperitWASM.Shared.Data
 		public override int GetHashCode() => value.GetHashCode();
 		public long ToUnits(long max = int.MaxValue) => value * max / int.MaxValue;
 		public int ToInt() => value;
+		public long Discount(long amount) => amount * int.MaxValue / (int.MaxValue + (long)value);
 		public string ToString(string fmt, long units, long units2)
 		{
 			return string.Format(CultureInfo.InvariantCulture, fmt, ToUnits(units), ToUnits(units * units2) % units2);

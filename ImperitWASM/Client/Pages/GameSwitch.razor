@@ -33,7 +33,7 @@
 	}
 	async Task CheckSession()
 	{
-		var info = await http.PostAsync<string, GameInfo>("api/Game/Info", storage.Name!);
+		var info = await http.PostAsync<PlayerId, GameInfo>("api/Game/Info", new PlayerId(storage.Player, storage.GameId));
 		if (info.S != Game.State.Started)
 		{
 			await DoLogoutAsync();
@@ -47,7 +47,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		await CheckSession();
-		PlayerColor = await http.PostAsync<string, Color>("api/Player/Color", storage.Name!);
+		PlayerColor = await http.PostAsync<int, Color>("api/Player/Color", storage.Player);
 		timer.Elapsed += async (sender, e) => await CheckSession();
 		timer.Start();
 	}

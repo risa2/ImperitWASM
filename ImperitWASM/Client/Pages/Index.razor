@@ -12,7 +12,7 @@
 		if (storage.IsSet)
 		{
 			State = await http.PostAsync<Session, Game.State>("api/Player/Correct", storage.Session);
-			await storage.SetAsync(State == Game.State.Invalid ? new Session() : storage.Session);
+			await storage.SetAsync(State == Game.State.Invalid ? new Session() : storage.Session, storage.Name);
 		}
 	}
 	async Task<bool> LoginAsync(Data.Login login)

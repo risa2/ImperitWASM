@@ -47,7 +47,7 @@ namespace ImperitWASM.Shared.Data
 		}
 		(IReadOnlyList<Player>, Provinces) Do(ICommand command, int player, IReadOnlyList<Player> players, Provinces provinces)
 		{
-			var (new_players, new_provinces, _) = command.Perform(players[player], players, provinces, Settings, Game);
+			var (new_players, new_provinces, _, _) = command.Perform(players[player], players, provinces, Settings, Game);
 			return (new_players.ToImmutableArray(), provinces.With(new_provinces))!;
 		}
 

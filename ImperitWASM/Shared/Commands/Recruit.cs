@@ -11,9 +11,9 @@ namespace ImperitWASM.Shared.Commands
 		{
 			return actor.Active && Province.IsAllyOf(actor.Id) && actor.MaxUsableMoney >= Soldiers.Price && Soldiers.Any;
 		}
-		public (IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
+		public (IEnumerable<Player>, IEnumerable<Province>, Game, IEnumerable<Powers>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
-			return (players.Select(altered => altered.Active ? altered.Pay(Soldiers.Price).Add(new Manoeuvre(Province.Order, Soldiers)) : altered), provinces, game);
+			return (players.Select(altered => altered.Active ? altered.Pay(Soldiers.Price).Add(new Manoeuvre(Province.Order, Soldiers)) : altered), provinces, game, Enumerable.Empty<Powers>());
 		}
 	}
 }

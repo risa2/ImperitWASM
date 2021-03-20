@@ -11,9 +11,9 @@ namespace ImperitWASM.Shared.Commands
 		{
 			return actor.Money >= Amount && Amount > 0 && actor != Recipient;
 		}
-		public (IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
+		public (IEnumerable<Player>, IEnumerable<Province>, Game, IEnumerable<Powers>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
-			return (players.Select(altered => altered == Recipient ? altered.ChangeMoney(Amount) : altered == actor ? altered.ChangeMoney(-Amount) : altered), provinces, game);
+			return (players.Select(altered => altered == Recipient ? altered.ChangeMoney(Amount) : altered == actor ? altered.ChangeMoney(-Amount) : altered), provinces, game, Enumerable.Empty<Powers>());
 		}
 	}
 }

@@ -15,9 +15,9 @@ namespace ImperitWASM.Shared.Commands
 		{
 			return Allowed(actor, provinces);
 		}
-		public (IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
+		public (IEnumerable<Player>, IEnumerable<Province>, Game, IEnumerable<Powers>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
-			return (players.Select(altered => altered.Active ? altered.Pay(Province.Price) : altered), provinces.Select(altered => Province == altered ? altered.RuledBy(actor.Id) : altered), game);
+			return (players.Select(altered => altered.Active ? altered.Pay(Province.Price) : altered), provinces.Select(altered => Province == altered ? altered.RuledBy(actor.Id) : altered), game, Enumerable.Empty<Powers>());
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
@@ -35,16 +36,19 @@ namespace ImperitWASM.Shared.Commands
 			return (NextActive(active, new_players.ToArray()), provinces.With(new_provinces));
 		}
 
-		public virtual (IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
+		public virtual (IEnumerable<Player>, IEnumerable<Province>, Game, IEnumerable<Powers>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
 			var (new_players, new_provinces) = EndOfTurn(players, provinces, settings);
+			var powers = new List<Powers>(1);
 			while (new_players.First(p => p.Active) is { Human: false } robot && new_players.Count(p => p.LivingHuman) > 1)
 			{
 				(new_players, new_provinces) = robot.Think(new_players, new_provinces, settings, game);
 				(new_players, new_provinces) = EndOfTurn(new_players, new_provinces, settings);
+
+				powers.Add(new Powers(new_players.Select(p => p.Power(new_provinces)).ToImmutableArray()));
 			}
-			bool finish = !new_players.Any(p => p.LivingHuman) || new_provinces.Winner.Item2 >= settings.FinalLandsCount;
-			return (new_players, new_provinces, finish ? game.Finish(): game);
+			bool finish = new_players.Count(p => p.LivingHuman) < 2 || new_provinces.Winner.Item2 >= settings.FinalLandsCount;
+			return (new_players, new_provinces, finish ? game.Finish(): game, powers);
 		}
 	}
 }

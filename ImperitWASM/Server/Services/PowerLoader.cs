@@ -23,9 +23,10 @@ namespace ImperitWASM.Server.Services
 		public void Add(int gameId, IEnumerable<Power> powers, bool fromTransaction) => db.Transaction(!fromTransaction, () =>
 		{
 			int order = db.Query<int>("SELECT COUNT(*) FROM Power WHERE GameId = @0", gameId).First();
-			foreach (var (i, power) in powers.Select((p, i) => (i, p)))
+			foreach (var power in powers)
 			{
-				db.Command("INSERT INTO Power (GameId, \"Order\", Alive, Final, Income, Money, Soldiers) VALUES (@0,@1,@2,@3,@4,@5,@6)", gameId, order + i, power.Alive, power.Final, power.Income, power.Money, power.Soldiers);
+				db.Command(@"INSERT INTO Power (GameId, ""Order"", Alive, Final, Income, Money, Soldiers) VALUES (@0,@1,@2,@3,@4,@5,@6)", gameId, order, power.Alive, power.Final, power.Income, power.Money, power.Soldiers);
+				++order;
 			}
 		});
 		public ImmutableArray<Powers> Get(int gameId)

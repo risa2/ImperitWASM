@@ -34,11 +34,11 @@ namespace ImperitWASM.Server.Services
 			var game = game_load[gameId];
 			if (game is not null && command.Allowed(players[player], players, provinces, settings))
 			{
-				var (new_pl, new_pr, new_game) = command.Perform(players[player], players, provinces, settings, game);
-				var (new_players, new_provinces) = (new_pl.ToImmutableArray(), provinces.With(new_pr));
+				var (players_en, provinces_en, new_game, powers) = command.Perform(players[player], players, provinces, settings, game);
+				var (new_players, new_provinces) = (players_en.ToImmutableArray(), provinces.With(provinces_en));
 
 				game_load[gameId] = new_game;
-				power_load.Add(gameId, new_players.Select(p => p.Power(new_provinces)), true);
+				power_load.Add(gameId, powers.SelectMany(p => p.Items), true);
 				player_load.Set(gameId, new_players, true);
 				province_load.Set(gameId, new_provinces, true);
 				return (true, new_players, new_provinces, new_game);

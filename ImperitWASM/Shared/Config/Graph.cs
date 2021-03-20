@@ -26,7 +26,7 @@ namespace ImperitWASM.Shared.Config
 				for (int n = 0; n < neighbors.Length; ++n)
 				{
 					int vertex = neighbors[n];
-					if (!visited[n] && stack[i].Distance + difficulty(stack[i].Pos, vertex) <= limit)
+					if (!visited[vertex] && stack[i].Distance + difficulty(stack[i].Pos, vertex) <= limit)
 					{
 						stack.Add((vertex, stack[i].Distance + difficulty(stack[i].Pos, vertex)));
 						visited[vertex] = true;

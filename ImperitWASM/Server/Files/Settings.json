@@ -1,7 +1,7 @@
 {
-	"CountdownSeconds":180,
+	"CountdownSeconds":240,
 	"DebtLimit":400,"DefaultInstability":214748365,
-	"DefaultMoney":200,
+	"DefaultMoney":250,
 	"FinalLandsCount":3,
 	"Interest":536870912,
 	"LandColor":{"R":17,"G":17,"B":17,"A":255},

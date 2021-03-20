@@ -29,27 +29,52 @@ namespace ImperitWASM.Server.Services
 			type_indices = settings.GetSoldierTypeIndices();
 		}
 
-		IEnumerable<Player> Get(string where, object? arg, object? arg2 = null) => db.Query<string, bool, bool, bool, int, string, int?, int?, int?, string?, int?, int?, int, int>(@"
-			SELECT Player.Name, Player.Active, Player.Alive, Player.Human, Player.Money, Player.Password,
-					Action.Id, Action.Debt, Action.Province, Action.Type, ActionRegiment.Count, ActionRegiment.Type,
+		IEnumerable<Player> Get(string where, object? arg, object? arg2 = null)
+		{
+			Player? player = null;
+			Manoeuvre? manoeuvre = null;
+
+			foreach (var (name, active, alive, human, money, password, debt, province, action, count, type, game_id, order) in db.Query<string, bool, bool, bool, int, string, int?, int?, string?, int?, int?, int, int>(@"
+				SELECT Player.Name, Player.Active, Player.Alive, Player.Human, Player.Money, Player.Password,
+					Action.Debt, Action.Province, Action.Type, ActionRegiment.Count, ActionRegiment.Type,
 					Player.GameId, Player.""Order"" FROM Player
-			LEFT JOIN Action ON Action.GameId=Player.GameId AND Action.Player=Player.""Order""
-			LEFT JOIN ActionRegiment ON ActionRegiment.ActionId=Action.Id WHERE " + where + @"
-			ORDER BY Player.""Order""", arg, arg2).GroupBy(p => p.Item1).Select((group, i) =>
+				LEFT JOIN Action ON Action.GameId=Player.GameId AND Action.Player=Player.""Order""
+				LEFT JOIN ActionRegiment ON ActionRegiment.ActionId=Action.Id WHERE " + where + @"
+				ORDER BY Player.""Order"" ", arg, arg2))
 			{
-				var player = group.First();
-				var actions = group.Where(g => g.Item9 is not null).GroupBy(g => g.Item9!.Value).Select(reg =>
+				if (player is not null && player.Order != order)
 				{
-					var action = reg.First();
-					return action.Item10 switch
+					yield return manoeuvre is null ? player : player.Add(manoeuvre);
+					player = null;
+					manoeuvre = null;
+				}
+				if (player is null)
+				{
+					player = new Player(new PlayerIdentity(name, order, game_id, human), money, alive, ImmutableList<IAction>.Empty, settings, Password.FromHash(password), active);
+				}
+
+				player = action == "Loan" && debt is int Debt ? player.Add(new Loan(Debt)) : player;
+					
+				if (action == "Manoeuvre" && province is int Province && type is int Type && count is int Count)
+				{
+					if (manoeuvre is not null && manoeuvre.Province != province)
 					{
-						"Loan" => new Loan(action.Item8!.Value) as IAction,
-						"Manoeuvre" => new Manoeuvre(action.Item9!.Value, new Soldiers(reg.Select(r => new Regiment(settings.SoldierTypes[r.Item12!.Value], r.Item11!.Value)))),
-						var x => throw new InvalidOperationException(x + " is not a valid Action type")
-					};
-				}).ToImmutableList();
-				return new Player(new PlayerIdentity(player.Item1, player.Item14, player.Item13, player.Item4), player.Item5, player.Item3, actions, settings, Password.FromHash(player.Item6), player.Item2);
-			});
+						player = player.Add(manoeuvre);
+						manoeuvre = null;
+					}
+					if (manoeuvre is null)
+					{
+						manoeuvre = new Manoeuvre(Province, new Soldiers());
+					}
+					manoeuvre = new Manoeuvre(Province, manoeuvre.Soldiers.Add(new Soldiers(settings.SoldierTypes[Type], Count)));
+				}
+			}
+			if (player is not null)
+			{
+				yield return player;
+			}
+		}
+
 		public ImmutableArray<Player> this[int gameId] => Get("Player.GameId=@0", gameId).ToImmutableArray();
 		public Player this[int gameId, int order] => Get(@"Player.GameId=@0 AND Player.""Order""=@1", gameId, order).First();
 		public Player? this[string name] => Get("Player.Name=@0", name).FirstOrDefault();

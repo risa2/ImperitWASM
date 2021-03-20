@@ -60,7 +60,7 @@ namespace ImperitWASM.Shared.Data
 
 		int[] Fight(int enemy, Func<SoldierType, int> powerof)
 		{
-			int me = regiments.Sum(regiment => powerof(regiment.Type)), died = 0;
+			int me = regiments.Sum(regiment => powerof(regiment.Type) * regiment.Count), died = 0;
 			int[] remaining = new int[regiments.Length];
 			if (enemy > me)
 			{

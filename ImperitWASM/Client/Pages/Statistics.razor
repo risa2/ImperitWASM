@@ -14,7 +14,7 @@
 	{
 		if (player != storage.Player && Players[storage.Player].M > 0)
 		{
-			Switch(Mode.Donation, null, null, Players.Try(storage.Player));
+			Switch(Mode.Donation, null, null, Players.Try(player));
 		}
 	}
 	async Task DoGiveUp()

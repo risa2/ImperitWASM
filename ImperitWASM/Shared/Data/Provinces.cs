@@ -34,7 +34,7 @@ namespace ImperitWASM.Shared.Data
 		public int IncomeOf(PlayerIdentity ip)
 		{
 			var divisions = Split(p => p.IsAllyOf(ip), (from, to) => to.IsAllyOf(ip));
-			return divisions.DefaultIfEmpty().Max(prov => prov?.OfType<Land>()?.Sum(p => p.Earnings) ?? 0);
+			return divisions.Select(area => area.Sum(province => province.Earnings)).DefaultIfEmpty().Max();
 		}
 
 		public bool HasAny(PlayerIdentity ip) => ControlledBy(ip).Any();

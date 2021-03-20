@@ -32,12 +32,11 @@ namespace ImperitWASM.Shared.Data
 
 		public (Player, Provinces) Act(Provinces provinces, Settings settings)
 		{
-			var (new_player, new_provinces) = Actions.Aggregate((this with { Actions = ImmutableList<IAction>.Empty }, provinces), (pair, action) =>
+			return Actions.Aggregate((this with { Actions = ImmutableList<IAction>.Empty }, provinces), (pair, action) =>
 			{
 				var (player, new_provinces, new_action) = action.Perform(pair.Item1, pair.provinces, settings);
 				return (new_action is not null ? player.Add(new_action) : player, new_provinces);
 			});
-			return (new_player, new_provinces);
 		}
 
 		public Player InvertActive => this with { Active = !Active };
@@ -52,9 +51,9 @@ namespace ImperitWASM.Shared.Data
 		public bool Equals(Player? p) => p is not null && Id == p.Id;
 		public override int GetHashCode() => Id.GetHashCode();
 
-		public (Player, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
+		public (IReadOnlyList<Player>, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
-			return new Brain(this, settings).Think(players, provinces, game);
+			return Brain.Think(Id, players, provinces, game, settings);
 		}
 		public static Color ColorOf(Player? p) => p?.Color ?? new Color();
 		public override string ToString() => Name;

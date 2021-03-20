@@ -9,7 +9,7 @@ namespace ImperitWASM.Shared.Commands
 	{
 		public bool Allowed(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings)
 		{
-			return actor.Money >= Amount && Amount > 0;
+			return actor.Money >= Amount && Amount > 0 && actor != Recipient;
 		}
 		public (IEnumerable<Player>, IEnumerable<Province>, Game) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{

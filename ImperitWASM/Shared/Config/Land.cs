@@ -1,9 +1,10 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using ImperitWASM.Shared.Data;
 
 namespace ImperitWASM.Shared.Config
 {
-	public record Land(int Id, string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes, int Earnings, Ratio Instability, bool IsStart, bool IsFinal, bool HasPort)
+	public record Land(int Id, string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes, int Earnings, Ratio DefaultInstability, bool IsStart, bool IsFinal, bool HasPort)
 		: Region(Id, Name, Shape, Soldiers, ExtraTypes)
 	{
 		public override Color Fill(Settings settings) => settings.LandColor;
@@ -18,7 +19,7 @@ namespace ImperitWASM.Shared.Config
 		public override int Score => IsFinal ? 1 : 0;
 		public override int Income => Earnings;
 
-		public override Ratio InstabilityWith(Settings settings, Soldiers present) => settings.Instability(present, Soldiers);
+		public override Ratio Instability(Soldiers present) => DefaultInstability.Adjust(Math.Max(DefensePower - present.DefensePower, 0), DefensePower);
 
 		string Suffix => (IsFinal ? "\u2605" : "") + (HasPort ? "\u2693" : "");
 		public override ImmutableArray<string> Text(Soldiers present) => ImmutableArray.Create(Name + Suffix, present.ToString(), Earnings + "\uD83D\uDCB0");

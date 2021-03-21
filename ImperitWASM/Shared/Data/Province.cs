@@ -18,10 +18,11 @@ namespace ImperitWASM.Shared.Data
 		public Province Revolt() => this with { Ruler = null, Soldiers = DefaultSoldiers };
 
 		public bool Recruitable(SoldierType type) => Region.Recruitable(type);
-		public bool Unstable => !CanPersist || !HasSoldiers || Region.Unstable(Settings, Soldiers);
-		public Ratio Instability => Region.InstabilityWith(Settings, Soldiers);
-		public bool Shaky(PlayerIdentity active) => !CanPersist || !Soldiers.Any || (IsAllyOf(active) && Region.Shaky(Settings, Soldiers));
+		public Ratio Instability => Region.Instability(Soldiers);
+		public bool Unstable => !CanPersist || Instability.Any;
+		public bool Shaky(PlayerIdentity active) => !CanPersist || (IsAllyOf(active) && Instability.RandomBool);
 		public Province RevoltIfShaky(PlayerIdentity active) => Shaky(active) ? Revolt() : this;
+		public bool KeepsPlayerAlive => HasSoldiers || Mainland;
 
 		public bool Inhabited => Ruler is not null;
 		public bool Inhabitable => !Inhabited && Region.Inhabitable;

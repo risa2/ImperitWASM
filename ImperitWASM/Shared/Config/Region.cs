@@ -25,14 +25,12 @@ namespace ImperitWASM.Shared.Config
 		public virtual int Score => 0;
 		public virtual int Income => 0;
 
-		public virtual Ratio InstabilityWith(Settings settings, Soldiers present) => Ratio.Zero;
+		public virtual Ratio Instability(Soldiers present) => Ratio.Zero;
 		public virtual ImmutableArray<string> Text(Soldiers present) => ImmutableArray<string>.Empty;
 
 		public bool Recruitable(SoldierType type) => ExtraTypes.Contains(type);
-		public bool Unstable(Settings settings, Soldiers present) => InstabilityWith(settings, present).Any;
-		public bool Shaky(Settings settings, Soldiers present) => InstabilityWith(settings, present).RandomBool;
 
 		public virtual bool Equals(Region? region) => Order == region?.Order;
-		public override int GetHashCode() => Name.GetHashCode();
+		public override int GetHashCode() => Order.GetHashCode();
 	}
 }

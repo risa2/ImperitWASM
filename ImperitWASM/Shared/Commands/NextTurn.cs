@@ -19,8 +19,8 @@ namespace ImperitWASM.Shared.Commands
 		}
 		static (IEnumerable<Player>, IEnumerable<Province>) Clear(PlayerIdentity actor_id, IEnumerable<Player> players, IEnumerable<Province> provinces)
 		{
-			var cleared_players = players.Select(altered => provinces.Any(province => province.IsAllyOf(altered.Id) && (province.HasSoldiers || province.Mainland)) ? altered : altered.Die()).ToArray();
-			var cleared_provinces = provinces.Select(altered => cleared_players.Any(player => player.Alive || !altered.IsAllyOf(player.Id)) ? altered.RevoltIfShaky(actor_id) : altered.Revolt());
+			var cleared_players = players.Select(altered => provinces.Any(province => province.IsAllyOf(altered.Id) && province.KeepsPlayerAlive) ? altered : altered.Die()).ToArray();
+			var cleared_provinces = provinces.Select(altered => cleared_players.FirstOrDefault(player => altered.IsAllyOf(player.Id))?.Alive == false ? altered.Revolt() : altered.RevoltIfShaky(actor_id));
 			return (cleared_players, cleared_provinces);
 		}
 		static Player[] NextActive(int active, IReadOnlyList<Player> players)
@@ -35,17 +35,18 @@ namespace ImperitWASM.Shared.Commands
 			(new_players, new_provinces) = Clear(players[active].Id, new_players, new_provinces.ToArray());
 			return (NextActive(active, new_players.ToArray()), provinces.With(new_provinces));
 		}
+		static Powers PowersFrom(IEnumerable<Player> players, Provinces provinces) => new Powers(players.Select(p => p.Power(provinces)).ToImmutableArray());
 
 		public virtual (IEnumerable<Player>, IEnumerable<Province>, Game, IEnumerable<Powers>) Perform(Player actor, IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)
 		{
 			var (new_players, new_provinces) = EndOfTurn(players, provinces, settings);
-			var powers = new List<Powers>(1);
+			var powers = new List<Powers> { PowersFrom(new_players, new_provinces) };
 			while (new_players.First(p => p.Active) is { Human: false } robot && new_players.Count(p => p.LivingHuman) > 1)
 			{
 				(new_players, new_provinces) = robot.Think(new_players, new_provinces, settings, game);
 				(new_players, new_provinces) = EndOfTurn(new_players, new_provinces, settings);
 
-				powers.Add(new Powers(new_players.Select(p => p.Power(new_provinces)).ToImmutableArray()));
+				powers.Add(PowersFrom(new_players, new_provinces));
 			}
 			bool finish = new_players.Count(p => p.LivingHuman) < 2 || new_provinces.Winner.Item2 >= settings.FinalLandsCount;
 			return (new_players, new_provinces, finish ? game.Finish(): game, powers);

@@ -48,7 +48,7 @@
 				@foreach (var ((type, _), mod) in settings.Types.Zip(Info.R).Where(x => x.Second).Zip(model))
 				{
 					<tr>
-						<td class="dotted" @onclick="() => infobox?.Open(type.D)">@type.D.Name @type.P@Sym.Money</td>
+						<td @onclick="() => infobox?.Open(type.D)">@type.D.Name @type.P@Sym.Money<sup>?</sup></td>
 						<td><InputNumber @bind-Value="mod.Value" /></td>
 					</tr>
 				}

@@ -9,7 +9,7 @@
 	ImmutableArray<Data.PlayerInfo> Players;
 	ImmutableArray<Powers> Powers;
 	int Active = 0;
-	System.Timers.Timer PowersTimer = new System.Timers.Timer { Interval = 1000, AutoReset = false };
+	System.Timers.Timer PowersTimer = new System.Timers.Timer { Interval = 100, AutoReset = false };
 
 	void Clicked(int player)
 	{
@@ -68,8 +68,8 @@
 					}
 				</tr>
 			}
-		</table><br/>
-		<button @onclick="DoGiveUp">Vzdát se</button>
+		</table><br/><br/>
+		<a @onclick="DoGiveUp">Vzdát se</a>
 	}
 	@if (!Players.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty)
 	{

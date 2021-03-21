@@ -79,9 +79,7 @@ table.players td:not(:first-child) {
 td:first-child {
 	text-align: left;
 }
-.dotted {
-	text-decoration: dotted underline;
-}
+
 input, button, select, option {
 	border: 0;
 	outline: none;
@@ -101,11 +99,6 @@ input {
 	padding: 8px 0;
 }
 
-input:disabled {
-	background-color: #bbb;
-	color: #111;
-}
-
 input[type=checkbox] {
 	width: 20px;
 }
@@ -114,40 +107,24 @@ button {
 	background-color: #0f0;
 }
 
-svg {
+svg.map {
 	width: 100%;
 	font-size: 8px;
 }
 
-ul.validation-errors {
-	color: #f22;
-	list-style-type: none;
-}
-
-svg polyline {
-	z-index: -1;
-}
-
-svg a {
-	z-index: 1;
-}
-
 svg.diagram {
 	width: 90%;
-	border: 1px dotted #777;
+	border: 1px solid #666;
 }
 
-input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+input::-ms-clear, input::-ms-reveal, input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
+	display: none;
 }
 
 input[type=number] {
 	-moz-appearance: textfield;
-}
-
-input::-ms-clear, input::-ms-reveal {
-	display: none;
 }
 
 .popup-box {

@@ -8,7 +8,6 @@ namespace ImperitWASM.Client.Data
 	public sealed record Click(int Player, int? From, int Clicked, int Game);
 	public sealed record DonationCmd(int P, string Key, int Recipient, int Amount, int Game);
 	public sealed record GameInfo(Game.State S = Game.State.Invalid, bool A = false);
-	public sealed record HistoryRecord(ImmutableArray<Powers> Powers, ImmutableArray<Color> Colors, string Name, Color Color);
 	public sealed record MoveCmd(int P, string Key, int From, int To, ImmutableArray<int> Counts, int Game);
 	public sealed record MoveData(int F, int T, int G);
 	public enum MoveErrors { Ok, FewSoldiers, LittleCapacity, NotPlaying, Else }
@@ -33,5 +32,5 @@ namespace ImperitWASM.Client.Data
 	public sealed record StartInfo(Game.State S = Game.State.Invalid, DateTimeOffset D = default);
 	public sealed record Switch(int? Select = null, View View = View.Map, int? From = null, int? To = null);
 	public enum View { Map, Donation, Move, Preview, Purchase, Recruit, Statistics }
-	public sealed record Winner(string N, Color C);
+	public sealed record Winner(string N, Color C, int F);
 }

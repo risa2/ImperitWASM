@@ -42,7 +42,7 @@ namespace ImperitWASM.Server.Controllers
 		[HttpPost("StartTime")] public DateTimeOffset? StartTime([FromBody] int gameId) => game_load[gameId]?.StartTime;
 		[HttpPost("Winner")] public Winner? Winner([FromBody] int gameId)
 		{
-			return province_load[gameId].Winner is ({ Human: true } H, int final) && final >= settings.FinalLandsCount ? new Winner(H.Name, H.Color) : null;
+			return province_load[gameId].Winner is ({ Human: true } H, int final) ? new Winner(H.Name, H.Color, final) : null;
 		}
 		RegistrationErrors DoRegistration(RegisteredPlayer player)
 		{
@@ -63,16 +63,5 @@ namespace ImperitWASM.Server.Controllers
 			return game_load.RegistrableGame ?? game_creator.Create();
 		}
 		[HttpPost("NextColor")] public Color NextColor([FromBody] int gameId) => game_creator.NextColor(gameId);
-
-		[HttpPost("History")] public HistoryRecord? History([FromBody] string name)
-		{
-			if (player_load[name] is Player player)
-			{
-				var (player_count, provinces) = (player_load.Count(player.GameId), province_load[player.GameId]);
-				var who = provinces.Winner.Item1 ?? new PlayerIdentity("", 0, 0, false);
-				return new HistoryRecord(power_load.Get(player.GameId), player_count.Range(PlayerIdentity.ColorOf).ToImmutableArray(), who.Name, who.Color);
-			}
-			return null;
-		}
 	}
 }

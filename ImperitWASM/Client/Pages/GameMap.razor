@@ -13,6 +13,7 @@
 	int? Selected = null;
 	Map? map;
 	System.Timers.Timer? UnselectingTimer = null, CountdownTimer = null, StartingTimer = null;
+	Winner? Winner = null;
 	async Task OnClickAsync(int i)
 	{
 		if (Info.A && Info.S == Game.State.Started)
@@ -34,7 +35,7 @@
 	public async Task ReloadAsync(GameInfo info)
 	{
 		Info = info;
-		CountdownTimer?.Start();
+		CountdownTimer?.Stop();
 
 		PlayerMoney = await http.PostAsync<PlayerId, int>("api/Player/Money", new PlayerId(storage.Player, storage.GameId));
 		await provinces.UpdateAsync(Preview ? "api/Provinces/Preview" : "api/Provinces/Current", storage.GameId);
@@ -44,6 +45,10 @@
 			TimeToStart = await http.PostAsync<int, DateTimeOffset>("api/Game/StartTime", storage.GameId) - DateTimeOffset.UtcNow;
 			CountdownTimer = new System.Timers.Timer { Interval = 1000, Enabled = Info.S == Game.State.Countdown };
 			CountdownTimer.Elapsed += (sender, args) => TimeToStart = TimeToStart.Subtract(TimeSpan.FromSeconds(1));
+		}
+		else if (Info.S == Game.State.Finished)
+		{
+			Winner = await http.PostAsync<int, Winner?>("api/Game/Winner", storage.GameId);
 		}
 		StateHasChanged();
 	}
@@ -82,6 +87,10 @@
 	else if (Info.S == Game.State.Finished)
 	{
 		<p>Hra již skončila</p>
+		if (Winner is not null)
+		{
+			<p>Vítěz: <span style="color:@Winner.C">@Winner.N@Sym.Stars(Winner.F)</span></p>
+		}
 	}
 	<Map @ref="map" Width="1000" Height="1000" Provinces="provinces" OnClickAsync="OnClickAsync" FontSize="9" SelectedColor="new Color(0, 0, 0, 100)" TextColor="(p, i) => p.GetColor()" />
 </main>

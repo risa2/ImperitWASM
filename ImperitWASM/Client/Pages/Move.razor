@@ -56,7 +56,7 @@
 				@foreach (var (i, count) in Info.Counts.Index().Where(p => p.v > 0))
 				{
 					<tr>
-						<td class="dotted" @onclick="() => infobox?.Open(settings.Types[i].D)">@settings.Types[i].D.Name</td>
+						<td @onclick="() => infobox?.Open(settings.Types[i].D)">@settings.Types[i].D.Name<sup>?</sup></td>
 						<td><InputNumber @bind-Value="model.Value![i].Value"/></td>
 					</tr>
 				}

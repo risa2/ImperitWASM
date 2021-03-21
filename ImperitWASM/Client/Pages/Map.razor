@@ -15,7 +15,7 @@
 		country?.Select(SelectedPoints, SelectedColor);
 	}
 }
-<svg viewBox="0 0 @Width @Height">
+<svg viewBox="0 0 @Width @Height" class="map">
 	@if (Provinces is not null)
 	{
 		@foreach (var (i, province) in Provinces.Index())

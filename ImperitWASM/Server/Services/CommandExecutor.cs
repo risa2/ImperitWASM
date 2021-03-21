@@ -32,7 +32,7 @@ namespace ImperitWASM.Server.Services
 		public (bool, ImmutableArray<Player>, Provinces, Game?) Perform(int gameId, int player, ICommand command, ImmutableArray<Player> players, Provinces provinces)
 		{
 			var game = game_load[gameId];
-			if (game is not null && command.Allowed(players[player], players, provinces, settings))
+			if (game is { Current: Game.State.Started } && command.Allowed(players[player], players, provinces, settings))
 			{
 				var (players_en, provinces_en, new_game, powers) = command.Perform(players[player], players, provinces, settings, game);
 				var (new_players, new_provinces) = (players_en.ToImmutableArray(), provinces.With(provinces_en));

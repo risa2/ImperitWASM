@@ -2,7 +2,7 @@
 
 @code{
 	[Parameter] public Func<Data.Login, Task<bool>>? LoginAsync { get; set; }
-	public enum Mode { Login, Registration, History }
+	public enum Mode { Login, Registration }
 	Mode mode = Mode.Login;
 	void Set(Mode mode)
 	{
@@ -14,11 +14,7 @@
 {
 	<Login Set="Set" LoginAsync="LoginAsync!"/>
 }
-else if (mode == Mode.Registration)
-{
-	<Registration Set="Set" LoginAsync="LoginAsync!"/>
-}
 else
 {
-	<History Set="Set"/>
+	<Registration Set="Set" LoginAsync="LoginAsync!"/>
 }

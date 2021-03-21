@@ -48,7 +48,7 @@ namespace ImperitWASM.Shared.Data
 			return new Power(Alive, my.Sum(p => p.Score), my.Sum(p => p.Earnings), Money - Debt, my.Sum(p => p.Power));
 		}
 
-		public bool Equals(Player? p) => p is not null && Id == p.Id;
+		public bool Equals(Player? p) => Id == p?.Id;
 		public override int GetHashCode() => Id.GetHashCode();
 
 		public (IReadOnlyList<Player>, Provinces) Think(IReadOnlyList<Player> players, Provinces provinces, Settings settings, Game game)

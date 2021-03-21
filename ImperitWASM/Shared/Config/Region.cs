@@ -11,7 +11,7 @@ namespace ImperitWASM.Shared.Config
 		public ImmutableArray<Point> Border => Shape.Border;
 		public Point Center => Shape.Center;
 
-		public virtual Color Fill(Settings settings) => new Color();
+		public virtual Color Fill(Settings settings, Color player_color) => new Color();
 		public virtual Color Stroke(Settings settings) => new Color();
 		public virtual int StrokeWidth(Settings settings) => 0;
 

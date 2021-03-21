@@ -22,7 +22,7 @@ namespace ImperitWASM.Server.Controllers
 		}
 		[HttpGet] public IEnumerable<ProvinceDisplay> GetProvinceList()
 		{
-			return settings.Regions.Select(region => new ProvinceDisplay(region.Border, region.Center, region.Fill(settings), region.Stroke(settings), region.StrokeWidth(settings), region.Text(region.Soldiers)));
+			return settings.Regions.Select(region => new ProvinceDisplay(region.Border, region.Center, region.Fill(settings, new Color()), region.Stroke(settings), region.StrokeWidth(settings), region.Text(region.Soldiers)));
 		}
 		[HttpPost("Free")] public IEnumerable<bool> Free([FromBody] int gameId) => province_load[gameId].Select(p => p.Inhabitable);
 		[HttpPost("Current")] public IEnumerable<ProvinceUpdate> Current([FromBody] int gameId)

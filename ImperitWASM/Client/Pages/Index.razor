@@ -6,19 +6,9 @@
 @inject SettingsLoader settings;
 
 @code{
-	Game.State State = Game.State.Invalid;
-	async Task UpdateState()
-	{
-		if (storage.IsSet)
-		{
-			State = await http.PostAsync<Session, Game.State>("api/Player/Correct", storage.Session);
-			await storage.SetAsync(State == Game.State.Invalid ? new Session() : storage.Session, storage.Name);
-		}
-	}
 	async Task<bool> LoginAsync(Data.Login login)
 	{
 		await storage.SetAsync(await http.PostAsync<Data.Login, Session>("api/Player/Login", login), login.N);
-		await UpdateState();
 		StateHasChanged();
 		return storage.IsSet;
 	}
@@ -26,31 +16,20 @@
 	{
 		await http.PostAsync("api/Player/Logout", storage.Key);
 		await storage.SetAsync(null);
-		State = Game.State.Invalid;
-		StateHasChanged();
-	}
-	void Start()
-	{
-		State = Game.State.Started;
 		StateHasChanged();
 	}
 	protected override async Task OnInitializedAsync()
 	{
 		await storage.LoadAsync();
-		await UpdateState();
-		await provinces.Load("api/Provinces");
+		await provinces.LoadAsync("api/Provinces");
 		await settings.LoadAsync("api/SoldierTypes");
 	}
 }
-@if (!storage.IsSet || State == Game.State.Invalid)
+@if (!storage.IsSet)
 {
 	<StartSwitch LoginAsync="LoginAsync"/>
 }
-else if (State == Game.State.Started)
-{
-	<GameSwitch LogoutAsync="LogoutAsync"/>
-}
 else
 {
-	<WaitingRoom LogoutAsync="LogoutAsync" State="State" Start="Start"/>
+	<GameSwitch LogoutAsync="LogoutAsync"/>
 }

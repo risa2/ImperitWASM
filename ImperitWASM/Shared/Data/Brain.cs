@@ -20,20 +20,21 @@ namespace ImperitWASM.Shared.Data
 		{
 			return provinces.Select(province => provinces.NeighborIndices(province).Where(n => provinces[n].IsAllyOf(Player)).Sum(n => Clamp(provinces[n].DefensePower - enemies[n] + defense[n], 0, provinces[n].DefensePower))).ToArray();
 		}
-		IEnumerable<int> EnemyNeighborIndices(Provinces provinces, int i)
+		IEnumerable<int> AttackableNeighborIndices(Provinces provinces, int i)
 		{
-			return provinces.NeighborIndices(provinces[i]).Where(n => provinces[n].IsEnemyOf(Player));
+			return provinces.NeighborIndices(provinces[i]).Where(n => !provinces[n].IsAllyOf(Player));
 		}
 		IEnumerable<int> AllyNeighborIndices(Provinces provinces, int i)
 		{
 			return provinces.NeighborIndices(provinces[i]).Where(n => provinces[n].IsAllyOf(Player));
 		}
-		int[] Attackable(Provinces provinces, IEnumerable<int> owned)
+		IEnumerable<int> Attackable(Provinces provinces, IEnumerable<int> owned)
 		{
-			return owned.SelectMany(i => EnemyNeighborIndices(provinces, i)).Distinct().ToArray();
+			return owned.SelectMany(i => AttackableNeighborIndices(provinces, i)).Distinct();
 		}
 
-		SoldierType? BestDefender(int i, int money) => Settings.RecruitableIn(i).OrderBy(type => money / type.Price * type.DefensePower).FirstOrDefault();
+		SoldierType? BestDefender(int i, int money) => Settings.RecruitableIn(i).OrderByDescending(type => money / type.Price * type.DefensePower).FirstOrDefault();
+		SoldierType? BestAttacker(int i, int money) => Settings.RecruitableIn(i).OrderByDescending(type => money / type.Price * type.AttackPower).FirstOrDefault();
 		Ship? BestShip(int i, int money) => Settings.RecruitableIn(i).OfType<Ship>().Where(type => type.Price <= money).OrderByDescending(type => type.Capacity).FirstOrDefault();
 
 		int EnemiesAfterAttack(Provinces provinces, int[] enemies, int[] defense, int start, int attacked)
@@ -51,15 +52,8 @@ namespace ImperitWASM.Shared.Data
 			return (new_players.ToImmutableArray(), provinces.With(new_provinces))!;
 		}
 
-		(IReadOnlyList<Player>, Provinces) Thinking(IReadOnlyList<Player> players, Provinces provinces)
+		void ReinforcementsFromSafeToEndangeredProvinces(ref IReadOnlyList<Player> players, ref Provinces provinces, int player, int[] enemies, int[] defense, int[] allies, int[] owned)
 		{
-			int player = players.Indices(player => player.Id == Player).First();
-			int[] enemies = ComputeEnemies(provinces);
-			int[] defense = provinces.Select(province => province.DefensePower).ToArray();
-			int[] allies = ComputeAllies(provinces, enemies, defense); // Neighbor provinces which can send reinforcements
-			int[] owned = provinces.Indices(province => province.IsAllyOf(Player)).ToArray();
-
-			// Defensive reinforcements from the safe provinces to the endangered
 			for (int i = 0; i < owned.Length; ++i)
 			{
 				if (enemies[owned[i]] > defense[owned[i]] && allies[owned[i]] > 0)
@@ -80,7 +74,10 @@ namespace ImperitWASM.Shared.Data
 					}
 				}
 			}
+		}
 
+		void DefensiveRecruitments(ref IReadOnlyList<Player> players, ref Provinces provinces, int player, int[] enemies, int[] defense, int[] owned)
+		{
 			// Defensive recruitment, if attack can be stopped
 			for (int i = 0; i < owned.Length && players[player].Money > 0; ++i)
 			{
@@ -104,22 +101,37 @@ namespace ImperitWASM.Shared.Data
 					defense[owned[i]] += recruited.DefensePower;
 				}
 			}
+		}
 
+		void OffensiveRecruitments(ref IReadOnlyList<Player> players, ref Provinces provinces, int player, int[] defense, int[] owned)
+		{
 			// Recruitments of ships
-			for (int i = 0; i < owned.Length && players[player].Money > 0; ++i)
+			var provinces_arg = provinces;
+			int port = owned.Where(n => provinces_arg[n].Port && !provinces_arg[n].HasShip).OrderBy(n => provinces_arg[n].AttackPower).FirstOr(-1);
+			if (port != -1 && BestShip(port, players[player].Money) is Ship ship)
 			{
-				if (BestShip(owned[i], players[player].Money) is Ship ship)
-				{
-					(players, provinces) = Do(new Recruit(provinces[owned[i]], new Soldiers(ship, 1)), player, players, provinces);
-					defense[owned[i]] += ship.DefensePower;
-				}
+				(players, provinces) = Do(new Recruit(provinces[port], new Soldiers(ship, 1)), player, players, provinces);
+				defense[port] += ship.DefensePower;
 			}
 
-			// Attacks
+			var provinces_arg2 = provinces;
+			int remaining_money = players[player].Money;
+			var (province, attacker) = owned.Select(n => (n, BestAttacker(n, remaining_money))).OrderByDescending(pair => pair.Item2?.AttackPower ?? -1).First();
+			if (attacker is not null)
+			{
+				var soldiers = new Soldiers(attacker, remaining_money / attacker.Price);
+				(players, provinces) = Do(new Recruit(provinces[province], soldiers), player, players, provinces);
+				defense[province] += soldiers.DefensePower;
+			}
+		}
+
+		void Attacks(ref IReadOnlyList<Player> players, ref Provinces provinces, int player, int[] enemies, int[] defense, int[] owned)
+		{
 			foreach (int attacked in Attackable(provinces, owned))
 			{
 				int[] starts = AllyNeighborIndices(provinces, attacked).ToArray();
-				var armies = starts.Select(i => AttackingSoldiers(provinces, enemies, defense, i, attacked)).ToArray();
+				var provinces_arg = provinces;
+				var armies = starts.Select(i => AttackingSoldiers(provinces_arg, enemies, defense, i, attacked)).ToArray();
 				if (armies.Sum(soldiers => soldiers.AttackPower) > defense[attacked])
 				{
 					if (provinces[attacked].IsEnemyOf(Player))
@@ -135,8 +147,23 @@ namespace ImperitWASM.Shared.Data
 					}
 				}
 			}
+		}
+
+		(IReadOnlyList<Player>, Provinces) Thinking(IReadOnlyList<Player> players, Provinces provinces)
+		{
+			int player = players.Indices(player => player.Id == Player).First();
+			int[] enemies = ComputeEnemies(provinces);
+			int[] defense = provinces.Select(province => province.DefensePower).ToArray();
+			int[] allies = ComputeAllies(provinces, enemies, defense); // Neighbor provinces which can send reinforcements
+			int[] owned = provinces.Indices(province => province.IsAllyOf(Player)).ToArray();
+
+			ReinforcementsFromSafeToEndangeredProvinces(ref players, ref provinces, player, enemies, defense, allies, owned);
+			DefensiveRecruitments(ref players, ref provinces, player, enemies, defense, owned);
+			OffensiveRecruitments(ref players, ref provinces, player, defense, owned);
+			Attacks(ref players, ref provinces, player, enemies, defense, owned);
 			return (players, provinces);
 		}
+
 		public static (IReadOnlyList<Player>, Provinces) Think(PlayerIdentity ip, IReadOnlyList<Player> players, Provinces provinces, Game game, Settings settings)
 		{
 			return new Brain(ip, settings, game).Thinking(players, provinces);

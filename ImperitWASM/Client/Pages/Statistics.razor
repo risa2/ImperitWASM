@@ -9,6 +9,7 @@
 	ImmutableArray<Data.PlayerInfo> Players;
 	ImmutableArray<Powers> Powers;
 	int Active = 0;
+	System.Timers.Timer PowersTimer = new System.Timers.Timer { Interval = 1000, AutoReset = false };
 
 	void Clicked(int player)
 	{
@@ -22,27 +23,34 @@
 		await http.PostAsync("api/Command/GiveUp", storage.Session);
 		await LogoutAsync!();
 	}
+	async Task LoadPowersAsync()
+	{
+		Powers = await http.PostAsync<int, ImmutableArray<Powers>>("api/Powers/List", storage.GameId);
+		StateHasChanged();
+	}
 	protected override async Task OnInitializedAsync()
 	{
 		Active = await http.PostAsync<int, int>("api/Game/Active", storage.GameId);
 		Players = await http.PostAsync<int, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", storage.GameId);
-		StateHasChanged();
-		Powers = await http.PostAsync<int, ImmutableArray<Powers>>("api/Powers/List", storage.GameId);
+
+		PowersTimer.Elapsed += async (s, e) => await LoadPowersAsync();
+		PowersTimer.Start();
 	}
+	string StarsOf(int i) => Powers.IsDefaultOrEmpty ? string.Empty : Sym.Stars(Powers[^1][i].Final);
 }
 <nav>
 	<a @onclick="() => Switch(Mode.Map, null, null, null)">Zpět</a>
 	<a class="this">@Players.Try(storage.Player)?.M@Sym.Money</a>
 </nav>
 <main>
-	@if (!Players.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty)
+	@if (!Players.IsDefaultOrEmpty)
 	{
 		<p>Na tahu je: <span style="color:@Players[Active].C;">@Players[Active].N</span></p>
 		<table class="players">
 			@foreach (var (i, name, color, alive, money, debt, income) in Players)
 			{
 				<tr @onclick="() => Clicked(i)">
-					<td style="color:@color;">@name@Sym.Stars(Powers[^1][i].Final)</td>
+					<td style="color:@color;">@name@StarsOf(i)</td>
 					@if (alive)
 					{
 						<td>@money@Sym.Money</td>
@@ -62,6 +70,9 @@
 			}
 		</table><br/>
 		<button @onclick="DoGiveUp">Vzdát se</button>
+	}
+	@if (!Players.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty)
+	{
 		<Graphs Players="Players.Select(p => p.C).ToImmutableArray()" Powers="Powers"/>
 	}
 </main>

@@ -20,35 +20,20 @@
 		(Current, From, To, Player) = (mode, from, to, player);
 		StateHasChanged();
 	}
-	async Task NextTurnAsync()
-	{
-		if (await http.PostAsync<Data.Session, bool>("api/Command/NextTurn", storage.Session))
-		{
-			await DoLogoutAsync();
-		}
-		else
-		{
-			await CheckSession();
-		}
-	}
-	async Task CheckSession()
+	async Task CheckSessionAsync()
 	{
 		var info = await http.PostAsync<PlayerId, GameInfo>("api/Game/Info", new PlayerId(storage.Player, storage.GameId));
-		if (info.S != Game.State.Started)
-		{
-			await DoLogoutAsync();
-		}
-		else if (info.A != Info.A)
+		if (info != Info)
 		{
 			Info = info;
-			Map?.Update(Info.A);
+			await (Map?.ReloadAsync(Info) ?? Task.CompletedTask);
 		}
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		await CheckSession();
+		await CheckSessionAsync();
 		PlayerColor = await http.PostAsync<int, Color>("api/Player/Color", storage.Player);
-		timer.Elapsed += async (sender, e) => await CheckSession();
+		timer.Elapsed += async (sender, e) => await CheckSessionAsync();
 		timer.Start();
 	}
 }
@@ -64,11 +49,11 @@
 
 @if (Current == View.Map)
 {
-	<GameMap @ref="Map" IsActive="Info.A" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" LogoutAsync="DoLogoutAsync" NextTurnAsync="NextTurnAsync"/>
+	<GameMap @ref="Map" Info="Info" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="false" LogoutAsync="DoLogoutAsync"/>
 }
 else if (Current == View.Preview)
 {
-	<GameMap IsActive="Info.A" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" LogoutAsync="DoLogoutAsync" NextTurnAsync="NextTurnAsync"/>
+	<GameMap Info="Info" Switch="(x, y, z) => Switch(x, y, z, null)" Preview="true" LogoutAsync="DoLogoutAsync"/>
 }
 else if (Current == View.Donation && Player is not null)
 {

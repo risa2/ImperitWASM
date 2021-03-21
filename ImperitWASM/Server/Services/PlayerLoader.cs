@@ -50,7 +50,7 @@ namespace ImperitWASM.Server.Services
 				}
 				if (player is null)
 				{
-					player = new Player(new PlayerIdentity(name, order, game_id, human), money, alive, ImmutableList<IAction>.Empty, settings, Password.FromHash(password), active);
+					player = new Player(new PlayerIdentity(name!, order, game_id, human), money, alive, ImmutableList<IAction>.Empty, settings, Password.FromHash(password!), active);
 				}
 
 				player = action == "Loan" && debt is int Debt ? player.Add(new Loan(Debt)) : player;

@@ -18,8 +18,8 @@ namespace ImperitWASM.Client.Services
 		public IEnumerator<ProvinceDisplay> GetEnumerator() => provinces!.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => provinces!.GetEnumerator();
 
-		public async Task Load(string url) => provinces ??= await http.GetAsync<List<ProvinceDisplay>>(url);
-		public async Task Update(string url, int gameId)
+		public async Task LoadAsync(string url) => provinces ??= await http.GetAsync<List<ProvinceDisplay>>(url);
+		public async Task UpdateAsync(string url, int gameId)
 		{
 			if (provinces is not null)
 			{

@@ -52,12 +52,13 @@ namespace ImperitWASM.Shared.Data
 
 		public bool Has(Soldiers soldiers) => Soldiers.Contains(soldiers);
 		public bool HasSoldiers => Soldiers.Any;
+		public bool HasShip => Soldiers.Any(r => r.Type is Ship);
 		public bool CanPersist => Soldiers.CanSurviveIn(Region);
 		public bool CanPersistWithout(Soldiers s) => Subtract(s).CanPersist;
 		public bool CanAnyMove(Provinces provinces, Province to) => Soldiers.Any(reg => reg.CanMoveAlone(provinces, this, to));
 		public bool CanMove(Provinces provinces, Province to, PlayerIdentity ip, Soldiers soldiers) => IsAllyOf(ip) && soldiers.CanMove(provinces, this, to) && CanPersistWithout(soldiers);
 
-		public Color Fill => PlayerIdentity.ColorOf(Ruler).Over(Region.Fill(Settings));
+		public Color Fill => Region.Fill(Settings, PlayerIdentity.ColorOf(Ruler));
 		public Color Stroke => Region.Stroke(Settings);
 		public int StrokeWidth => Region.StrokeWidth(Settings);
 

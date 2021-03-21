@@ -7,7 +7,7 @@ namespace ImperitWASM.Shared.Config
 	public record Land(int Id, string Name, Shape Shape, Soldiers Soldiers, ImmutableArray<SoldierType> ExtraTypes, int Earnings, Ratio DefaultInstability, bool IsStart, bool IsFinal, bool HasPort)
 		: Region(Id, Name, Shape, Soldiers, ExtraTypes)
 	{
-		public override Color Fill(Settings settings) => settings.LandColor;
+		public override Color Fill(Settings settings, Color player_color) => player_color.Over(settings.LandColor);
 
 		public override bool Inhabitable => IsStart;
 		public override bool Sailable => HasPort;

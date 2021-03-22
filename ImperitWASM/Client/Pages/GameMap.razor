@@ -12,7 +12,7 @@
 	int PlayerMoney = 0;
 	int? Selected = null;
 	Map? map;
-	System.Timers.Timer? UnselectingTimer = null, CountdownTimer = null, StartingTimer = null;
+	System.Timers.Timer? UnselectingTimer = null, CountdownTimer = null;
 	Winner? Winner = null;
 	async Task OnClickAsync(int i)
 	{
@@ -20,7 +20,8 @@
 		{
 			var s = await http.PostAsync<Data.Click, Data.Switch>("api/Switch/Clicked", new Data.Click(storage.Player, Selected, i, storage.GameId));
 			Switch(s.View, s.From, s.To);
-			map?.Select(Selected = s.Select);
+			Selected = s.Select;
+			map?.Select(Selected);
 
 			UnselectingTimer?.Stop();
 			UnselectingTimer = new System.Timers.Timer { Interval = 5000, AutoReset = false, Enabled = true };
@@ -43,8 +44,13 @@
 		if (Info.S == Game.State.Countdown)
 		{
 			TimeToStart = await http.PostAsync<int, DateTimeOffset>("api/Game/StartTime", storage.GameId) - DateTimeOffset.UtcNow;
-			CountdownTimer = new System.Timers.Timer { Interval = 1000, Enabled = Info.S == Game.State.Countdown };
-			CountdownTimer.Elapsed += (sender, args) => TimeToStart = TimeToStart.Subtract(TimeSpan.FromSeconds(1));
+			CountdownTimer = new System.Timers.Timer { Interval = 1000 };
+			CountdownTimer.Elapsed += (sender, args) =>
+			{
+				TimeToStart = TimeToStart.Subtract(TimeSpan.FromMilliseconds(1000));
+				StateHasChanged();
+			};
+			CountdownTimer.Start();
 		}
 		else if (Info.S == Game.State.Finished)
 		{
@@ -62,7 +68,7 @@
 	}
 	else
 	{
-		@if (Info.A)
+		@if (Info.A && Info.S == Game.State.Started)
 		{
 			<a @onclick="NextTurnAsync">Konec</a>
 		}

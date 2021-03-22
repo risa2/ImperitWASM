@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Immutable;
 using System.Linq;
 using ImperitWASM.Client.Data;
 using ImperitWASM.Server.Services;
-using ImperitWASM.Shared;
 using ImperitWASM.Shared.Config;
 using ImperitWASM.Shared.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -18,28 +16,23 @@ namespace ImperitWASM.Server.Controllers
 		readonly IGameCreator game_creator;
 		readonly IProvinceLoader province_load;
 		readonly IPlayerLoader player_load;
-		readonly Settings settings;
-		readonly IPowerLoader power_load;
-		public GameController(IGameLoader game_load, IGameCreator game_creator, IProvinceLoader province_load, IPlayerLoader player_load, Settings settings, IPowerLoader power_load)
+		public GameController(IGameLoader game_load, IGameCreator game_creator, IProvinceLoader province_load, IPlayerLoader player_load)
 		{
 			this.game_load = game_load;
 			this.game_creator = game_creator;
 			this.province_load = province_load;
 			this.player_load = player_load;
-			this.settings = settings;
-			this.power_load = power_load;
 		}
 		[HttpPost("Active")] public int Active([FromBody] int gameId) => player_load[gameId].First(p => p.Active).Order;
 		[HttpPost("Info")] public GameInfo Info([FromBody] PlayerId id)
 		{
+			game_creator.StartAll();
 			return game_load[id.G] is Game g ? new GameInfo(g.Current, player_load[id.G, id.P].Active) : new GameInfo();
 		}
-		[HttpPost("StartInfo")] public StartInfo StartInfo([FromBody] int gameId)
+		[HttpPost("StartTime")] public DateTimeOffset? StartTime([FromBody] int gameId)
 		{
-			game_creator.StartAll();
-			return game_load[gameId] is Game g ? new StartInfo(g.Current, g.StartTime) : new StartInfo();
+			return game_load[gameId]?.StartTime;
 		}
-		[HttpPost("StartTime")] public DateTimeOffset? StartTime([FromBody] int gameId) => game_load[gameId]?.StartTime;
 		[HttpPost("Winner")] public Winner? Winner([FromBody] int gameId)
 		{
 			return province_load[gameId].Winner is ({ Human: true } H, int final) ? new Winner(H.Name, H.Color, final) : null;

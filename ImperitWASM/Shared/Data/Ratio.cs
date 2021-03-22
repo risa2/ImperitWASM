@@ -17,7 +17,7 @@ namespace ImperitWASM.Shared.Data
 		public static Ratio operator -(Ratio x, Ratio y) => new Ratio((long)x.value - y.value);
 		public static Ratio operator *(Ratio x, long y) => new Ratio(x.value * y);
 		public static Ratio operator /(Ratio x, long y) => new Ratio(x.value / y);
-		public Ratio Adjust(long mul, long div) => new Ratio((value * mul - 1 + div) / div);
+		public Ratio Adjust(long mul, long div) => new Ratio((value * mul + div - 1) / div);
 		public static int operator *(int x, Ratio y) => y.Adjust(x, int.MaxValue).ToInt();
 		public static int operator /(int x, Ratio y) => y.Adjust(int.MaxValue, x).ToInt();
 		public static Ratio operator *(Ratio x, Ratio y) => x.Adjust(y.value, int.MaxValue);

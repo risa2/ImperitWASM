@@ -45,7 +45,7 @@ namespace ImperitWASM.Shared.Data
 		public Power Power(Provinces provinces)
 		{
 			var my = provinces.ControlledBy(Id).ToImmutableArray();
-			return new Power(Alive, my.Sum(p => p.Score), my.Sum(p => p.Earnings), Money - Debt, my.Sum(p => p.Power));
+			return new Power(Alive, my.Sum(p => p.Score), provinces.IncomeOf(Id), Money - Debt, my.Sum(p => p.Power));
 		}
 
 		public bool Equals(Player? p) => Id == p?.Id;

@@ -14,14 +14,14 @@ namespace ImperitWASM.Shared.Data
 		public Soldiers DefaultSoldiers => Region.Soldiers;
 
 		public Province RuledBy(PlayerIdentity ruler) => this with { Ruler = ruler };
-		public Province WithSoldiers(Soldiers soldiers) => this with { Soldiers = soldiers };
 		public Province Revolt() => this with { Ruler = null, Soldiers = DefaultSoldiers };
 
 		public bool Recruitable(SoldierType type) => Region.Recruitable(type);
 		public Ratio Instability => Region.Instability(Soldiers);
-		public bool Unstable => !CanPersist || Instability.Any;
-		public bool Shaky(PlayerIdentity active) => !CanPersist || (IsAllyOf(active) && Instability.RandomBool);
-		public Province RevoltIfShaky(PlayerIdentity active) => Shaky(active) ? Revolt() : this;
+		public Province Clear(PlayerIdentity active)
+		{
+			return IsAllyOf(active) && Instability.RandomBool ? Revolt() : CanPersist ? this : this with { Soldiers = Soldiers.MaxPersistent(Region) };
+		}
 		public bool KeepsPlayerAlive => HasSoldiers || Mainland;
 
 		public bool Inhabited => Ruler is not null;
@@ -41,8 +41,8 @@ namespace ImperitWASM.Shared.Data
 		public int Power => Soldiers.Power;
 		public int DefaultDefensePower => DefaultSoldiers.DefensePower;
 
-		public Province Subtract(Soldiers army) => WithSoldiers(Soldiers.Subtract(army));
-		public Province Reinforce(Soldiers another) => WithSoldiers(Soldiers.Add(another));
+		public Province Subtract(Soldiers army) => this with { Soldiers = Soldiers.Subtract(army) };
+		public Province Reinforce(Soldiers another) => this with { Soldiers = Soldiers.Add(another) };
 		public Province AttackedBy(PlayerIdentity ip, Soldiers s) => this with { Ruler = s.AttackPower > Soldiers.DefensePower ? ip : Ruler, Soldiers = Soldiers.AttackedBy(s) };
 		public Province VisitedBy(PlayerIdentity ip, Soldiers s) => IsAllyOf(ip) ? Reinforce(s) : AttackedBy(ip, s);
 

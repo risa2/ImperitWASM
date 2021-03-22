@@ -17,10 +17,12 @@ namespace ImperitWASM.Shared.Commands
 			(actor, provinces) = actor.Earn(provinces).Act(provinces, settings);
 			return (players.Select(altered => altered == actor ? actor.InvertActive : altered), provinces);
 		}
+		static bool RulerIsDead(Province province, IEnumerable<Player> players) => players.FirstOrDefault(player => province.IsAllyOf(player.Id)) is { Alive: false };
 		static (IEnumerable<Player>, IEnumerable<Province>) Clear(PlayerIdentity actor_id, IEnumerable<Player> players, IEnumerable<Province> provinces)
 		{
-			var cleared_players = players.Select(altered => provinces.Any(province => province.IsAllyOf(altered.Id) && province.KeepsPlayerAlive) ? altered : altered.Die()).ToArray();
-			var cleared_provinces = provinces.Select(altered => cleared_players.FirstOrDefault(player => altered.IsAllyOf(player.Id))?.Alive == false ? altered.Revolt() : altered.RevoltIfShaky(actor_id));
+			var revolted_provinces = provinces.Select(altered => altered.Clear(actor_id)).ToArray();
+			var cleared_players = players.Select(altered => revolted_provinces.Any(province => province.IsAllyOf(altered.Id) && province.KeepsPlayerAlive) ? altered : altered.Die()).ToArray();
+			var cleared_provinces = revolted_provinces.Select(altered => RulerIsDead(altered, cleared_players) ? altered.Revolt() : altered);
 			return (cleared_players, cleared_provinces);
 		}
 		static Player[] NextActive(int active, IReadOnlyList<Player> players)

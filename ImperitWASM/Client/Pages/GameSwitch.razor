@@ -8,7 +8,7 @@
 	PlayerInfo? Player = null;
 	Color PlayerColor = new Color();
 	GameInfo Info = new GameInfo();
-	System.Timers.Timer timer = new System.Timers.Timer(400);
+	System.Timers.Timer timer = new System.Timers.Timer(1000);
 	GameMap? Map { get; set; }
 	Task DoLogoutAsync()
 	{
@@ -20,7 +20,7 @@
 		(Current, From, To, Player) = (mode, from, to, player);
 		StateHasChanged();
 	}
-	async Task CheckSessionAsync()
+	async Task CheckGameInfoAsync()
 	{
 		var info = await http.PostAsync<PlayerId, GameInfo>("api/Game/Info", new PlayerId(storage.Player, storage.GameId));
 		if (info != Info)
@@ -31,9 +31,9 @@
 	}
 	protected override async Task OnInitializedAsync()
 	{
-		await CheckSessionAsync();
+		await CheckGameInfoAsync();
 		PlayerColor = await http.PostAsync<int, Color>("api/Player/Color", storage.Player);
-		timer.Elapsed += async (sender, e) => await CheckSessionAsync();
+		timer.Elapsed += async (sender, e) => await CheckGameInfoAsync();
 		timer.Start();
 	}
 }

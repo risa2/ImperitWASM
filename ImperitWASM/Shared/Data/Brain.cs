@@ -20,32 +20,15 @@ namespace ImperitWASM.Shared.Data
 		{
 			return provinces.Select(province => provinces.NeighborIndices(province).Where(n => provinces[n].IsAllyOf(Player)).Sum(n => Clamp(provinces[n].DefensePower - enemies[n] + defense[n], 0, provinces[n].DefensePower))).ToArray();
 		}
-		IEnumerable<int> AttackableNeighborIndices(Provinces provinces, int i)
-		{
-			return provinces.NeighborIndices(provinces[i]).Where(n => !provinces[n].IsAllyOf(Player));
-		}
 		IEnumerable<int> AllyNeighborIndices(Provinces provinces, int i)
 		{
 			return provinces.NeighborIndices(provinces[i]).Where(n => provinces[n].IsAllyOf(Player));
-		}
-		IEnumerable<int> Attackable(Provinces provinces, IEnumerable<int> owned)
-		{
-			return owned.SelectMany(i => AttackableNeighborIndices(provinces, i)).Distinct();
 		}
 
 		SoldierType? BestDefender(int i, int money) => Settings.RecruitableIn(i).OrderByDescending(type => money / type.Price * type.DefensePower).FirstOrDefault();
 		SoldierType? BestAttacker(int i, int money) => Settings.RecruitableIn(i).OrderByDescending(type => money / type.Price * type.AttackPower).FirstOrDefault();
 		Ship? BestShip(int i, int money) => Settings.RecruitableIn(i).OfType<Ship>().Where(type => type.Price <= money).OrderByDescending(type => type.Capacity).FirstOrDefault();
 
-		int EnemiesAfterAttack(Provinces provinces, int[] enemies, int[] defense, int start, int attacked)
-		{
-			return Max(0, enemies[start] - defense[start] + (provinces[attacked].IsEnemyOf(Player) ? enemies[attacked] : 0));
-		}
-		Soldiers AttackingSoldiers(Provinces provinces, int[] enemies, int[] defense, int start, int attacked)
-		{
-			var movable = provinces[start].MaxMovable(provinces, provinces[attacked]);
-			return movable.FightAgainst(EnemiesAfterAttack(provinces, enemies, defense, start, attacked), type => type.DefensePower);
-		}
 		(IReadOnlyList<Player>, Provinces) Do(ICommand command, int player, IReadOnlyList<Player> players, Provinces provinces)
 		{
 			var (new_players, new_provinces, _, _) = command.Perform(players[player], players, provinces, Settings, Game);
@@ -125,14 +108,34 @@ namespace ImperitWASM.Shared.Data
 			}
 		}
 
+		IEnumerable<int> AttackableNeighborIndices(Provinces provinces, int i)
+		{
+			return provinces.NeighborIndices(provinces[i]).Where(n => !provinces[n].IsAllyOf(Player));
+		}
+		IEnumerable<int> Attackable(Provinces provinces, IEnumerable<int> owned)
+		{
+			return owned.SelectMany(i => AttackableNeighborIndices(provinces, i)).Distinct();
+		}
+		int EnemiesAfterAttack(Provinces provinces, int[] enemies, int start, int attacked)
+		{
+			return Max(0, enemies[start] - (provinces[attacked].IsEnemyOf(Player) ? provinces[attacked].AttackPower : 0));
+		}
+		Soldiers AttackingSoldiers(Provinces provinces, int[] enemies, int start, int attacked)
+		{
+			var movable = provinces[start].MaxMovable(provinces, provinces[attacked]);
+			return movable.FightAgainst(EnemiesAfterAttack(provinces, enemies, start, attacked), type => type.DefensePower);
+		}
+		Soldiers[] AttackingSoldiers(Provinces provinces, int[] enemies, int[] starts, int attacked)
+		{
+			return starts.Select(i => AttackingSoldiers(provinces, enemies, i, attacked)).ToArray();
+		}
 		void Attacks(ref IReadOnlyList<Player> players, ref Provinces provinces, int player, int[] enemies, int[] defense, int[] owned)
 		{
 			foreach (int attacked in Attackable(provinces, owned))
 			{
 				int[] starts = AllyNeighborIndices(provinces, attacked).ToArray();
-				var provinces_arg = provinces;
-				var armies = starts.Select(i => AttackingSoldiers(provinces_arg, enemies, defense, i, attacked)).ToArray();
-				if (armies.Sum(soldiers => soldiers.AttackPower) > defense[attacked])
+				var armies = AttackingSoldiers(provinces, enemies, starts, attacked);
+				if (armies.Sum(soldiers => soldiers.AttackPower) > defense[attacked] + (provinces[attacked].IsEnemyOf(Player) ? 0 : enemies[attacked]))
 				{
 					if (provinces[attacked].IsEnemyOf(Player))
 					{

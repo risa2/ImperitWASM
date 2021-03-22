@@ -9,7 +9,7 @@
 	ImmutableArray<Data.PlayerInfo> Players;
 	ImmutableArray<Powers> Powers;
 	int Active = 0;
-	System.Timers.Timer PowersTimer = new System.Timers.Timer { Interval = 100, AutoReset = false };
+	bool ShowPowers = false;
 
 	void Clicked(int player)
 	{
@@ -26,15 +26,13 @@
 	async Task LoadPowersAsync()
 	{
 		Powers = await http.PostAsync<int, ImmutableArray<Powers>>("api/Powers/List", storage.GameId);
+		ShowPowers = true;
 		StateHasChanged();
 	}
 	protected override async Task OnInitializedAsync()
 	{
 		Active = await http.PostAsync<int, int>("api/Game/Active", storage.GameId);
 		Players = await http.PostAsync<int, ImmutableArray<Data.PlayerInfo>>("api/Player/Infos", storage.GameId);
-
-		PowersTimer.Elapsed += async (s, e) => await LoadPowersAsync();
-		PowersTimer.Start();
 	}
 	string StarsOf(int i) => Powers.IsDefaultOrEmpty ? string.Empty : Sym.Stars(Powers[^1][i].Final);
 }
@@ -68,11 +66,18 @@
 					}
 				</tr>
 			}
-		</table><br/><br/>
-		<a @onclick="DoGiveUp">Vzdát se</a>
-	}
-	@if (!Players.IsDefaultOrEmpty && !Powers.IsDefaultOrEmpty)
-	{
-		<Graphs Players="Players.Select(p => p.C).ToImmutableArray()" Powers="Powers"/>
+		</table><br/>
+		@if (!ShowPowers)
+		{
+			<button @onclick="LoadPowersAsync">Zobrazit více</button>
+		}
+		else if (!Powers.IsDefaultOrEmpty)
+		{
+			@if (Players[Active].A)
+			{
+				<a @onclick="DoGiveUp">Vzdát se</a><br/>
+			}
+			<Graphs Players="Players.Select(p => p.C).ToImmutableArray()" Powers="Powers"/>
+		}
 	}
 </main>

@@ -55,8 +55,8 @@ namespace ImperitWASM.Shared.Data
 		{
 			return Any && from.Has(this) && Capacity(provinces, from, to) >= 0;
 		}
+		public int CanSustain(Region province) => regiments.Sum(p => p.CanSustain(province));
 		public bool CanSurviveIn(Region province) => regiments.Sum(p => p.CanSustain(province) - p.Weight) >= 0;
-
 
 		int[] Fight(int enemy, Func<SoldierType, int> powerof)
 		{
@@ -104,12 +104,22 @@ namespace ImperitWASM.Shared.Data
 		public Soldiers MaxMovable(Provinces provinces, Province from, Province to)
 		{
 			var result = new Soldiers(regiments.Where(p => p.CanMoveAlone(provinces, from, to)));
-			foreach (var p in regiments.Where(p => !p.CanMoveAlone(provinces, from, to)).OrderBy(p => p.Type.Weight - p.Type.CanMove(provinces, from, to)))
+			foreach (var (type, count) in regiments.Where(p => !p.CanMoveAlone(provinces, from, to)).OrderBy(p => p.Type.Weight - p.Type.CanMove(provinces, from, to)))
 			{
-				result += new Soldiers(p.Type, Math.Min(result.Capacity(provinces, from, to) / (p.Type.Weight - p.Type.CanMove(provinces, from, to)), p.Count));
+				result += new Soldiers(type, Math.Min(result.Capacity(provinces, from, to) / (type.Weight - type.CanMove(provinces, from, to)), count));
 			}
 			return result;
 		}
+		public Soldiers MaxPersistent(Region where)
+		{
+			var result = new Soldiers(regiments.Where(r => r.CanSustain(where) >= r.Weight));
+			foreach (var (type, count) in regiments.Where(r => r.CanSustain(where) < r.Weight).OrderBy(r => r.Weight - r.CanSustain(where)))
+			{
+				result += new Soldiers(type, Math.Min(result.CanSustain(where) / (type.Weight - type.CanSustain(where)), count));
+			}
+			return result;
+		}
+
 		public IEnumerator<Regiment> GetEnumerator() => (regiments as IEnumerable<Regiment>).GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 		public override string ToString() => string.Join("", regiments.Select(p => p.Count + p.Type.Symbol));

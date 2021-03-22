@@ -11,14 +11,15 @@
 	}
 	static string ToString(double num) => num.ToString(CultureInfo.InvariantCulture);
 }
-@if (!Players.IsDefaultOrEmpty && Powers is { IsDefault: false, Length: > 6 })
+@if (!Players.IsDefaultOrEmpty && Powers is { IsDefault: false, Length: > 3 })
 {
+	int TotalMax = Powers.Max(p => p.TotalMax);
 	var TotalAvg = Powers.Select(p => p.TotalAvg);
-	var TotalMax = Powers.Max(p => p.TotalMax);
-	var Ratios = Powers.Select(p => p.GetRatios()).ToImmutableArray();
-	var RatioSums = new double[Ratios.Length];
 	var Lives = Players.Select((_, i) => Math.Min(Powers.Length, Powers.Count(p => p[i].Alive) + 1)).ToImmutableArray();
-	var Changes = Powers.Zip(Powers.Skip(1), (prev, next) => next.ChangesFrom(prev)).ToImmutableArray();
+	var Ratios = Powers.Select(p => p.Ratios).ToImmutableArray();
+	var RatioOrder = Players.Indices().OrderByDescending(i => Ratios[^1][i]).ThenByDescending(i => Lives[i]).ToImmutableArray();
+	var RatioSums = new double[Ratios.Length];
+	var Changes = Powers.Zip(Powers.Skip(1), (prev, next) => next.ChangesFrom(prev).Index().MaxBy(pair => Math.Abs(pair.v))).ToImmutableArray();
 
 	<p>Síla:</p>
 	<svg viewBox="-10 -10 1220 620" class="diagram">
@@ -30,22 +31,20 @@
 	</svg>
 	<p>Poměrná změna síly:</p>
 	<svg viewBox="-10 -10 1220 620" class="diagram">
-		@for (int p = 0; p < Players.Length; ++p)
+		@for (int i = 0; i < Changes.Length; ++i)
 		{
-			@for (int c = 0; c < Changes.Length && c < Lives[p] - 1; ++c)
-			{
-				<circle cx="@(600 * (2 * c + 1) / (Powers.Length - 1))" cy="@(300 - (int)(300 * Changes[c][p]))" 
-					fill="transparent" stroke="@Players[p]" r="@ToString(300.0 / Powers.Length)"></circle>
-			}
+			<rect x="@ToString(i * 1200.0 / Changes.Length)" y="@ToString(Changes[i].v < 0.0 ? 300.0 : 300.0 * (1 - Changes[i].v))"
+				width="@ToString(1200.0 / Changes.Length)" height="@ToString(Math.Abs(Changes[i].v) * 300.0)" fill="@Players[Changes[i].i]">
+			</rect>
 		}
 	</svg>
 	<p>Počet vojáků a peněz v poměru k ostatním hráčům:</p>
 	<svg viewBox="0 0 1200 600" class="diagram">
-		@for (int i = 0; i < Players.Length; ++i)
+		@for (int i = 0; i < RatioOrder.Length; ++i)
 		{
-			<polyline points="@(Polyline(RatioSums.Select(r => (int)(r * 2000)).Take(Math.Min(Lives[i] + 1, Ratios.Length)), Ratios.Length, 2000, 0, 0, 1200, 600) + " " +
-								Polyline(RatioSums.Select((r,j) => (int)((r + Ratios[j][i]) * 2000)).Take(Math.Min(Lives[i] + 1, Ratios.Length)), Ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[i]"></polyline>
-			RatioSums.Each((_, j) => RatioSums[j] += Ratios[j][i]);
+			<polyline points="@(Polyline(RatioSums.Select(r => (int)(r * 2000)).Take(Math.Min(Lives[RatioOrder[i]] + 1, Ratios.Length)), Ratios.Length, 2000, 0, 0, 1200, 600) + " " +
+								Polyline(RatioSums.Select((r, j) => (int)((r + Ratios[j][RatioOrder[i]]) * 2000)).Take(Math.Min(Lives[RatioOrder[i]] + 1, Ratios.Length)), Ratios.Length, 2000, 0, 0, 1200, 600, true))" fill="@Players[RatioOrder[i]]"></polyline>
+			RatioSums.Each((_, j) => RatioSums[j] += Ratios[j][RatioOrder[i]]);
 		}
 	</svg>
 }

@@ -6,6 +6,7 @@
 @code{
 	[Parameter] public Func<Task>? LogoutAsync { get; set; }
 	[Parameter] public Action<Mode, int?, int?, Data.PlayerInfo?> Switch { get; set; } = ((a, x, y, z) => { });
+	[Parameter] public Game.State GameState { get; set; }
 	ImmutableArray<Data.PlayerInfo> Players;
 	ImmutableArray<Powers> Powers;
 	int Active = 0;
@@ -13,7 +14,7 @@
 
 	void Clicked(int player)
 	{
-		if (player != storage.Player && Players[storage.Player].M > 0)
+		if (player != storage.Player && Players[storage.Player].M > 0 && GameState == Game.State.Started)
 		{
 			Switch(Mode.Donation, null, null, Players.Try(player));
 		}
@@ -21,13 +22,16 @@
 	async Task DoGiveUp()
 	{
 		await http.PostAsync("api/Command/GiveUp", storage.Session);
-		await LogoutAsync!();
+		Switch(Mode.Map, null, null, null);
 	}
 	async Task LoadPowersAsync()
 	{
-		Powers = await http.PostAsync<int, ImmutableArray<Powers>>("api/Powers/List", storage.GameId);
-		ShowPowers = true;
-		StateHasChanged();
+		if (!ShowPowers)
+		{
+			ShowPowers = true;
+			Powers = await http.PostAsync<int, ImmutableArray<Powers>>("api/Powers/List", storage.GameId);
+			StateHasChanged();
+		}
 	}
 	protected override async Task OnInitializedAsync()
 	{
@@ -73,11 +77,15 @@
 		}
 		else if (!Powers.IsDefaultOrEmpty)
 		{
-			@if (Players[Active].A)
+			@if (Players[Active].A && GameState == Game.State.Started)
 			{
-				<a @onclick="DoGiveUp">Vzdát se</a><br/>
+				<p><a @onclick="DoGiveUp">Vzdát se</a></p><br/>
 			}
 			<Graphs Players="Players.Select(p => p.C).ToImmutableArray()" Powers="Powers"/>
+		}
+		else
+		{
+			<p>Načítání...</p>
 		}
 	}
 </main>

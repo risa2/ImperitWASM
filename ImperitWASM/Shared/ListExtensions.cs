@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ImperitWASM.Shared
 {
@@ -12,26 +11,8 @@ namespace ImperitWASM.Shared
 		public static IEnumerable<int> Indices<T>(this IEnumerable<T> en, Func<T, bool> pred) => en.Select((v, i) => (v, i)).Where(x => pred(x.v)).Select(x => x.i);
 		public static T Must<T>(this T? value) where T : class => value ?? throw new ArgumentNullException(typeof(T).FullName);
 		public static T FirstOr<T>(this IEnumerable<T> e, T x) => e.DefaultIfEmpty(x).First();
-		public static T? MinBy<T, TC>(this IEnumerable<T> e, Func<T, TC> selector, T? v = default) where T : class => e.OrderBy(selector).FirstOr(v);
-		public static (ImmutableList<A>, P) Fold<A, P>(this IEnumerable<A> e, P init, Func<P, A, (P, A?)> fn) where A : class
-		{
-			var result = ImmutableList.CreateBuilder<A>();
-			foreach (var item in e)
-			{
-				var (next_init, added) = fn(init, item);
-				init = next_init;
-				if (added is not null)
-				{
-					result.Add(added);
-				}
-			}
-			return (result.ToImmutable(), init);
-		}
+		public static T? MaxBy<T, TC>(this IEnumerable<T> e, Func<T, TC> selector, T? v = default) => e.OrderByDescending(selector).FirstOr(v);
 		public static ImmutableDictionary<T, int> Lookup<T>(this IEnumerable<T> e) where T : notnull => e.Select((a, i) => (a, i)).ToImmutableDictionary(it => it.a, it => it.i);
-		public static int FirstRotated<T>(this IReadOnlyList<T> arr, int shift, Func<T, bool> cond, int otherwise)
-		{
-			return Enumerable.Range(shift, arr.Count).Where(i => cond(arr[i % arr.Count])).FirstOr(otherwise) % arr.Count;
-		}
 		public static ImmutableList<T> Replace<T, TC>(this ImmutableList<T> lst, Predicate<TC> cond, Func<TC, TC, TC> join, TC init) where T : class where TC : T
 		{
 			var those = lst.OfType<TC>().Where(x => cond(x));
@@ -78,7 +59,6 @@ namespace ImperitWASM.Shared
 				}
 			}
 		}
-		public static IEnumerable<T> Range<T>(this int count, Func<int, T> selector) => Enumerable.Range(0, count).Select(selector);
 		public static void Shuffle<T>(this IList<T> list)
 		{
 			for (int i = 0, len = list.Count; i < len - 1; ++i)
@@ -105,6 +85,7 @@ namespace ImperitWASM.Shared
 			}
 		}
 		public static IEnumerable<(int i, T v)> Index<T>(this IEnumerable<T> e) => e.Select((v, i) => (i, v));
+		public static IEnumerable<int> Indices<T>(this IEnumerable<T> e) => e.Select((v, i) => i);
 		public static ImmutableArray<T> Alter<T>(this IReadOnlyCollection<T> e, IEnumerable<(int, T)> changes)
 		{
 			var result = ImmutableArray.CreateBuilder<T>(e.Count);

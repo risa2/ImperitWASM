@@ -24,6 +24,10 @@ namespace ImperitWASM.Shared.Data
 		{
 			return provinces.NeighborIndices(provinces[i]).Where(n => provinces[n].IsAllyOf(Player));
 		}
+		static IEnumerable<int> ShiplessPorts(Provinces provinces, int[] owned)
+		{
+			return owned.Where(n => provinces[n].Port && !provinces[n].HasShip);
+		}
 
 		SoldierType? BestDefender(int i, int money) => Settings.RecruitableIn(i).OrderByDescending(type => money / type.Price * type.DefensePower).FirstOrDefault();
 		SoldierType? BestAttacker(int i, int money) => Settings.RecruitableIn(i).OrderByDescending(type => money / type.Price * type.AttackPower).FirstOrDefault();
@@ -86,20 +90,19 @@ namespace ImperitWASM.Shared.Data
 			}
 		}
 
-		void OffensiveRecruitments(ref IReadOnlyList<Player> players, ref Provinces provinces, int player, int[] defense, int[] owned)
+		void OffensiveRecruitments(ref IReadOnlyList<Player> players, ref Provinces provinces, int player, int[] enemies, int[] defense, int[] owned)
 		{
 			// Recruitments of ships
 			var provinces_arg = provinces;
-			int port = owned.Where(n => provinces_arg[n].Port && !provinces_arg[n].HasShip).OrderBy(n => provinces_arg[n].AttackPower).FirstOr(-1);
+			int port = ShiplessPorts(provinces, owned).MaxBy(n => provinces_arg[n].AttackPower, -1);
 			if (port != -1 && BestShip(port, players[player].Money) is Ship ship)
 			{
 				(players, provinces) = Do(new Recruit(provinces[port], new Soldiers(ship, 1)), player, players, provinces);
 				defense[port] += ship.DefensePower;
 			}
 
-			var provinces_arg2 = provinces;
 			int remaining_money = players[player].Money;
-			var (province, attacker) = owned.Select(n => (n, BestAttacker(n, remaining_money))).OrderByDescending(pair => pair.Item2?.AttackPower ?? -1).First();
+			var (province, attacker) = owned.Select(n => (n, BestAttacker(n, remaining_money))).Where(pair => pair.Item2 is not null).MaxBy(pair => enemies[pair.n]);
 			if (attacker is not null)
 			{
 				var soldiers = new Soldiers(attacker, remaining_money / attacker.Price);
@@ -162,7 +165,7 @@ namespace ImperitWASM.Shared.Data
 
 			ReinforcementsFromSafeToEndangeredProvinces(ref players, ref provinces, player, enemies, defense, allies, owned);
 			DefensiveRecruitments(ref players, ref provinces, player, enemies, defense, owned);
-			OffensiveRecruitments(ref players, ref provinces, player, defense, owned);
+			OffensiveRecruitments(ref players, ref provinces, player, enemies, defense, owned);
 			Attacks(ref players, ref provinces, player, enemies, defense, owned);
 			return (players, provinces);
 		}

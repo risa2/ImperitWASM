@@ -40,6 +40,6 @@ namespace ImperitWASM.Shared.Data
 		public bool HasAny(PlayerIdentity ip) => ControlledBy(ip).Any();
 		public bool HasNeighborRuledBy(Province province, PlayerIdentity ip) => NeighborsOf(province).Any(p => p.Mainland && p.IsAllyOf(ip));
 		public IEnumerable<int> Inhabitable => Items.Indices(it => it.Inhabitable);
-		public (PlayerIdentity?, int) Winner => Items.GroupBy(province => province.Ruler).Where(g => g.Key is { Human: true }).Select(g => (g.Key, g.Sum(province => province.Score))).OrderBy(p => p.Item2).FirstOrDefault() is ({ Human: true } human, int finals) ? (human, finals) : (null, 0);
+		public (PlayerIdentity?, int) Winner => Items.GroupBy(province => province.Ruler).Where(g => g.Key.Human).Select(g => (g.Key, g.Sum(province => province.Score))).MaxBy(p => p.Item2) is ({ Human: true } human, int finals) ? (human, finals) : (null, 0);
 	}
 }

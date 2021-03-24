@@ -14,7 +14,7 @@
 
 	void Clicked(int player)
 	{
-		if (player != storage.Player && Players[storage.Player].M > 0 && GameState == Game.State.Started)
+		if (player != storage.Player && Players[storage.Player].M > 0 && Players[player].A && GameState == Game.State.Started)
 		{
 			Switch(Mode.Donation, null, null, Players.Try(player));
 		}
@@ -47,7 +47,10 @@
 <main>
 	@if (!Players.IsDefaultOrEmpty)
 	{
-		<p>Na tahu je: <span style="color:@Players[Active].C;">@Players[Active].N</span></p>
+		@if (GameState == Game.State.Started)
+		{
+			<p>Na tahu je: <span style="color:@Players[Active].C;">@Players[Active].N</span></p>
+		}
 		<table class="players">
 			@foreach (var (i, name, color, alive, money, debt, income) in Players)
 			{

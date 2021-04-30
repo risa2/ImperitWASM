@@ -10,6 +10,7 @@
 \usepackage{tikz}
 \usepackage{xcolor}
 \usepackage{float}
+\usepackage{hyperref}
 
 \definecolor{keyword}{RGB}{0, 64, 255}
 
@@ -92,11 +93,11 @@ Tímto bych chtěl poděkovat Mgr. Marku Blahovi za odborné vedení práce.
 \thispagestyle{empty}
 \Large\textbf{Anotace}\normalsize
 
-Práce se zabývá vytvořením internetové počítačové hry zvané Imperit pomocí Blazor WebAssembly z~frameworku .NET. Hra je koncipovaná jako tahová strategie, jejímž tématem je dobývání území na~herním plánu, s~právě jedním vítězem a omezeným náhodným prvkem.
+Práce se zabývá vytvořením internetové počítačové hry zvané Imperit pomocí Blazor WebAssembly z~frameworku .NET. Hra je koncipovaná jako tahová strategie, jejímž tématem je dobývání území na~herním plánu, s~právě jedním vítězem a omezeným ná\-hod\-ným prvkem.
 
 \Large\textbf{Klíčová slova}\normalsize
 
-počítačová hra; tahová strategie; válečná strategie; územní expanze; hra s~nulovým součtem;\- dotnet; blazor; webassembly
+počítačová hra; tahová strategie; válečná strategie; územní expanze; hra s~nulovým sou\-čtem; dotnet; blazor; webassembly
 
 \Large\textbf{Annotation}\normalsize
 
@@ -110,25 +111,25 @@ computer game; turn-based strategy; war strategy; territorial expansion; zero-su
 \tableofcontents
 \newpage
 \section{Úvod}
-Cílem této práce je vytvořit hru o~dobývání území navrženou tak, aby skončila v rozumném čase s jednoznačně určeným vítězem. Vítězství by však nemělo na~konci hry nastat neočekávaně, například nějakým neintuitivním počítáním bodů. Již v~průběhu hry by mělo být patrné, který hráč má k~výhře nejblíže, ale ostatní hráči by měli mít možnost vývoj zvrátit při spolupráci. Hráči by tedy měli být vedeni ke spolupráci a následné zradě, neboť vítěz může být jen jeden. Aby hra nebyla příliš jednotvárná a deterministická, měla by také obsahovat náhodný prvek, jež by však měl být omezený a pravděpodobnost náhodných jevů by měla být známá, aby hráči mohli a museli s~rizikem počítat.
+Cílem této práce je vytvořit hru o~dobývání území navrženou tak, aby skončila v~rozumném čase s~jednoznačně určeným vítězem. Vítězství by však nemělo na~konci hry nastat neočekávaně, například nějakým neintuitivním počítáním bodů. Již v~průběhu hry by mělo být patrné, který hráč má k~výhře nejblíže, ale ostatní hráči by měli mít možnost vývoj zvrátit při~spolupráci. Hráči by měli být vedeni ke~spolupráci a následné zradě, neboť vítěz může být jen jeden. Aby hra nebyla příliš jednotvárná a deterministická, měla by také obsahovat náhodný prvek, jež by však měl být omezený a pravděpodobnost náhodných jevů by měla být známá, aby hráči mohli a museli s~rizikem počítat.
 
 Pro vytvoření hry byl zvolen formát tahové strategie, protože strategie v~reálném čase buď vyvíjí tlak na~hráče z~důvodu nedostatku času, nebo ve~snaze vyhnout se tomuto problému vede ke zdlouhavému čekání na~dokončení některých akcí. \cite{turnreal1} V~obou případech realtimová strategie vede k~orientaci na~postřeh a trpělivost spíše než na~vymýšlení strategie. \cite{turnreal2} Kromě toho vede k fixaci hráčů k~jejich obrazovkám, což je sice většinou žádoucí stav, jelikož hry mají být poutavé, ale zaměření této hry bylo jiné.
 
 \section{Popis hry}
 \subsection{Registrace}
-Hru může hrát 2--16 hráčů. Při registraci si hráč zvolí jméno a heslo vybere si na mapě kliknutím zemi, v~níž bude začínat. Na~výběr má pouze některé ze zemí. Název zemí, v~nichž nelze začínat, je napsán šedou barvou. Zaregistrovaný hráč musí počkat na spuštění hry. Po registraci druhého hráče čeká hra na~registraci dalších hráčů čtyři minuty a potom se automaticky spustí. Pokud se zaregistrovalo méně než 16~hráčů, jsou hráči doplněni roboty, což jsou automaticky vytvoření hráči, kteří hrají podle naprogramovaných pravidel.
+Hru může hrát 2--16 hráčů. Při registraci si hráč zvolí jméno a heslo a kliknutím si na mapě vybere zemi, v~níž bude začínat. Na~výběr má pouze některé ze zemí. Názvy zemí, v~nichž nelze začínat, jsou napsány šedou barvou. Zaregistrovaný hráč musí počkat na spuštění hry. Po registraci druhého hráče čeká hra na~registraci dalších hráčů čtyři minuty a potom se automaticky spustí. Pokud se zaregistrovalo méně než 16~hráčů, jsou hráči doplněni roboty, což jsou automaticky vytvoření hráči, kteří hrají podle naprogramovaných pravidel.
 \subsection{Průběh hry}
 Každý hráč začíná s~určitým množstvím peněz a s~vojáky ve~své počáteční provincii. Tahy hráčů se střídají v~tom pořadí, v~němž se tito hráči zaregistrovali, a účastní-li se roboti hry, hrají až po lidských hráčích. Během tahu může hráč provádět libovolné množství akcí bez~časového omezení, dokud se sám nerozhodne svůj tah ukončit. Může verbovat vojáky a rozšiřovat svoje území nákupem a dobýváním -- moře může pouze dobývat, ale země může i koupit. Verbování a dobývání se však dokončí až po ukončení tahu.
 \subsection{Provincie}
 Hra se odehrává na~mapě, která připomíná mapu Evropy a skládá se ze~126 provincií. Jsou tři typy provincií: země, moře a pohoří. Země a moře můžou patřit nějakému hráči, který v~nich může mít svou armádu. Pohoří nikomu nepatří a armáda v~nich být nemůže. Hráč dobude provincii, pokud do~ní pošle armádu, jejíž útočná síla je vyšší než obranná síla tamních jednotek. Provincii hráč ovládá, dokud není dobyta jiným hráčem nebo dokud se sama neodtrhne.
 
-Země se může hráči odtrhnout vždy po jeho tahu. Pravděpodobnost odtržení země bez~armády je 10 \% a s~růstem obranné síly armády klesá tak, že když obranná síla armády v~zemi je alespoň tak velká jako na~začátku hry, země se již nemůže odtrhnout.
+Země se může hráči odtrhnout vždy po jeho tahu. Pravděpodobnost odtržení země bez~ar\-má\-dy je 10 \% a s~růstem obranné síly armády klesá tak, že když obranná síla ar\-má\-dy v~zemi je alespoň tak velká jako na~začátku hry, země se již nemůže odtrhnout.
 \subsection{Peníze}
-Hráč získává po svém tahu daňový výnos ze svých zemí a tento výnos se u~různých zemí liší. Jestli chce hráč získat výnos ze všech svých zemí, musí jeho provincie tvořit souvislé území. Pokud je území hráče rozdělené na~více částí, mezi nimiž jsou provincie, které jsou neobydlené nebo jsou pod kontrolou jiného hráče, získá hráč pouze výnos z~části s~nejvyším výnosem. Existuje tedy značná motivace udržovat své území souvislé.
+Hráč získává po svém tahu daňový výnos ze svých zemí a tento výnos se u~různých zemí liší. Jestli chce hráč získat výnos ze všech svých zemí, musí jeho provincie tvořit souvislé území. Pokud je území hráče rozdělené na~více částí, mezi nimiž jsou provincie, které jsou neobydlené nebo jsou pod kontrolou jiného hráče, získá hráč pouze výnos z~části s~nejvyším výnosem. Existuje proto značná motivace udržovat své území souvislé.
 
 Za peníze je možné kupovat další země nebo vojenské jednotky, s~nimiž lze dobývat provincie a bránit provincie už dobyté. Cena země je součtem ceny jejích vojenských jednotek, dvojnásobku jejího výnosu a obranné síly jejích vojenských jednotek. Pokud hráč dluží nějaké peníze, jsou mu po získání daňového výnosu zabaveny peníze ke splacení dluhu. Pokud všechny jeho peníze ke splacení dluhu nestačí, je zbývající dluh navýšen o~úrok 25 \% a zůstává hráči do~dalšího kola. Dluh nesmí přesáhnout 400, pokud k~tomu dojde, provede se exekuce, hráč ztratí několik svých zemí a jeho dluh bude snížen o~cenu těchto zemí.
 \subsection{Vojenské jednotky}
-V~tabulce jsou uvedeny typy vojenských jednotek, které se ve~hře dají koupit. Je zde uvedena jejich cena, síla v~boji, vzdálenost, na~jakou se mohou samy přesunout a v~jakém prostředí. Pokud se jednotka dokáže přesunout a navíc má nějakou nosnost, může přepravit jiné jednotky, které to nedokáží. Celková nosnost jednotek, které přepravu provádějí, musí být stejná nebo vyšší než je celková hmotnost přepravovaných jednotek.
+V~tabulce jsou uvedeny typy vojenských jednotek, které se ve~hře dají koupit. Je zde uvedena jejich cena, síla v~boji, vzdálenost, na~jakou se mohou samy přesunout a v~jakém prostředí. Pokud se jednotka dokáže přesunout a navíc má nějakou nosnost, může přepravit jiné jednotky, které to nedokáží. Celková nosnost jednotek, které přepravu provádějí, musí být stejná nebo vyšší, než je celková hmotnost přepravovaných jednotek.
 
 \begin{tabular}{l r r r r r l}
 Název		& Cena	& Síla	& Vzdálenost	&Nosnost& Hmotnost	& Prostředí\\ \hline
@@ -188,9 +189,16 @@ Po~kliknutí na tlačítko pod tabulkou se zde zobrazí možnost vzdát se, a po
 	\label{graph3}
 \end{figure}
 
+\subsection{Vývoj a reakce hráčů}
+Pravidla hry jsou založena na~starší papírové hře, jejíž pravidla byla průběžně vytvářena a měněna, aby byla hra co nejlépe hratelná. Aby se neznehodnotila mapa, byly údaje o~armádách v~provinciích napsány na~vedlejších papírech, ale to vedlo k~nepřehlednosti a praktické nemožnosti kontrolovat dodržování všech pravidel. Převedení hry do~počítačové podoby tyto problémy odstranilo a zároveň umožnilo hru více hráčů z~různých zařízení přes~internet.
+
+Trvalo dlouhou dobu, než bylo nalezeno pravidlo, podle něhož určit vítěze. Požadavek, aby vítěz obsadil všechno území nebo zničil ostatní hráče, vedl ke~hrám, které nebylo možné dokončit v~řádu hodin. Nakonec se ukázalo, že dobře funguje koncept cílových zemí, z~nichž musí vítěz většinu dobýt. Cílové země jsou rozprostřené po~celé mapě, ale je jich jen malý počet, takže hráči se musí snažit nejen ovládnout velké území, ale i expandovat správným směrem.
+
+Později bylo přidáno pravidlo, podle něhož může hráč získat příjem pouze z~největšího souvislého území pod svou kontrolou. Nemůže vybírat daně ve~více zemích pod svou kontrolou, jež jsou odděleny cizím územím. Cílem pravidla bylo umožnit taktiku oslabení protivníka rozdělením jeho území. Hráči, jejichž území bylo takto rozděleno, reagovali na~jeho zavedení nesouhlasně, ale ve~skutečnosti právě tím potvrzují, že pravidlo činí hru zajímavější.
+
 \section{Program}
 \subsection{Použité technologie}
-\textbf{\CS{}: }Celý program je napsaný v~jazyce \CS{}, jelikož tento jazyk může běžet na~straně serveru (viz ASP.NET Core) i klienta (viz Blazor WebAssembly) a obě části mohou využívat společné knihovny a pracovat s~týmiž datovými typy. Navíc tento jazyk umožňuje využívat knihoven z~frameworku .NET a na~rozdíl od jazyků PHP a JavaScript, které se často pro~vývoj webových aplikací používají, je staticky typovaný a kompilovaný do~bytekódu, což do~určité míry kontroluje správnost programu.
+\textbf{\CS{}: }Celý program je napsaný v~jazyce \CS{}, jelikož tento jazyk může běžet na~straně serveru (viz ASP.NET Core) i klienta (viz Blazor WebAssembly) a obě části mohou sdílet společné knihovny a pracovat s~týmiž datovými typy. Navíc tento jazyk umožňuje využívat knihoven z~frameworku .NET a na~rozdíl od jazyků PHP a JavaScript, které se často pro~vývoj webových aplikací používají, je staticky typovaný a kompilovaný do~bytekódu, což do~určité míry kontroluje správnost programu.
 
 \textbf{ASP.NET Core: }Framework ASP.NET Core je využíván na~straně serveru ke zpracovávání HTTP dotazů a odesílání odpovědí.
 
@@ -201,7 +209,7 @@ Program se skládá ze tří projektů:
 \begin{itemize}
 \item\textit{Shared} -- Obsahuje třídy, které druhé dva projekty využívají (viz obrázek \ref{projects}), nachází se v~něm většina herní logiky a odpovídá větší části modelu v~architektuře MVC \cite{mvc}
 \item\textit{Client} -- Odpovídá pohledu v~architektuře MVC a obsahuje soubory v~HTML, CSS a kód v~\CS{}, překládaný do~WebAssembly a spouštěný v~prohlížeči klienta
-\item\textit{Server} -- Implementuje webové API, jež odesílá odpovědi na~dotazy klienta, a zahrnuje kód, který je potřebný k~funkčnosti API, tedy práci s~databází a s~třídami z~projektu \textit{Shared}; v~architektuře MVC odpovídá kontroleru a části modelu
+\item\textit{Server} -- Implementuje webové API, jež odesílá odpovědi na~dotazy klienta, a zahrnuje kód, který je potřebný k~funkčnosti API, což zahrnuje práci s~databází a se~třídami z~projektu \textit{Shared}; v~architektuře MVC odpovídá kontroleru a části modelu
 \end{itemize}
 
 \begin{figure}[H]
@@ -220,7 +228,7 @@ Program se skládá ze tří projektů:
 \end{figure}
 
 \subsection{Shared}
-Projekt \textit{Shared} obsahuje složku \textit{Conversion}, v~níž jsou třídy zajišťující načítání některých typů v~ostatních složkách z~formátu JSON nebo naopak zápis do~tohoto formátu. Ve~složkách \textit{Commands}, \textit{Config} a \textit{Data} jsou datové typy, které odpovídají různým jevům ve~hře. Jedná se o~neměnné datové typy a z~pohledu jazyka \CS{} jsou to záznamy (\textit{records}), nikoliv třídy. Dále je však budu označovat jako třídy, protože v~paradigmatu objektově orientovaného programování se skutečně o~třídy jedná, neboť jejich instance obsahují data i funkce, které s~těmito daty pracují. \cite{oop} Neměnné typy umožňují psát funkce a metody, které jsou referenčně transparentní (tj. nemají vedlejší účinky), a tím usnadňují přemýšlení o~programu a snižují riziko chyb. \cite{immutable1}\cite{immutable2}
+Projekt \textit{Shared} obsahuje složku \textit{Conversion}, v~níž jsou třídy zajišťující načítání některých typů v~ostatních slož\-kách z~formátu JSON nebo naopak zápis do~tohoto formátu. Ve~slož\-kách \textit{Commands}, \textit{Config} a \textit{Data} jsou datové typy, které odpovídají různým jevům ve~hře. Jedná se o~neměnné datové typy a z~pohledu jazyka \CS{} jsou to záznamy (\textit{records}), nikoliv třídy. Dále je však budu označovat jako třídy, protože v~paradigmatu objektově orientovaného programování se skutečně o~třídy jedná, neboť jejich instance obsahují data i funkce, které s~těmito daty pracují. \cite{oop} Neměnné typy umožňují psát funkce a metody, které jsou referenčně transparentní (tj. nemají vedlejší účinky), a tím usnadňují přemýšlení o~programu a snižují riziko chyb. \cite{immutable1}\cite{immutable2}
 
 \subsubsection{Commands}
 Ve~složce \textit{Commands} se nachází rozhraní \textit{ICommand} a třídy, jež ho implementují. Každá z~nich odpovídá nějakému příkazu, který může hráč provést: nákup provincie, darování peněz, verbování vojáků, přesun vojáků, kapitulace a konec tahu. Rozhraní má dvě metody; obě přebírají jako parametry seznam hráčů a provincií, nastavení hry a hráče, jenž příkaz provedl. Jedna z~nich ověřuje, zda je příkaz možné provést a druhá jej provede a vrátí změněný seznam hráčů a provincií (aniž by měnila ten původní). Kód rozhraní vypadá takto:
@@ -279,11 +287,11 @@ Ve~složce \textit{Data} se nacházejí třídy pro~data, jež reprezentují sta
 \hspace*{8mm}\texttt{(Player, Provinces, IAction?) Perform(Player active, Provinces provinces, Settings settings);}\\
 \texttt{\}}\normalsize
 
-Akce tedy podobně jako příkaz přebírá informace o~stavu a vrací změněný stav. Třetí vrácená hodnota je potom akce, která v~příštím kole nahradí v~poli akcí hráče tuto akci, nebo hodnota \textit{null}, pokud má být tato akce bez~náhrady odstraněna. Rozhraní \textit{IAction} implementují třídy \textit{Loan} a \textit{Manoeuvre}, které reprezentují splácení půjčky a přesun vojska. Třetí vrácená hodnota je u~přesunu vojska vždy \textit{null}, neboť přesun vojska se vždy na~konci dokončí, zatímco u~půjčky se vrací opět půjčka, jejíž dlužná částka je zvýšená o~úrok a snížená o~splacenou částku, nebo \textit{null}, pokud již došlo ke splacení půjčky.
+Akce podobně jako příkaz přebírá informace o~stavu a vrací změněný stav. Třetí vrácená hodnota je potom akce, která v~příštím kole nahradí v~poli akcí hráče tuto akci, nebo hodnota \textit{null}, pokud má být tato akce bez~náhrady odstraněna. Rozhraní \textit{IAction} implementují třídy \textit{Loan} a \textit{Manoeuvre}, které reprezentují splácení půjčky a přesun vojska. Třetí vrácená hodnota je u~přesunu vojska vždy \textit{null}, neboť přesun vojska se vždy na~konci dokončí, zatímco u~půjčky se vrací opět půjčka, jejíž dlužná částka je zvýšená o~úrok a snížená o~splacenou částku, nebo \textit{null}, pokud již došlo ke splacení půjčky.
 
-Třída \textit{Province} obsahuje instanci třídy \textit{Region}, jež uchovává základní a neměnné informace o~provincii, a třídy \textit{Settings}, která je využívána v~metodách. Dále obsahuje \textit{PlayerIdentity} hráče, jemuž provincie náleží, nebo hodnotu \textit{null}, pokud provincie žádnému hráči nepatří. Třída \textit{Province} tedy obsahuje pouze identitu hráče a nikoliv přímo instanci třídy \textit{Player}. Důvodem je to, že ostatní údaje o~hráči se mohou měnit, což by při~použití neměnných datových typů vyžadovalo pokaždé přímo měnit všechny provincie změněného hráče, což by do~kódu vneslo zbytečnou složitost. Navíc je ve~třídě \textit{Province} identita hráče použita pouze pro~porovnání, zda hráč, který do~provincie poslal vojenské jednotky je vládcem provincie, nebo se snaží provincii dobýt. Třída \textit{Province} ještě obsahuje objekt třídy \textit{Soldiers}, který reprezentuje současnou armádu v~provincii a obsahuje neměnné pole typu \textit{Regiment}, což je třída obsahující instanci \textit{SoldierType} a počet vojenských jednotek onoho typu. Provincie jsou následně zapouzdřené ve~třídě \textit{Provinces}, která obsahuje pole provincií a objekt třídy \textit{Graph}, v~němž je uloženo, mezi kterými provinciemi vede cesta.
+Třída \textit{Province} obsahuje instanci třídy \textit{Region}, jež uchovává základní a neměnné informace o~provincii, a třídy \textit{Settings}, která je využívána v~metodách. Dále obsahuje \textit{PlayerIdentity} hráče, jemuž provincie náleží, nebo hodnotu \textit{null}, pokud provincie žádnému hráči nepatří. Třída \textit{Province} obsahuje pouze identitu hráče a nikoliv přímo instanci třídy \textit{Player}. Důvodem je to, že ostatní údaje o~hráči se mohou měnit, což by při~použití neměnných datových typů vyžadovalo pokaždé přímo měnit všechny provincie změněného hráče, čímž by se do~kódu vnesla zbytečnou složitost. Navíc je ve~třídě \textit{Province} identita hráče použita pouze pro~porovnání, zda hráč, který do~provincie poslal vojenské jednotky je vládcem provincie, nebo se snaží provincii dobýt. Třída \textit{Province} ještě obsahuje objekt třídy \textit{Soldiers}, který reprezentuje současnou armádu v~provincii a obsahuje neměnné pole typu \textit{Regiment}, což je třída obsahující instanci \textit{SoldierType} a počet vojenských jednotek onoho typu. Provincie jsou následně zapouzdřené ve~třídě \textit{Provinces}, která obsahuje pole provincií a objekt třídy \textit{Graph}, v~němž je uloženo, mezi kterými provinciemi vede cesta.
 
-Mezi další třídy v~této složce patří \textit{Game}, obsahující informace o~stavu samotné hry, což je údaj o~tom, zda hra již začala nebo skončila (a kdy se tak stalo), zda je nově vytvořená, nebo zda brzy začne (a kdy se tak stane). Síla hráče v~daném kole se ukládá do~třídy \textit{Power} a skládá se z~počtu jeho čílových zemí, peněz, výše příjmů, síly vojáků a údaje, zda je hráč vůbec naživu. Hodnoty síly každého hráče pro~dané kolo se ukládají do~pole typu \textit{Power} ve~třídě \textit{Powers}. Dále se ve~složce nachází pomocné typy \textit{Ratio}, jež reprezentuje zlomek od $0$ do~$1$, a \textit{Password}, jež reprezentuje hashované heslo. Třída \textit{Brain} obsahuje algoritmus hráče robota.
+Mezi další třídy v~této složce patří \textit{Game}, obsahující informace o~stavu samotné hry, mezi~něž se řadí údaj o~tom, zda hra již začala nebo skončila (a kdy se tak stalo), zda je nově vytvořená, nebo zda brzy začne (a kdy se tak stane). Síla hráče v~daném kole se ukládá do~třídy \textit{Power} a skládá se z~počtu jeho čílových zemí, peněz, výše příjmů, síly vojáků a údaje, zda je hráč vůbec naživu. Hodnoty síly každého hráče pro~dané kolo se ukládají do~pole typu \textit{Power} ve~třídě \textit{Powers}. Dále se ve~složce nachází pomocné typy \textit{Ratio}, jež reprezentuje zlomek od $0$ do~$1$, a \textit{Password}, jež reprezentuje hashované heslo. Třída \textit{Brain} obsahuje algoritmus hráče robota.
 
 \subsection{Server}
 V~projektu \textit{Server} se nachází složky \textit{Controllers}, \textit{Files}, \textit{Pages}, \textit{Properties} a \textit{Services}. Složky \textit{Properties} a \textit{Pages} slouží pro~potřeby frameworku ASP.NET Core. Ve~složce \textit{Files} se nachází nastavení hry, načtená při~spuštění do~objektu \textit{Settings}, a SQL kód pro~vytvoření tabulek v~databázi. Ve~složce \textit{Controllers} jsou třídy kontrolerů, jež jako parametry v~konstruktoru dostanou objekty služeb, pomocí nichž získávají a zpracovávají data z~databáze. Toho využívají k~odpovídání na~HTTP dotazy z~klienta.
@@ -293,7 +301,12 @@ Složka \textit{Services} obsahuje třídy služeb, které zajišťují práci s
 \subsection{Client}
 V~projektu \textit{Client} se nachází složka \textit{Pages}, v~níž se nachází soubory Blazor komponentů. Každý takový soubor obsahuje kód v~HTML i v~\CS{} a reprezentuje určitou část stránky i její chování. Kód v~\CS{} může být spouštěn při~načtení stránky nebo při~interakci s~uživatelem a provádí změny stránky tím, že může části HTML zobrazovat jen při~splnění určité podmínky, vytvářet HTML kód v~cyklu nebo vyjádřit část HTML kódu jako hodnotu výrazu v~\CS{} a při~změně této hodnoty ji měnit. Navíc lze komponent použít jako HTML tag v~jiném komponentu a tak rozdělit stránku do~více souborů.
 
-Ve~složce \textit{Services} se nachází služby, které může kód v~\CS{} využívat k~posílání HTTP dotazů na~server a přístupu k~úložišti v~prohlížeči a složka \textit{Data} obsahuje datové typy, které definují strukturu formátu JSON používaného při~komunikaci se serverem a zápisu do~úložiště. Složka \textit{Properties} obsahuje pouze konfigurační soubor \textit{launchSettings.json} pro~potřeby frameworku Blazor. Ve~složce \textit{wwwroot} se nachází soubory \textit{favicon.ico} a \textit{site.css}, které obsahují ikonu stránky a její CSS styly, a \textit{index.html}, což je krátký HTML soubor, který se zobrazí při~načítání stránky a pomocí JavaScriptu načte a spustí aplikaci.
+Ve~složce \textit{Services} se nachází služby, které může kód v~\CS{} využívat k~posílání HTTP dotazů na~server a přístupu k~úložišti v~prohlížeči a složka \textit{Data} obsahuje datové typy, které definují strukturu formátu JSON používaného při~komunikaci se serverem a zápisu do~úložiště. Složka \textit{Properties} obsahuje pouze konfigurační soubor \textit{launchSettings.json} pro~potřeby frameworku Blazor. Ve~složce \textit{wwwroot} se nachází soubory \textit{favicon.ico} a \textit{site.css}, které obsahují ikonu stránky a její CSS styly, a krátký HTML soubor \textit{index.html}, který se zobrazí při~načítání stránky a pomocí JavaScriptu načte a spustí aplikaci.
+
+\section{Závěr}
+Byla vyvinuta internetová strategická hra o~dobývání území pomocí \CS{} a frameworku .NET. Lze ji hrát na~stránkách \href{http://imperit.aspifyhost.com}{http://imperit.aspifyhost.com} a její kód je dostupný na~platformě GitHub \href{https://github.com/RichardBlazek/ImperitWASM}{https://github.com/RichardBlazek/ImperitWASM}. Hru mohou hrát děti od~osmi let, jsou-li jim vysvětlena pravidla a základní strategie; starším hráčům by měl postačovat text této práce jako~příručka.
+
+Hru je možné rozšířit o~další typy vojáků či změnit mapu (např. na~jíný kontinent) bez~změny v~kódu pouze úpravou konfiguračního souboru. Dále by bylo možné do~hry přidat další akce a příkazy (např. morová epidemie nebo smlouvy mezi~hráči) implementací příslušných rozhraní. Ve~své současné podobě je hra funkční, ale může být dále mnoha způsoby rozšířena.
 
 \newpage
 \printbibliography[heading=bibintoc, title={Použitá literatura}]
